@@ -1,0 +1,6 @@
+$dokka.format:html
+$dokka.linkExtension:html
+
+com.sudoplatform.sudoentitlements
+com.sudoplatform.sudoentitlements.types
+

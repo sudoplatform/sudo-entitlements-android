@@ -1,0 +1,29 @@
+# this is an auto generated file. This will be overwritten
+query GetEntitlements {
+  getEntitlements {
+    createdAtEpochMs
+    updatedAtEpochMs
+    version
+    name
+    description
+    entitlements {
+      name
+      description
+      value
+    }
+  }
+}
+mutation RedeemEntitlements {
+  redeemEntitlements {
+    createdAtEpochMs
+    updatedAtEpochMs
+    version
+    name
+    description
+    entitlements {
+      name
+      description
+      value
+    }
+  }
+}
