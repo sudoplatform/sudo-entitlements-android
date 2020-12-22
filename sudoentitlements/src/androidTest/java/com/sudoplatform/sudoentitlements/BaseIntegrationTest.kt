@@ -143,6 +143,11 @@ abstract class BaseIntegrationTest {
         return (integrationTestEntitlementsSet ?: "false").toBoolean()
     }
 
+    protected fun defaultEntitlementsSetForTestUsers(): Boolean {
+        val defaultEntitlementsSetForTestUsers = InstrumentationRegistry.getArguments().getString("DEFAULT_ENTITLEMENTS_SET_FOR_TEST_USERS")
+        return (defaultEntitlementsSetForTestUsers ?: "false").toBoolean()
+    }
+
     protected suspend fun enableUserForEntitlementsRedemption(entitlementsSet: String = "integration-test") {
         val customTest = mapOf("ent" to mapOf("externalId" to UUID.randomUUID().toString()))
         setCustomAttributesAndSignInAgain(mapOf(

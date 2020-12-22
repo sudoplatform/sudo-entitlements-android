@@ -19,6 +19,7 @@ import io.kotlintest.shouldNotBe
 import io.kotlintest.shouldThrow
 import kotlinx.coroutines.runBlocking
 import org.junit.After
+import org.junit.Assume.assumeFalse
 import org.junit.Assume.assumeTrue
 import org.junit.Before
 import org.junit.Test
@@ -56,7 +57,7 @@ class SudoEntitlementsClientIntegrationTest : BaseIntegrationTest() {
     }
 
     @After
-    fun fini() = runBlocking<Unit> {
+    fun fini() = runBlocking {
         userClient.reset()
         Timber.uprootAll()
     }
@@ -116,7 +117,7 @@ class SudoEntitlementsClientIntegrationTest : BaseIntegrationTest() {
     }
 
     @Test
-    fun redeemEntitlementsShouldReturnEntitlementsSet() = runBlocking<Unit> {
+    fun redeemEntitlementsShouldReturnEntitlementsSet() = runBlocking {
         // Can only run if client config files are present
         assumeTrue(clientConfigFilesPresent())
         assumeTrue(integrationTestEntitlementsSetAvailable())
@@ -129,15 +130,28 @@ class SudoEntitlementsClientIntegrationTest : BaseIntegrationTest() {
     }
 
     @Test
-    fun redeemEntitlementsShouldThrowForInvalidTokenError() = runBlocking<Unit> {
+    fun redeemEntitlementsShouldThrowInvalidTokenErrorForRawTestUser() = runBlocking<Unit> {
         // Can only run if client config files are present
         assumeTrue(clientConfigFilesPresent())
+        assumeFalse(defaultEntitlementsSetForTestUsers())
 
         signInAndRegister()
 
         shouldThrow<SudoEntitlementsClient.EntitlementsException.InvalidTokenException> {
             entitlementsClient.redeemEntitlements()
         }
+    }
+
+    @Test
+    fun redeemEntitlementsShouldSucceedForRawTestUser() = runBlocking {
+        // Can only run if client config files are present
+        assumeTrue(clientConfigFilesPresent())
+        assumeTrue(defaultEntitlementsSetForTestUsers())
+
+        signInAndRegister()
+
+        val redeemedEntitlements = entitlementsClient.redeemEntitlements()
+        redeemedEntitlements shouldNotBe null
     }
 
     @Test
@@ -155,7 +169,71 @@ class SudoEntitlementsClientIntegrationTest : BaseIntegrationTest() {
     }
 
     @Test
-    fun getEntitlementsShouldReturnEntitlementsSetResult() = runBlocking<Unit> {
+    fun getEntitlementsConsumptionShouldReturnEntitlementsSet() = runBlocking {
+        // Can only run if client config files are present
+        assumeTrue(clientConfigFilesPresent())
+        assumeTrue(integrationTestEntitlementsSetAvailable())
+
+        signInAndRegister()
+
+        enableUserForEntitlementsRedemption()
+
+        val redeemed = entitlementsClient.redeemEntitlements()
+        checkEntitlementsSet(redeemed)
+
+        val consumption = entitlementsClient.getEntitlementsConsumption()
+
+        consumption.entitlements.version shouldBe redeemed.version
+        consumption.entitlements.entitlementsSetName shouldBe redeemed.name
+        consumption.entitlements.entitlements.size shouldBe redeemed.entitlements.size
+        for (i in 0..consumption.entitlements.entitlements.size - 1) {
+            redeemed.entitlements.contains(consumption.entitlements.entitlements[i]) shouldBe true
+        }
+        consumption.consumption shouldBe listOf()
+    }
+
+    @Test
+    fun getEntitlementsConsumptionShouldThrowInvalidTokenErrorForRawTestUser() = runBlocking<Unit> {
+        // Can only run if client config files are present
+        assumeTrue(clientConfigFilesPresent())
+        assumeFalse(defaultEntitlementsSetForTestUsers())
+
+        signInAndRegister()
+
+        shouldThrow<SudoEntitlementsClient.EntitlementsException.InvalidTokenException> {
+            entitlementsClient.getEntitlementsConsumption()
+        }
+    }
+
+    @Test
+    fun getEntitlementsConsumptionShouldThrowNoEntitlementsErrorForRawTestUser() = runBlocking<Unit> {
+        // Can only run if client config files are present
+        assumeTrue(clientConfigFilesPresent())
+        assumeTrue(defaultEntitlementsSetForTestUsers())
+
+        signInAndRegister()
+
+        shouldThrow<SudoEntitlementsClient.EntitlementsException.NoEntitlementsException> {
+            entitlementsClient.getEntitlementsConsumption()
+        }
+    }
+
+    @Test
+    fun getEntitlementsConsumptionShouldThrowForUnentitledUser() = runBlocking<Unit> {
+        // Can only run if client config files are present
+        assumeTrue(clientConfigFilesPresent())
+        assumeTrue(integrationTestEntitlementsSetAvailable())
+
+        signInAndRegister()
+        enableUserForEntitlementsRedemption("no-such-entitlements-set")
+
+        shouldThrow<SudoEntitlementsClient.EntitlementsException.NoEntitlementsException> {
+            entitlementsClient.getEntitlementsConsumption()
+        }
+    }
+
+    @Test
+    fun getEntitlementsShouldReturnEntitlementsSetResult() = runBlocking {
         // Can only run if client config files are present
         assumeTrue(clientConfigFilesPresent())
         assumeTrue(integrationTestEntitlementsSetAvailable())
@@ -176,7 +254,7 @@ class SudoEntitlementsClientIntegrationTest : BaseIntegrationTest() {
     }
 
     @Test
-    fun getEntitlementsShouldReturnNullForUnentitledUser() = runBlocking<Unit> {
+    fun getEntitlementsShouldReturnNullForUnentitledUser() = runBlocking {
         // Can only run if client config files are present
         assumeTrue(clientConfigFilesPresent())
         assumeTrue(integrationTestEntitlementsSetAvailable())
@@ -205,6 +283,30 @@ class SudoEntitlementsClientIntegrationTest : BaseIntegrationTest() {
         shouldThrow<SudoEntitlementsClient.EntitlementsException.FailedException> {
             entitlementsClient.getEntitlements()
         }
+    }
+
+    @Test
+    fun getEntitlementsShouldThrowInvalidTokenErrorForRawTestUser() = runBlocking<Unit> {
+        // Can only run if client config files are present
+        assumeTrue(clientConfigFilesPresent())
+        assumeFalse(defaultEntitlementsSetForTestUsers())
+
+        signInAndRegister()
+
+        shouldThrow<SudoEntitlementsClient.EntitlementsException.InvalidTokenException> {
+            entitlementsClient.getEntitlements()
+        }
+    }
+
+    @Test
+    fun getEntitlementsShouldSucceedForRawTestUser() = runBlocking<Unit> {
+        // Can only run if client config files are present
+        assumeTrue(clientConfigFilesPresent())
+        assumeTrue(defaultEntitlementsSetForTestUsers())
+
+        signInAndRegister()
+
+        entitlementsClient.getEntitlements()
     }
 
     private fun checkEntitlementsSet(entitlementsSet: EntitlementsSet) {

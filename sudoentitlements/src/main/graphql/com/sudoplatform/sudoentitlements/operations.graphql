@@ -13,6 +13,29 @@ query GetEntitlements {
     }
   }
 }
+query GetEntitlementsConsumption {
+  getEntitlementsConsumption {
+    entitlements {
+      version
+      entitlementsSetName
+      entitlements {
+        name
+        description
+        value
+      }
+    }
+    consumption {
+      consumer {
+        id
+        issuer
+      }
+      name
+      value
+      consumed
+      available
+    }
+  }
+}
 mutation RedeemEntitlements {
   redeemEntitlements {
     createdAtEpochMs

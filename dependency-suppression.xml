@@ -17,4 +17,10 @@
         <notes>Kotlin analysis is only used during documentation generation</notes>
         <cve>CVE-2015-5237</cve>
     </suppress>
+    <suppress>
+        <notes><![CDATA[
+            Guava temporary file creation is not used in the Sudo Entitlements SDK.
+            ]]></notes>
+        <cve>CVE-2020-8908</cve>
+    </suppress>
 </suppressions>

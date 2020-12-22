@@ -10,6 +10,7 @@ import android.content.Context
 import com.amazonaws.mobileconnectors.appsync.AWSAppSyncClient
 import com.sudoplatform.sudoapiclient.ApiClientManager
 import com.sudoplatform.sudoentitlements.logging.LogConstants
+import com.sudoplatform.sudoentitlements.types.EntitlementsConsumption
 import com.sudoplatform.sudoentitlements.types.EntitlementsSet
 import com.sudoplatform.sudologging.AndroidUtilsLogDriver
 import com.sudoplatform.sudologging.LogLevel
@@ -101,21 +102,34 @@ interface SudoEntitlementsClient {
     sealed class EntitlementsException(message: String? = null, cause: Throwable? = null) : RuntimeException(message, cause) {
         class AmbiguousEntitlementsException(message: String? = null, cause: Throwable? = null) :
             EntitlementsException(message = message, cause = cause)
+        class AuthenticationException(message: String? = null, cause: Throwable? = null) :
+            EntitlementsException(message = message, cause = cause)
+        class FailedException(message: String? = null, cause: Throwable? = null) :
+            EntitlementsException(message = message, cause = cause)
         class InvalidTokenException(message: String? = null, cause: Throwable? = null) :
             EntitlementsException(message = message, cause = cause)
-        class AuthenticationException(message: String? = null, cause: Throwable? = null) :
-                EntitlementsException(message = message, cause = cause)
-        class FailedException(message: String? = null, cause: Throwable? = null) :
-                EntitlementsException(message = message, cause = cause)
+        class NoEntitlementsException(message: String? = null, cause: Throwable? = null) :
+            EntitlementsException(message = message, cause = cause)
+        class ServiceException(message: String? = null, cause: Throwable? = null) :
+            EntitlementsException(message = message, cause = cause)
         class UnknownException(cause: Throwable) :
                 EntitlementsException(cause = cause)
     }
+
+    /**
+     * Get the current set of entitlements and their consumption for the user.
+     *
+     * @return The [EntitlementsConsumption] for the user
+     */
+    @Throws(EntitlementsException::class)
+    suspend fun getEntitlementsConsumption(): EntitlementsConsumption
 
     /**
      * Get the current set of entitlements for the user.
      *
      * @return The [EntitlementsSet] the user currently has or null if unentitled.
      */
+    @Deprecated("Use getEntitlementsConsumption instead")
     @Throws(EntitlementsException::class)
     suspend fun getEntitlements(): EntitlementsSet?
 
@@ -126,4 +140,27 @@ interface SudoEntitlementsClient {
      */
     @Throws(EntitlementsException::class)
     suspend fun redeemEntitlements(): EntitlementsSet
+}
+
+/**
+ * Scaling factor used to scale down the entitlements set version when
+ * constructing a composite version as in [UserEntitlements] and [EntitlementsSet]
+ * types.
+ */
+const val entitlementsSetVersionScalingFactor = 100000
+
+@Throws(IllegalArgumentException::class)
+fun splitUserEntitlementsVersion(version: Double): Pair<Long, Long> {
+    if (version < 0) {
+        throw IllegalArgumentException("version negative")
+    }
+    val userEntitlementsVersion = Math.round(version)
+    val entitlementsSetVersion = Math.round(version * entitlementsSetVersionScalingFactor % entitlementsSetVersionScalingFactor)
+
+    val reconstructed = userEntitlementsVersion + entitlementsSetVersion.toDouble() / entitlementsSetVersionScalingFactor
+    if (reconstructed != version) {
+        throw IllegalArgumentException("version too precise")
+    }
+
+    return Pair(userEntitlementsVersion, entitlementsSetVersion)
 }

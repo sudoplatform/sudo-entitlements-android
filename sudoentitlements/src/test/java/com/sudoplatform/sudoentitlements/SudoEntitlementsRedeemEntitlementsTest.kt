@@ -229,7 +229,7 @@ class SudoEntitlementsRedeemEntitlementsTest : BaseTests() {
             val error = com.apollographql.apollo.api.Error(
                 "mock",
                 emptyList(),
-                mapOf("errorType" to "AmbiguousEntitlementsError")
+                mapOf("errorType" to "sudoplatform.entitlements.AmbiguousEntitlementsError")
             )
             Response.builder<RedeemEntitlementsMutation.Data>(RedeemEntitlementsMutation())
                 .errors(listOf(error))
@@ -262,7 +262,7 @@ class SudoEntitlementsRedeemEntitlementsTest : BaseTests() {
             val error = com.apollographql.apollo.api.Error(
                 "mock",
                 emptyList(),
-                mapOf("errorType" to "InvalidTokenError")
+                mapOf("errorType" to "sudoplatform.InvalidTokenError")
             )
             Response.builder<RedeemEntitlementsMutation.Data>(RedeemEntitlementsMutation())
                 .errors(listOf(error))

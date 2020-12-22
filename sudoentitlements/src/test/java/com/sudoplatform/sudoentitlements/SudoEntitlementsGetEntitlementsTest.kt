@@ -232,7 +232,7 @@ class SudoEntitlementsGetEntitlementsTest : BaseTests() {
             val error = com.apollographql.apollo.api.Error(
                 "mock",
                 emptyList(),
-                mapOf("errorType" to "InvalidTokenError")
+                mapOf("errorType" to "sudoplatform.InvalidTokenError")
             )
             Response.builder<GetEntitlementsQuery.Data>(GetEntitlementsQuery())
                 .errors(listOf(error))
