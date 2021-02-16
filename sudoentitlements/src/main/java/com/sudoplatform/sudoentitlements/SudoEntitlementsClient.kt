@@ -83,12 +83,12 @@ interface SudoEntitlementsClient {
             Objects.requireNonNull(sudoUserClient, "SudoUserClient must be provided.")
 
             val appSyncClient = appSyncClient
-                    ?: ApiClientManager.getClient(this@Builder.context!!, this@Builder.sudoUserClient!!)
+                ?: ApiClientManager.getClient(this@Builder.context!!, this@Builder.sudoUserClient!!)
 
             return DefaultSudoEntitlementsClient(
-                    context = context!!,
-                    appSyncClient = appSyncClient,
-                    logger = logger
+                context = context!!,
+                appSyncClient = appSyncClient,
+                logger = logger
             )
         }
     }
@@ -113,7 +113,7 @@ interface SudoEntitlementsClient {
         class ServiceException(message: String? = null, cause: Throwable? = null) :
             EntitlementsException(message = message, cause = cause)
         class UnknownException(cause: Throwable) :
-                EntitlementsException(cause = cause)
+            EntitlementsException(cause = cause)
     }
 
     /**

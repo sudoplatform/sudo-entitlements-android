@@ -60,17 +60,22 @@ class SudoEntitlementsGetEntitlementsConsumptionTest : BaseTests() {
                     )
                 )
             ),
-            listOf(GetEntitlementsConsumptionQuery.Consumption(
-                "typename",
-                GetEntitlementsConsumptionQuery.Consumer(
+            listOf(
+                GetEntitlementsConsumptionQuery.Consumption(
                     "typename",
-                    "consumer-id",
-                    "consumer-issuer"),
-                "e.name",
-                42,
-                32,
-                10
-            ))
+                    GetEntitlementsConsumptionQuery.Consumer(
+                        "typename",
+                        "consumer-id",
+                        "consumer-issuer"
+                    ),
+                    "e.name",
+                    42,
+                    32,
+                    10,
+                    50.0,
+                    100.0
+                )
+            )
         )
     }
 
@@ -140,6 +145,8 @@ class SudoEntitlementsGetEntitlementsConsumptionTest : BaseTests() {
             value shouldBe 42
             consumed shouldBe 32
             available shouldBe 10
+            firstConsumedAtEpochMs shouldBe 50.0
+            lastConsumedAtEpochMs shouldBe 100.0
         }
 
         verify(mockAppSyncClient).query(any<GetEntitlementsConsumptionQuery>())

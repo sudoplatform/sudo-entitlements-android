@@ -33,6 +33,8 @@ query GetEntitlementsConsumption {
       value
       consumed
       available
+      firstConsumedAtEpochMs
+      lastConsumedAtEpochMs
     }
   }
 }

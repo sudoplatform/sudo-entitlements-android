@@ -1,7 +1,7 @@
 apply plugin: 'com.android.library'
 apply plugin: 'com.amazonaws.appsync'
 apply plugin: 'kotlin-android'
-apply plugin: 'kotlin-android-extensions'
+apply plugin: 'kotlin-parcelize'
 apply plugin: "org.owasp.dependencycheck"
 
 android {
@@ -74,8 +74,8 @@ dependencies {
     implementation "com.amazonaws:aws-android-sdk-appsync:$appsync_version"
 
     // Sudo Platform
-    implementation "com.sudoplatform:sudouser:8.2.2"
-    implementation "com.sudoplatform:sudoapiclient:1.4.0"
+    implementation "com.sudoplatform:sudouser:9.1.0"
+    implementation "com.sudoplatform:sudoapiclient:2.0.0"
 
     // Utils
     implementation "commons-codec:commons-codec:1.15"
@@ -172,7 +172,6 @@ kotlinter {
     ignoreFailures = false
     reporters = ['checkstyle', 'plain']
     experimentalRules = false
-    fileBatchSize = 30
 }
 
 // Apollo Code Generation

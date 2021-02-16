@@ -98,13 +98,16 @@ abstract class BaseIntegrationTest {
         val sessionCredentials = BasicSessionCredentials(
             InstrumentationRegistry.getArguments().getString("AWS_ACCESS_KEY_ID"),
             InstrumentationRegistry.getArguments().getString("AWS_SECRET_ACCESS_KEY"),
-            InstrumentationRegistry.getArguments().getString("AWS_SESSION_TOKEN"))
+            InstrumentationRegistry.getArguments().getString("AWS_SESSION_TOKEN")
+        )
         val identityProvider = AmazonCognitoIdentityProviderClient(sessionCredentials)
 
-        identityProvider.adminUpdateUserAttributes(AdminUpdateUserAttributesRequest()
-            .withUserPoolId(userPoolId)
-            .withUsername(userClient.getUserName())
-            .withUserAttributes(attributes.map { AttributeType().withName(it.key).withValue(it.value) }))
+        identityProvider.adminUpdateUserAttributes(
+            AdminUpdateUserAttributesRequest()
+                .withUserPoolId(userPoolId)
+                .withUsername(userClient.getUserName())
+                .withUserAttributes(attributes.map { AttributeType().withName(it.key).withValue(it.value) })
+        )
 
         val latest = Date(Date().time + 30000)
         while (Date().before(latest) && !attributes.keys.all { identityTokenHasAttribute(it) }) {
@@ -150,8 +153,11 @@ abstract class BaseIntegrationTest {
 
     protected suspend fun enableUserForEntitlementsRedemption(entitlementsSet: String = "integration-test") {
         val customTest = mapOf("ent" to mapOf("externalId" to UUID.randomUUID().toString()))
-        setCustomAttributesAndSignInAgain(mapOf(
-            "custom:entitlementsSet" to entitlementsSet,
-            "custom:test" to JSONObject(customTest).toString()))
+        setCustomAttributesAndSignInAgain(
+            mapOf(
+                "custom:entitlementsSet" to entitlementsSet,
+                "custom:test" to JSONObject(customTest).toString()
+            )
+        )
     }
 }

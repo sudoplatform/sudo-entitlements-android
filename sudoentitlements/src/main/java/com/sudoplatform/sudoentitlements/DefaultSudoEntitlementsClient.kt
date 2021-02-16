@@ -64,8 +64,8 @@ internal class DefaultSudoEntitlementsClient(
             val query = GetEntitlementsConsumptionQuery.builder().build()
 
             val queryResponse = appSyncClient.query(query)
-                    .responseFetcher(AppSyncResponseFetchers.NETWORK_ONLY)
-                    .enqueueFirst()
+                .responseFetcher(AppSyncResponseFetchers.NETWORK_ONLY)
+                .enqueueFirst()
 
             if (queryResponse.hasErrors()) {
                 logger.warning("errors = ${queryResponse.errors()}")

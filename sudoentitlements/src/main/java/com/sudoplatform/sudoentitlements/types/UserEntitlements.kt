@@ -1,7 +1,7 @@
 package com.sudoplatform.sudoentitlements.types
 
 import android.os.Parcelable
-import kotlinx.android.parcel.Parcelize
+import kotlinx.parcelize.Parcelize
 
 /**
  * A representation of the entitlements of a user and how they are assigned

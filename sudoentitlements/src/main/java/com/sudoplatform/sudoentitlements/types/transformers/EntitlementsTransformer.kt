@@ -54,13 +54,15 @@ internal object EntitlementsTransformer {
 
     private fun fromQueryConsumption(items: List<GetEntitlementsConsumptionQuery.Consumption>): List<EntitlementConsumption> {
         return items.map { item ->
-                EntitlementConsumption(
-                    name = item.name(),
-                    consumer = item.consumer()?.let { EntitlementConsumer(id = it.id(), issuer = it.issuer()) },
-                    value = item.value(),
-                    consumed = item.consumed(),
-                    available = item.available()
-                )
+            EntitlementConsumption(
+                name = item.name(),
+                consumer = item.consumer()?.let { EntitlementConsumer(id = it.id(), issuer = it.issuer()) },
+                value = item.value(),
+                consumed = item.consumed(),
+                available = item.available(),
+                firstConsumedAtEpochMs = item.firstConsumedAtEpochMs(),
+                lastConsumedAtEpochMs = item.lastConsumedAtEpochMs()
+            )
         }
     }
 

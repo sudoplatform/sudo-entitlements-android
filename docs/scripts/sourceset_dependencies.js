@@ -1,1 +1,1 @@
-sourceset_dependencies = '{":sudoentitlements/debug": [], ":sudoentitlements/main": [], ":sudoentitlements/release": []}'
+sourceset_dependencies = '{":sudoentitlements/androidTestRelease": [], ":sudoentitlements/debug": [], ":sudoentitlements/main": [], ":sudoentitlements/release": []}'

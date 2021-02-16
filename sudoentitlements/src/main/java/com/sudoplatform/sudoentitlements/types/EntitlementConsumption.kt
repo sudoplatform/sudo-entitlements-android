@@ -1,7 +1,7 @@
 package com.sudoplatform.sudoentitlements.types
 
 import android.os.Parcelable
-import kotlinx.android.parcel.Parcelize
+import kotlinx.parcelize.Parcelize
 
 /**
  * A representation of the consumption of a particular entitlement
@@ -24,6 +24,12 @@ import kotlinx.android.parcel.Parcelize
  *     The amount of the entitlement that is yet to be consumed. Provided for convenience.
  *     `available` + `consumed` always equals `value`
  *
+ * @property firstConsumedAtEpochMs
+ *      Time at which this entitlement was first consumed
+ *
+ * @property lastConsumedAtEpochMs
+ *      Time of the most recent consumption of this entitlement
+ *
  * @since 2020-12-21
  */
 @Parcelize
@@ -32,5 +38,7 @@ data class EntitlementConsumption(
     val consumer: EntitlementConsumer?,
     val value: Int,
     val consumed: Int,
-    val available: Int
+    val available: Int,
+    val firstConsumedAtEpochMs: Double?,
+    val lastConsumedAtEpochMs: Double?
 ) : Parcelable
