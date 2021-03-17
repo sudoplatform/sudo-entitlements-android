@@ -13,10 +13,6 @@
             ]]></notes>
         <cve>CVE-2020-15824</cve>
     </suppress>
-    <suppress until="2021-03-31">
-        <notes>Kotlin analysis is only used during documentation generation</notes>
-        <cve>CVE-2015-5237</cve>
-    </suppress>
     <suppress>
         <notes><![CDATA[
             Guava temporary file creation is not used in the Sudo Entitlements SDK.
@@ -29,5 +25,13 @@
             occurs because the kotlin coroutines libraries are at 1.4.2 and match the broad CPE pattern.
             ]]></notes>
         <cve>CVE-2020-29582</cve>
+    </suppress>
+    <suppress until="2021-05-15">
+        <notes>
+            <![CDATA[
+            vulnerability is A comparison error in OpenBSDBCrypt.checkPassword(). checkPassword is not used.
+            ]]>
+        </notes>
+        <cve>CVE-2020-28052</cve>
     </suppress>
 </suppressions>
