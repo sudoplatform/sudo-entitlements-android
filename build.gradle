@@ -1,8 +1,9 @@
 buildscript {
     ext.kotlin_version = '1.4.30'
     ext.plugin_version = '2.2.0'
-    ext.appsync_version = '3.1.2'
-    ext.dokka_version = '1.4.0'
+    ext.appsync_version = '3.1.1'
+    ext.aws_version = "2.16.12"
+    ext.dokka_version = '1.4.30'
 
     repositories {
         maven { url = "https://plugins.gradle.org/m2" }
@@ -22,16 +23,53 @@ buildscript {
     }
 }
 
+ext {
+    projectGroup = 'com.sudoplatform'
+}
+
 apply plugin: 'io.codearte.nexus-staging'
+nexusStaging {
+    packageGroup = projectGroup
+    stagingProfileId = '14314878e2a1b'
+    numberOfRetries = 50
+}
+
+if(project.file("${rootProject.projectDir}/util/internal-repo.gradle").exists()) {
+    apply from: "${rootProject.projectDir}/util/internal-repo.gradle"
+}
+else {
+    ext["internalRepoUsername"] = ""
+    ext["internalRepoPassword"] = ""
+    ext["internalSnapshotRepoUrl"] = ""
+    ext["internalSnapshotRepoName"] = ""
+    ext["internalReleaseRepoUrl"] = ""
+    ext["internalReleaseRepoName"] = ""
+}
 
 allprojects {
     repositories {
         mavenLocal()
         google()
         mavenCentral()
-        //  the following line is required to access the dependency
-        //  org.jetbrains.trove4j:trove4j:20160824.
-        maven { url 'https://plugins.gradle.org/m2/' }
+        jcenter() // Needed for Dokka dependencies
+        if (internalRepoUsername?.trim()) {
+            maven {
+                name = internalSnapshotRepoName
+                url = internalSnapshotRepoUrl
+                credentials {
+                    username = internalRepoUsername
+                    password = internalRepoPassword
+                }
+            }
+            maven {
+                name = internalReleaseRepoName
+                url = internalReleaseRepoUrl
+                credentials {
+                    username = internalRepoUsername
+                    password = internalRepoPassword
+                }
+            }
+        }
     }
     gradle.projectsEvaluated {
         tasks.withType(Test) {

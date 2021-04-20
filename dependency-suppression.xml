@@ -34,4 +34,20 @@
         </notes>
         <cve>CVE-2020-28052</cve>
     </suppress>
+    <suppress>
+        <notes>
+            <![CDATA[
+            vulnerability is in log4j SMTP appender dependency of kotlin-analysis-intellij - this is a gradle plugin.
+            ]]>
+        </notes>
+        <cve>CVE-2020-9488</cve>
+    </suppress>
+    <suppress>
+        <notes>
+            <![CDATA[
+            vulnerability is in log4j SMTP appender dependency of kotlin-analysis-intellij - this is a gradle plugin.
+            ]]>
+        </notes>
+        <cve>CVE-2019-17571</cve>
+    </suppress>
 </suppressions>

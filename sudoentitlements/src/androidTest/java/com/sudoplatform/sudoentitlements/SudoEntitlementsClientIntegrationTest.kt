@@ -193,23 +193,9 @@ class SudoEntitlementsClientIntegrationTest : BaseIntegrationTest() {
     }
 
     @Test
-    fun getEntitlementsConsumptionShouldThrowInvalidTokenErrorForRawTestUser() = runBlocking<Unit> {
-        // Can only run if client config files are present
-        assumeTrue(clientConfigFilesPresent())
-        assumeFalse(defaultEntitlementsSetForTestUsers())
-
-        signInAndRegister()
-
-        shouldThrow<SudoEntitlementsClient.EntitlementsException.InvalidTokenException> {
-            entitlementsClient.getEntitlementsConsumption()
-        }
-    }
-
-    @Test
     fun getEntitlementsConsumptionShouldThrowNoEntitlementsErrorForRawTestUser() = runBlocking<Unit> {
         // Can only run if client config files are present
         assumeTrue(clientConfigFilesPresent())
-        assumeTrue(defaultEntitlementsSetForTestUsers())
 
         signInAndRegister()
 
@@ -286,16 +272,14 @@ class SudoEntitlementsClientIntegrationTest : BaseIntegrationTest() {
     }
 
     @Test
-    fun getEntitlementsShouldThrowInvalidTokenErrorForRawTestUser() = runBlocking<Unit> {
+    fun getEntitlementsShouldThrowReturnNullForRawTestUser() = runBlocking<Unit> {
         // Can only run if client config files are present
         assumeTrue(clientConfigFilesPresent())
         assumeFalse(defaultEntitlementsSetForTestUsers())
 
         signInAndRegister()
 
-        shouldThrow<SudoEntitlementsClient.EntitlementsException.InvalidTokenException> {
-            entitlementsClient.getEntitlements()
-        }
+        entitlementsClient.getEntitlements() shouldBe null
     }
 
     @Test
