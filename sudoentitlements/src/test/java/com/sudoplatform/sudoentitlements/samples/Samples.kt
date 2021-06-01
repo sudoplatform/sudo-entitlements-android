@@ -6,7 +6,7 @@
 package com.sudoplatform.sudoentitlements.samples
 
 import android.content.Context
-import com.nhaarman.mockitokotlin2.mock
+import org.mockito.kotlin.mock
 import com.sudoplatform.sudoentitlements.BaseTests
 import com.sudoplatform.sudoentitlements.SudoEntitlementsClient
 import com.sudoplatform.sudouser.SudoUserClient

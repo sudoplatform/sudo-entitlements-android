@@ -6,9 +6,9 @@
 
 package com.sudoplatform.sudoentitlements
 
-import com.nhaarman.mockitokotlin2.doReturn
-import com.nhaarman.mockitokotlin2.mock
-import com.nhaarman.mockitokotlin2.stub
+import org.mockito.kotlin.doReturn
+import org.mockito.kotlin.mock
+import org.mockito.kotlin.stub
 import com.sudoplatform.sudoentitlements.rules.ActualPropertyResetter
 import com.sudoplatform.sudoentitlements.rules.PropertyResetRule
 import com.sudoplatform.sudoentitlements.rules.PropertyResetter
