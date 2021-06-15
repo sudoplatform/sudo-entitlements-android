@@ -87,6 +87,7 @@ interface SudoEntitlementsClient {
 
             return DefaultSudoEntitlementsClient(
                 context = context!!,
+                sudoUserClient = this@Builder.sudoUserClient!!,
                 appSyncClient = appSyncClient,
                 logger = logger
             )
@@ -111,6 +112,8 @@ interface SudoEntitlementsClient {
         class NoEntitlementsException(message: String? = null, cause: Throwable? = null) :
             EntitlementsException(message = message, cause = cause)
         class ServiceException(message: String? = null, cause: Throwable? = null) :
+            EntitlementsException(message = message, cause = cause)
+        class NotSignedInException(message: String? = null, cause: Throwable? = null) :
             EntitlementsException(message = message, cause = cause)
         class UnknownException(cause: Throwable) :
             EntitlementsException(cause = cause)

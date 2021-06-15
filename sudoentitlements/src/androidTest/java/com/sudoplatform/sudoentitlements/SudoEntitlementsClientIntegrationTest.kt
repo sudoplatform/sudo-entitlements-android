@@ -257,7 +257,7 @@ class SudoEntitlementsClientIntegrationTest : BaseIntegrationTest() {
         // Can only run if client config files are present
         assumeTrue(clientConfigFilesPresent())
 
-        shouldThrow<SudoEntitlementsClient.EntitlementsException.FailedException> {
+        shouldThrow<SudoEntitlementsClient.EntitlementsException.NotSignedInException> {
             entitlementsClient.getEntitlements()
         }
 
@@ -266,13 +266,13 @@ class SudoEntitlementsClientIntegrationTest : BaseIntegrationTest() {
         // Attempt to query entitlements after signing in then out
         userClient.globalSignOut()
 
-        shouldThrow<SudoEntitlementsClient.EntitlementsException.FailedException> {
+        shouldThrow<SudoEntitlementsClient.EntitlementsException.NotSignedInException> {
             entitlementsClient.getEntitlements()
         }
     }
 
     @Test
-    fun getEntitlementsShouldThrowReturnNullForRawTestUser() = runBlocking<Unit> {
+    fun getEntitlementsShouldReturnNullForRawTestUser() = runBlocking<Unit> {
         // Can only run if client config files are present
         assumeTrue(clientConfigFilesPresent())
         assumeFalse(defaultEntitlementsSetForTestUsers())

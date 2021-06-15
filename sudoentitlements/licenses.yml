@@ -369,11 +369,6 @@
   license: The Apache Software License, Version 2.0
   licenseUrl: http://www.apache.org/licenses/LICENSE-2.0.txt
   url: http://developer.android.com/tools/extras/support-library.html
-- artifact: commons-codec:commons-codec:+
-  name: Apache Commons Codec
-  copyrightHolder: Apache
-  license: Apache License, Version 2.0
-  url: https://commons.apache.org/proper/commons-codec/
 - artifact: com.squareup.retrofit2:retrofit:+
   name: Retrofit
   copyrightHolder: Square, Inc.

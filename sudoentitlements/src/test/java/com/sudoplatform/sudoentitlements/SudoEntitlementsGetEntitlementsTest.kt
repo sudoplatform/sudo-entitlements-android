@@ -10,15 +10,9 @@ import android.content.Context
 import com.amazonaws.mobileconnectors.appsync.AWSAppSyncClient
 import com.apollographql.apollo.api.Response
 import com.apollographql.apollo.exception.ApolloHttpException
-import org.mockito.kotlin.any
-import org.mockito.kotlin.doReturn
-import org.mockito.kotlin.doThrow
-import org.mockito.kotlin.mock
-import org.mockito.kotlin.stub
-import org.mockito.kotlin.verify
-import org.mockito.kotlin.verifyNoMoreInteractions
 import com.sudoplatform.sudoentitlements.graphql.CallbackHolder
 import com.sudoplatform.sudoentitlements.graphql.GetEntitlementsQuery
+import com.sudoplatform.sudouser.SudoUserClient
 import io.kotlintest.shouldBe
 import io.kotlintest.shouldNotBe
 import io.kotlintest.shouldThrow
@@ -35,6 +29,15 @@ import okhttp3.ResponseBody.Companion.toResponseBody
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
+import org.mockito.kotlin.any
+import org.mockito.kotlin.doReturn
+import org.mockito.kotlin.doThrow
+import org.mockito.kotlin.mock
+import org.mockito.kotlin.never
+import org.mockito.kotlin.stub
+import org.mockito.kotlin.whenever
+import org.mockito.kotlin.verify
+import org.mockito.kotlin.verifyNoMoreInteractions
 
 /**
  * Test the correct operation of [SudoEntitlementsClient.getEntitlements] using mocks and spies.
@@ -74,6 +77,10 @@ class SudoEntitlementsGetEntitlementsTest : BaseTests() {
         mock<Context>()
     }
 
+    private val mockSudoUserClient by before {
+        mock<SudoUserClient>()
+    }
+
     private val mockAppSyncClient by before {
         mock<AWSAppSyncClient>().stub {
             on { query(any<GetEntitlementsQuery>()) } doReturn queryHolder.queryOperation
@@ -83,6 +90,7 @@ class SudoEntitlementsGetEntitlementsTest : BaseTests() {
     private val client by before {
         DefaultSudoEntitlementsClient(
             mockContext,
+            mockSudoUserClient,
             mockAppSyncClient,
             mockLogger
         )
@@ -90,12 +98,14 @@ class SudoEntitlementsGetEntitlementsTest : BaseTests() {
 
     @Before
     fun init() {
+        whenever(mockSudoUserClient.isSignedIn()).thenReturn(true)
+
         queryHolder.callback = null
     }
 
     @After
     fun fini() {
-        verifyNoMoreInteractions(mockContext, mockAppSyncClient)
+        verifyNoMoreInteractions(mockContext, mockSudoUserClient, mockAppSyncClient)
     }
 
     @Test
@@ -127,6 +137,7 @@ class SudoEntitlementsGetEntitlementsTest : BaseTests() {
             value shouldBe 42
         }
 
+        verify(mockSudoUserClient).isSignedIn()
         verify(mockAppSyncClient).query(any<GetEntitlementsQuery>())
     }
 
@@ -168,7 +179,28 @@ class SudoEntitlementsGetEntitlementsTest : BaseTests() {
         result.entitlements.isEmpty() shouldBe true
         result.entitlements.size shouldBe 0
 
+        verify(mockSudoUserClient).isSignedIn()
         verify(mockAppSyncClient).query(any<GetEntitlementsQuery>())
+    }
+
+    @Test
+    fun `getEntitlements() should throw if not signed in`() = runBlocking<Unit> {
+        whenever(mockSudoUserClient.isSignedIn()).thenReturn(false)
+
+        queryHolder.callback shouldBe null
+
+        val deferredResult = async(Dispatchers.IO) {
+            shouldThrow<SudoEntitlementsClient.EntitlementsException.NotSignedInException> {
+                client.getEntitlements()
+            }
+        }
+        deferredResult.start()
+
+        delay(100L)
+        queryHolder.callback shouldBe null
+
+        verify(mockSudoUserClient).isSignedIn()
+        verify(mockAppSyncClient, never()).query(any<GetEntitlementsQuery>())
     }
 
     @Test
@@ -194,6 +226,7 @@ class SudoEntitlementsGetEntitlementsTest : BaseTests() {
         val optionalResult = deferredResult.await()
         optionalResult shouldBe null
 
+        verify(mockSudoUserClient).isSignedIn()
         verify(mockAppSyncClient).query(any<GetEntitlementsQuery>())
     }
 
@@ -220,6 +253,7 @@ class SudoEntitlementsGetEntitlementsTest : BaseTests() {
         val optionalResult = deferredResult.await()
         optionalResult shouldBe null
 
+        verify(mockSudoUserClient).isSignedIn()
         verify(mockAppSyncClient).query(any<GetEntitlementsQuery>())
     }
 
@@ -253,6 +287,7 @@ class SudoEntitlementsGetEntitlementsTest : BaseTests() {
 
         deferredResult.await()
 
+        verify(mockSudoUserClient).isSignedIn()
         verify(mockAppSyncClient).query(any<GetEntitlementsQuery>())
     }
 
@@ -286,6 +321,7 @@ class SudoEntitlementsGetEntitlementsTest : BaseTests() {
 
         deferredResult.await()
 
+        verify(mockSudoUserClient).isSignedIn()
         verify(mockAppSyncClient).query(any<GetEntitlementsQuery>())
     }
 
@@ -320,6 +356,7 @@ class SudoEntitlementsGetEntitlementsTest : BaseTests() {
 
         deferredResult.await()
 
+        verify(mockSudoUserClient).isSignedIn()
         verify(mockAppSyncClient).query(any<GetEntitlementsQuery>())
     }
 
@@ -342,6 +379,7 @@ class SudoEntitlementsGetEntitlementsTest : BaseTests() {
         delay(100L)
         deferredResult.await()
 
+        verify(mockSudoUserClient).isSignedIn()
         verify(mockAppSyncClient).query(any<GetEntitlementsQuery>())
     }
 
@@ -356,6 +394,7 @@ class SudoEntitlementsGetEntitlementsTest : BaseTests() {
             client.getEntitlements()
         }
 
+        verify(mockSudoUserClient).isSignedIn()
         verify(mockAppSyncClient).query(any<GetEntitlementsQuery>())
     }
 }

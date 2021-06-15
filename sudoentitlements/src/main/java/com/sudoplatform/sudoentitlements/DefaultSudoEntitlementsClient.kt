@@ -12,6 +12,7 @@ import com.amazonaws.mobileconnectors.appsync.fetcher.AppSyncResponseFetchers
 import com.amazonaws.services.cognitoidentity.model.NotAuthorizedException
 import com.apollographql.apollo.api.Error
 import com.apollographql.apollo.exception.ApolloException
+import com.sudoplatform.sudoapiclient.ApiClientManager
 import com.sudoplatform.sudoentitlements.appsync.enqueue
 import com.sudoplatform.sudoentitlements.appsync.enqueueFirst
 import com.sudoplatform.sudoentitlements.graphql.GetEntitlementsConsumptionQuery
@@ -24,20 +25,23 @@ import com.sudoplatform.sudoentitlements.types.transformers.EntitlementsTransfor
 import com.sudoplatform.sudologging.AndroidUtilsLogDriver
 import com.sudoplatform.sudologging.LogLevel
 import com.sudoplatform.sudologging.Logger
+import com.sudoplatform.sudouser.SudoUserClient
 import java.util.concurrent.CancellationException
 
 /**
  * Default implementation of the [SudoEntitlementsClient] interface.
  *
  * @property context Application context.
- * @property appSyncClient GraphQL client used to make requests to AWS and call sudo entitlements service API.
+ * @property sudoUserClient `SudoUserClient` instance required to issue authentication tokens
+ * @property appSyncClient optional AppSync client to use. Mainly used for unit testing.
  * @property logger Errors and warnings will be logged here.
  *
  * @since 2020-08-26
  */
 internal class DefaultSudoEntitlementsClient(
     private val context: Context,
-    private val appSyncClient: AWSAppSyncClient,
+    private val sudoUserClient: SudoUserClient,
+    appSyncClient: AWSAppSyncClient? = null,
     private val logger: Logger = Logger(LogConstants.SUDOLOG_TAG, AndroidUtilsLogDriver(LogLevel.INFO))
 ) : SudoEntitlementsClient {
 
@@ -58,8 +62,21 @@ internal class DefaultSudoEntitlementsClient(
         private const val ERROR_AMBIGUOUS_ENTITLEMENTS = "sudoplatform.entitlements.AmbiguousEntitlementsError"
     }
 
+    private val appSyncClient: AWSAppSyncClient
+
+    init {
+        this.appSyncClient = appSyncClient ?: ApiClientManager.getClient(
+            context,
+            this.sudoUserClient
+        )
+    }
+
     @Throws(SudoEntitlementsClient.EntitlementsException::class)
     override suspend fun getEntitlementsConsumption(): EntitlementsConsumption {
+        if (!this.sudoUserClient.isSignedIn()) {
+            throw SudoEntitlementsClient.EntitlementsException.NotSignedInException()
+        }
+
         try {
             val query = GetEntitlementsConsumptionQuery.builder().build()
 
@@ -87,6 +104,10 @@ internal class DefaultSudoEntitlementsClient(
 
     @Throws(SudoEntitlementsClient.EntitlementsException::class)
     override suspend fun getEntitlements(): EntitlementsSet? {
+        if (!this.sudoUserClient.isSignedIn()) {
+            throw SudoEntitlementsClient.EntitlementsException.NotSignedInException()
+        }
+
         try {
             val query = GetEntitlementsQuery.builder().build()
 
@@ -113,6 +134,10 @@ internal class DefaultSudoEntitlementsClient(
 
     @Throws(SudoEntitlementsClient.EntitlementsException::class)
     override suspend fun redeemEntitlements(): EntitlementsSet {
+        if (!this.sudoUserClient.isSignedIn()) {
+            throw SudoEntitlementsClient.EntitlementsException.NotSignedInException()
+        }
+
         try {
             val mutation = RedeemEntitlementsMutation.builder()
                 .build()

@@ -10,15 +10,9 @@ import android.content.Context
 import com.amazonaws.mobileconnectors.appsync.AWSAppSyncClient
 import com.apollographql.apollo.api.Response
 import com.apollographql.apollo.exception.ApolloHttpException
-import org.mockito.kotlin.any
-import org.mockito.kotlin.doReturn
-import org.mockito.kotlin.doThrow
-import org.mockito.kotlin.mock
-import org.mockito.kotlin.stub
-import org.mockito.kotlin.verify
-import org.mockito.kotlin.verifyNoMoreInteractions
 import com.sudoplatform.sudoentitlements.graphql.CallbackHolder
 import com.sudoplatform.sudoentitlements.graphql.RedeemEntitlementsMutation
+import com.sudoplatform.sudouser.SudoUserClient
 import io.kotlintest.shouldBe
 import io.kotlintest.shouldNotBe
 import io.kotlintest.shouldThrow
@@ -33,6 +27,15 @@ import okhttp3.ResponseBody.Companion.toResponseBody
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
+import org.mockito.kotlin.any
+import org.mockito.kotlin.doReturn
+import org.mockito.kotlin.doThrow
+import org.mockito.kotlin.mock
+import org.mockito.kotlin.never
+import org.mockito.kotlin.stub
+import org.mockito.kotlin.whenever
+import org.mockito.kotlin.verify
+import org.mockito.kotlin.verifyNoMoreInteractions
 import java.net.HttpURLConnection
 
 /**
@@ -73,6 +76,10 @@ class SudoEntitlementsRedeemEntitlementsTest : BaseTests() {
         mock<Context>()
     }
 
+    private val mockSudoUserClient by before {
+        mock<SudoUserClient>()
+    }
+
     private val mockAppSyncClient by before {
         mock<AWSAppSyncClient>().stub {
             on { mutate(any<RedeemEntitlementsMutation>()) } doReturn mutationHolder.mutationOperation
@@ -82,6 +89,7 @@ class SudoEntitlementsRedeemEntitlementsTest : BaseTests() {
     private val client by before {
         DefaultSudoEntitlementsClient(
             mockContext,
+            mockSudoUserClient,
             mockAppSyncClient,
             mockLogger
         )
@@ -89,12 +97,14 @@ class SudoEntitlementsRedeemEntitlementsTest : BaseTests() {
 
     @Before
     fun init() {
+        whenever(mockSudoUserClient.isSignedIn()).thenReturn(true)
+
         mutationHolder.callback = null
     }
 
     @After
     fun fini() {
-        verifyNoMoreInteractions(mockContext, mockAppSyncClient)
+        verifyNoMoreInteractions(mockContext, mockSudoUserClient, mockAppSyncClient)
     }
 
     @Test
@@ -124,7 +134,28 @@ class SudoEntitlementsRedeemEntitlementsTest : BaseTests() {
             value shouldBe 42
         }
 
+        verify(mockSudoUserClient).isSignedIn()
         verify(mockAppSyncClient).mutate(any<RedeemEntitlementsMutation>())
+    }
+
+    @Test
+    fun `getEntitlements() should throw if not signed in`() = runBlocking<Unit> {
+        whenever(mockSudoUserClient.isSignedIn()).thenReturn(false)
+
+        mutationHolder.callback shouldBe null
+
+        val deferredResult = async(Dispatchers.IO) {
+            shouldThrow<SudoEntitlementsClient.EntitlementsException.NotSignedInException> {
+                client.redeemEntitlements()
+            }
+        }
+        deferredResult.start()
+
+        delay(100L)
+        mutationHolder.callback shouldBe null
+
+        verify(mockSudoUserClient).isSignedIn()
+        verify(mockAppSyncClient, never()).mutate(any<RedeemEntitlementsMutation>())
     }
 
     @Test
@@ -151,6 +182,7 @@ class SudoEntitlementsRedeemEntitlementsTest : BaseTests() {
 
         deferredResult.await()
 
+        verify(mockSudoUserClient).isSignedIn()
         verify(mockAppSyncClient).mutate(any<RedeemEntitlementsMutation>())
     }
 
@@ -184,6 +216,7 @@ class SudoEntitlementsRedeemEntitlementsTest : BaseTests() {
 
         deferredResult.await()
 
+        verify(mockSudoUserClient).isSignedIn()
         verify(mockAppSyncClient).mutate(any<RedeemEntitlementsMutation>())
     }
 
@@ -217,6 +250,7 @@ class SudoEntitlementsRedeemEntitlementsTest : BaseTests() {
 
         deferredResult.await()
 
+        verify(mockSudoUserClient).isSignedIn()
         verify(mockAppSyncClient).mutate(any<RedeemEntitlementsMutation>())
     }
 
@@ -250,6 +284,7 @@ class SudoEntitlementsRedeemEntitlementsTest : BaseTests() {
 
         deferredResult.await()
 
+        verify(mockSudoUserClient).isSignedIn()
         verify(mockAppSyncClient).mutate(any<RedeemEntitlementsMutation>())
     }
 
@@ -283,6 +318,7 @@ class SudoEntitlementsRedeemEntitlementsTest : BaseTests() {
 
         deferredResult.await()
 
+        verify(mockSudoUserClient).isSignedIn()
         verify(mockAppSyncClient).mutate(any<RedeemEntitlementsMutation>())
     }
 
@@ -317,6 +353,7 @@ class SudoEntitlementsRedeemEntitlementsTest : BaseTests() {
 
         deferredResult.await()
 
+        verify(mockSudoUserClient).isSignedIn()
         verify(mockAppSyncClient).mutate(any<RedeemEntitlementsMutation>())
     }
 
@@ -339,6 +376,7 @@ class SudoEntitlementsRedeemEntitlementsTest : BaseTests() {
 
         deferredResult.await()
 
+        verify(mockSudoUserClient).isSignedIn()
         verify(mockAppSyncClient).mutate(any<RedeemEntitlementsMutation>())
     }
 
@@ -353,6 +391,7 @@ class SudoEntitlementsRedeemEntitlementsTest : BaseTests() {
             client.redeemEntitlements()
         }
 
+        verify(mockSudoUserClient).isSignedIn()
         verify(mockAppSyncClient).mutate(any<RedeemEntitlementsMutation>())
     }
 }

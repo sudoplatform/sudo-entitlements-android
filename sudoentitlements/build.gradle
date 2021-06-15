@@ -11,7 +11,7 @@ android {
         minSdkVersion 23
         targetSdkVersion 30
         versionCode = 1
-        versionName = "2.0.5"
+        versionName = "2.0.6"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         testApplicationId = "com.sudoplatform.sudoentitlements.test"
         consumerProguardFiles 'consumer-rules.pro'
@@ -81,10 +81,6 @@ dependencies {
     implementation "com.sudoplatform:sudoconfigmanager:1.2.3"
     implementation "com.sudoplatform:sudouser:9.3.5"
     implementation "com.sudoplatform:sudoapiclient:2.0.4"
-
-
-    // Utils
-    implementation 'commons-codec:commons-codec:20041127.091804'
 
     // Testing
     testImplementation "junit:junit:4.13.2"
