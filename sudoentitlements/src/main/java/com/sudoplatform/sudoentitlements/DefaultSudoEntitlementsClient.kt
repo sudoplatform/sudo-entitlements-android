@@ -7,6 +7,7 @@
 package com.sudoplatform.sudoentitlements
 
 import android.content.Context
+import androidx.annotation.VisibleForTesting
 import com.amazonaws.mobileconnectors.appsync.AWSAppSyncClient
 import com.amazonaws.mobileconnectors.appsync.fetcher.AppSyncResponseFetchers
 import com.amazonaws.services.cognitoidentity.model.NotAuthorizedException
@@ -26,6 +27,7 @@ import com.sudoplatform.sudologging.AndroidUtilsLogDriver
 import com.sudoplatform.sudologging.LogLevel
 import com.sudoplatform.sudologging.Logger
 import com.sudoplatform.sudouser.SudoUserClient
+import java.io.IOException
 import java.util.concurrent.CancellationException
 
 /**
@@ -94,11 +96,7 @@ internal class DefaultSudoEntitlementsClient(
             return result.let { EntitlementsTransformer.toEntityFromGetEntitlementsConsumptionQueryResult(it) }
         } catch (e: Throwable) {
             logger.debug("unexpected error $e")
-            when (e) {
-                is NotAuthorizedException -> throw SudoEntitlementsClient.EntitlementsException.AuthenticationException(cause = e)
-                is ApolloException -> throw SudoEntitlementsClient.EntitlementsException.FailedException(cause = e)
-                else -> throw interpretEntitlementsException(e)
-            }
+            throw recognizeError(e)
         }
     }
 
@@ -124,11 +122,7 @@ internal class DefaultSudoEntitlementsClient(
             return result?.let { EntitlementsTransformer.toEntityFromGetEntitlementsQueryResult(it) }
         } catch (e: Throwable) {
             logger.debug("unexpected error $e")
-            when (e) {
-                is NotAuthorizedException -> throw SudoEntitlementsClient.EntitlementsException.AuthenticationException(cause = e)
-                is ApolloException -> throw SudoEntitlementsClient.EntitlementsException.FailedException(cause = e)
-                else -> throw interpretEntitlementsException(e)
-            }
+            throw recognizeError(e)
         }
     }
 
@@ -155,11 +149,7 @@ internal class DefaultSudoEntitlementsClient(
             return EntitlementsTransformer.toEntityFromRedeemEntitlementsMutationResult(result)
         } catch (e: Throwable) {
             logger.debug("unexpected error $e")
-            when (e) {
-                is NotAuthorizedException -> throw SudoEntitlementsClient.EntitlementsException.AuthenticationException(cause = e)
-                is ApolloException -> throw SudoEntitlementsClient.EntitlementsException.FailedException(cause = e)
-                else -> throw interpretEntitlementsException(e)
-            }
+            throw recognizeError(e)
         }
     }
 
@@ -179,12 +169,29 @@ internal class DefaultSudoEntitlementsClient(
         }
         return SudoEntitlementsClient.EntitlementsException.FailedException(e.toString())
     }
+}
 
-    private fun interpretEntitlementsException(e: Throwable): Throwable {
-        return when (e) {
-            is CancellationException,
-            is SudoEntitlementsClient.EntitlementsException -> e
-            else -> SudoEntitlementsClient.EntitlementsException.UnknownException(e)
-        }
+@VisibleForTesting
+fun recognizeError(e: Throwable): Throwable {
+    return recognizeRootCause(e) ?: when (e) {
+        is ApolloException -> SudoEntitlementsClient.EntitlementsException.FailedException(cause = e)
+        else -> SudoEntitlementsClient.EntitlementsException.UnknownException(e)
+    }
+}
+
+private fun recognizeRootCause(e: Throwable?): Throwable? {
+    // If we find a Sudo Platform exception, return that
+    if (e?.javaClass?.`package`?.name?.startsWith("com.sudoplatform.") ?: false) {
+        return e
+    }
+
+    return when (e) {
+        is NotAuthorizedException -> SudoEntitlementsClient.EntitlementsException.AuthenticationException(cause = e)
+        is ApolloException -> recognizeRootCause(e.cause)
+        is CancellationException -> e
+        is IOException -> recognizeRootCause(e.cause)
+        is RuntimeException -> recognizeRootCause(e.cause)
+        is SudoEntitlementsClient.EntitlementsException -> e
+        else -> null
     }
 }

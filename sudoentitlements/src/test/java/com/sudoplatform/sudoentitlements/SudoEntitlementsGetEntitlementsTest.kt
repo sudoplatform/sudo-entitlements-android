@@ -8,7 +8,9 @@ package com.sudoplatform.sudoentitlements
 
 import android.content.Context
 import com.amazonaws.mobileconnectors.appsync.AWSAppSyncClient
+import com.amazonaws.services.cognitoidentity.model.NotAuthorizedException
 import com.apollographql.apollo.api.Response
+import com.apollographql.apollo.exception.ApolloException
 import com.apollographql.apollo.exception.ApolloHttpException
 import com.sudoplatform.sudoentitlements.graphql.CallbackHolder
 import com.sudoplatform.sudoentitlements.graphql.GetEntitlementsQuery
@@ -38,6 +40,7 @@ import org.mockito.kotlin.stub
 import org.mockito.kotlin.whenever
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.verifyNoMoreInteractions
+import java.io.IOException
 
 /**
  * Test the correct operation of [SudoEntitlementsClient.getEntitlements] using mocks and spies.
@@ -377,6 +380,29 @@ class SudoEntitlementsGetEntitlementsTest : BaseTests() {
         deferredResult.start()
 
         delay(100L)
+        deferredResult.await()
+
+        verify(mockSudoUserClient).isSignedIn()
+        verify(mockAppSyncClient).query(any<GetEntitlementsQuery>())
+    }
+
+    @Test
+    fun `getEntitlements() should find error when unauthorized error occurs`() = runBlocking<Unit> {
+
+        queryHolder.callback shouldBe null
+
+        mockAppSyncClient.stub {
+            on { query(any<GetEntitlementsQuery>()) } doThrow RuntimeException(ApolloException("", IOException(NotAuthorizedException(""))))
+        }
+
+        val deferredResult = async(Dispatchers.IO) {
+            shouldThrow<SudoEntitlementsClient.EntitlementsException.AuthenticationException> {
+                client.getEntitlements()
+            }
+        }
+        deferredResult.start()
+        delay(100L)
+
         deferredResult.await()
 
         verify(mockSudoUserClient).isSignedIn()

@@ -38,6 +38,7 @@ $dokka.location:com.sudoplatform.sudoentitlements.types/UserEntitlements/entitle
 $dokka.location:com.sudoplatform.sudoentitlements.types/UserEntitlements/version/#/PointingToDeclaration/sudoentitlements/com.sudoplatform.sudoentitlements.types/-user-entitlements/version.html
 $dokka.location:com.sudoplatform.sudoentitlements////PointingToDeclaration/sudoentitlements/com.sudoplatform.sudoentitlements/index.html
 $dokka.location:com.sudoplatform.sudoentitlements//entitlementsSetVersionScalingFactor/#/PointingToDeclaration/sudoentitlements/com.sudoplatform.sudoentitlements/entitlements-set-version-scaling-factor.html
+$dokka.location:com.sudoplatform.sudoentitlements//recognizeError/#kotlin.Throwable/PointingToDeclaration/sudoentitlements/com.sudoplatform.sudoentitlements/recognize-error.html
 $dokka.location:com.sudoplatform.sudoentitlements//splitUserEntitlementsVersion/#kotlin.Double/PointingToDeclaration/sudoentitlements/com.sudoplatform.sudoentitlements/split-user-entitlements-version.html
 $dokka.location:com.sudoplatform.sudoentitlements/SudoEntitlementsClient.Builder///PointingToDeclaration/sudoentitlements/com.sudoplatform.sudoentitlements/-sudo-entitlements-client/-builder/index.html
 $dokka.location:com.sudoplatform.sudoentitlements/SudoEntitlementsClient.Builder/build/#/PointingToDeclaration/sudoentitlements/com.sudoplatform.sudoentitlements/-sudo-entitlements-client/-builder/build.html
