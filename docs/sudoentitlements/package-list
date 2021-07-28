@@ -68,6 +68,7 @@ $dokka.location:com.sudoplatform.sudoentitlements/SudoEntitlementsClient.Entitle
 $dokka.location:com.sudoplatform.sudoentitlements/SudoEntitlementsClient///PointingToDeclaration/sudoentitlements/com.sudoplatform.sudoentitlements/-sudo-entitlements-client/index.html
 $dokka.location:com.sudoplatform.sudoentitlements/SudoEntitlementsClient/getEntitlements/#/PointingToDeclaration/sudoentitlements/com.sudoplatform.sudoentitlements/-sudo-entitlements-client/get-entitlements.html
 $dokka.location:com.sudoplatform.sudoentitlements/SudoEntitlementsClient/getEntitlementsConsumption/#/PointingToDeclaration/sudoentitlements/com.sudoplatform.sudoentitlements/-sudo-entitlements-client/get-entitlements-consumption.html
+$dokka.location:com.sudoplatform.sudoentitlements/SudoEntitlementsClient/getExternalId/#/PointingToDeclaration/sudoentitlements/com.sudoplatform.sudoentitlements/-sudo-entitlements-client/get-external-id.html
 $dokka.location:com.sudoplatform.sudoentitlements/SudoEntitlementsClient/redeemEntitlements/#/PointingToDeclaration/sudoentitlements/com.sudoplatform.sudoentitlements/-sudo-entitlements-client/redeem-entitlements.html
 com.sudoplatform.sudoentitlements
 com.sudoplatform.sudoentitlements.types

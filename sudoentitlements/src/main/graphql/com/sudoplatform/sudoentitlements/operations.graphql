@@ -38,6 +38,9 @@ query GetEntitlementsConsumption {
     }
   }
 }
+query GetExternalId {
+  getExternalId
+}
 mutation RedeemEntitlements {
   redeemEntitlements {
     createdAtEpochMs

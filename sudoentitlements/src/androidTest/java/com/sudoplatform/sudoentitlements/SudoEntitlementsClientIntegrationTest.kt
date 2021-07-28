@@ -293,6 +293,54 @@ class SudoEntitlementsClientIntegrationTest : BaseIntegrationTest() {
         entitlementsClient.getEntitlements()
     }
 
+    @Test
+    fun getExternalIdBeforeRedeemShouldWork() = runBlocking {
+        // Can only run if client config files are present
+        assumeTrue(clientConfigFilesPresent())
+
+        signInAndRegister()
+
+        val expectedExternalId = enableUserForExternalIdMapping()
+
+        val actualExternalId = entitlementsClient.getExternalId()
+
+        actualExternalId shouldBe expectedExternalId
+    }
+
+    @Test
+    fun getExternalIdAfterDefaultRedeemShouldWork() = runBlocking {
+        // Can only run if client config files are present
+        assumeTrue(clientConfigFilesPresent())
+        assumeTrue(defaultEntitlementsSetForTestUsers())
+
+        signInAndRegister()
+
+        val expectedExternalId = enableUserForExternalIdMapping()
+
+        entitlementsClient.redeemEntitlements()
+
+        val actualExternalId = entitlementsClient.getExternalId()
+
+        actualExternalId shouldBe expectedExternalId
+    }
+
+    @Test
+    fun getExternalIdAfterClaimEntitlementsRedeemShouldWork() = runBlocking {
+        // Can only run if client config files are present
+        assumeTrue(clientConfigFilesPresent())
+        assumeTrue(defaultEntitlementsSetForTestUsers())
+
+        signInAndRegister()
+
+        val expectedExternalId = enableUserForEntitlementsRedemption()
+
+        entitlementsClient.redeemEntitlements()
+
+        val actualExternalId = entitlementsClient.getExternalId()
+
+        actualExternalId shouldBe expectedExternalId
+    }
+
     private fun checkEntitlementsSet(entitlementsSet: EntitlementsSet) {
         with(entitlementsSet) {
             name.isNotBlank() shouldBe true

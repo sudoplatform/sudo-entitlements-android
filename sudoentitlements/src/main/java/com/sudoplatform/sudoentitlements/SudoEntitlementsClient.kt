@@ -137,6 +137,14 @@ interface SudoEntitlementsClient {
     suspend fun getEntitlements(): EntitlementsSet?
 
     /**
+     * Get the user's external ID as determined by entitlements service
+     *
+     * @return The external ID of the user
+     */
+    @Throws(EntitlementsException::class)
+    suspend fun getExternalId(): String
+
+    /**
      * Redeem the entitlements for the user.
      *
      * @return The current [EntitlementsSet] the user has after the redemption has completed.

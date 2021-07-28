@@ -151,13 +151,30 @@ abstract class BaseIntegrationTest {
         return (defaultEntitlementsSetForTestUsers ?: "false").toBoolean()
     }
 
-    protected suspend fun enableUserForEntitlementsRedemption(entitlementsSet: String = "integration-test") {
-        val customTest = mapOf("ent" to mapOf("externalId" to UUID.randomUUID().toString()))
+    protected suspend fun enableUserForExternalIdMapping(externalId: String = UUID.randomUUID().toString()): String {
+        val customTest = mapOf("ent" to mapOf("externalId" to externalId))
+        setCustomAttributesAndSignInAgain(
+            mapOf(
+                "custom:test" to JSONObject(customTest).toString()
+            )
+        )
+
+        return externalId
+    }
+
+    /**
+     * @return external ID of user
+     */
+    protected suspend fun enableUserForEntitlementsRedemption(entitlementsSet: String = "integration-test"): String {
+        val externalId = UUID.randomUUID().toString()
+        val customTest = mapOf("ent" to mapOf("externalId" to externalId))
         setCustomAttributesAndSignInAgain(
             mapOf(
                 "custom:entitlementsSet" to entitlementsSet,
                 "custom:test" to JSONObject(customTest).toString()
             )
         )
+
+        return externalId
     }
 }

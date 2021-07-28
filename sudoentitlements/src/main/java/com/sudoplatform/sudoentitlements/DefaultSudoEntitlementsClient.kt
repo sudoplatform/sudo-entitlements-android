@@ -18,6 +18,7 @@ import com.sudoplatform.sudoentitlements.appsync.enqueue
 import com.sudoplatform.sudoentitlements.appsync.enqueueFirst
 import com.sudoplatform.sudoentitlements.graphql.GetEntitlementsConsumptionQuery
 import com.sudoplatform.sudoentitlements.graphql.GetEntitlementsQuery
+import com.sudoplatform.sudoentitlements.graphql.GetExternalIdQuery
 import com.sudoplatform.sudoentitlements.graphql.RedeemEntitlementsMutation
 import com.sudoplatform.sudoentitlements.logging.LogConstants
 import com.sudoplatform.sudoentitlements.types.EntitlementsConsumption
@@ -94,6 +95,33 @@ internal class DefaultSudoEntitlementsClient(
             val result = queryResponse.data()?.entitlementsConsumption
                 ?: throw SudoEntitlementsClient.EntitlementsException.FailedException(ENTITLEMENTS_NOT_FOUND_MSG)
             return result.let { EntitlementsTransformer.toEntityFromGetEntitlementsConsumptionQueryResult(it) }
+        } catch (e: Throwable) {
+            logger.debug("unexpected error $e")
+            throw recognizeError(e)
+        }
+    }
+
+    @Throws(SudoEntitlementsClient.EntitlementsException::class)
+    override suspend fun getExternalId(): String {
+        if (!this.sudoUserClient.isSignedIn()) {
+            throw SudoEntitlementsClient.EntitlementsException.NotSignedInException()
+        }
+
+        try {
+            val query = GetExternalIdQuery.builder().build()
+
+            val queryResponse = appSyncClient.query(query)
+                .responseFetcher(AppSyncResponseFetchers.NETWORK_ONLY)
+                .enqueueFirst()
+
+            if (queryResponse.hasErrors()) {
+                logger.warning("errors = ${queryResponse.errors()}")
+                throw interpretEntitlementsError(queryResponse.errors().first())
+            }
+
+            val result = queryResponse.data()?.externalId
+                ?: throw SudoEntitlementsClient.EntitlementsException.FailedException(ENTITLEMENTS_NOT_FOUND_MSG)
+            return result
         } catch (e: Throwable) {
             logger.debug("unexpected error $e")
             throw recognizeError(e)
