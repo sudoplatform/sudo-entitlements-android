@@ -25,6 +25,7 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import timber.log.Timber
+import java.util.UUID
 
 /**
  * Test the operation of the [SudoEntitlementsClient].
@@ -186,8 +187,8 @@ class SudoEntitlementsClientIntegrationTest : BaseIntegrationTest() {
         consumption.entitlements.version shouldBe redeemed.version
         consumption.entitlements.entitlementsSetName shouldBe redeemed.name
         consumption.entitlements.entitlements.size shouldBe redeemed.entitlements.size
-        for (i in 0..consumption.entitlements.entitlements.size - 1) {
-            redeemed.entitlements.contains(consumption.entitlements.entitlements[i]) shouldBe true
+        for (element in consumption.entitlements.entitlements) {
+            redeemed.entitlements.contains(element) shouldBe true
         }
         consumption.consumption shouldBe listOf()
     }
@@ -272,7 +273,7 @@ class SudoEntitlementsClientIntegrationTest : BaseIntegrationTest() {
     }
 
     @Test
-    fun getEntitlementsShouldReturnNullForRawTestUser() = runBlocking<Unit> {
+    fun getEntitlementsShouldReturnNullForRawTestUser() = runBlocking {
         // Can only run if client config files are present
         assumeTrue(clientConfigFilesPresent())
         assumeFalse(defaultEntitlementsSetForTestUsers())
@@ -339,6 +340,31 @@ class SudoEntitlementsClientIntegrationTest : BaseIntegrationTest() {
         val actualExternalId = entitlementsClient.getExternalId()
 
         actualExternalId shouldBe expectedExternalId
+    }
+
+    @Test
+    fun consumeBooleanEntitlementsShouldThrowInvalidArgumentError() = runBlocking {
+        assumeTrue(clientConfigFilesPresent())
+
+        signInAndRegister()
+
+        shouldThrow<SudoEntitlementsClient.EntitlementsException.InvalidArgumentException> {
+            entitlementsClient.consumeBooleanEntitlements(arrayOf(UUID.randomUUID().toString()))
+        }
+        Unit
+    }
+
+    @Test
+    fun consumeBooleanEntitlementsShouldSucceed() = runBlocking {
+        assumeTrue(clientConfigFilesPresent())
+        assumeTrue(integrationTestEntitlementsSetAvailable())
+
+        signInAndRegister()
+
+        enableUserForEntitlementsRedemption()
+        entitlementsClient.redeemEntitlements()
+
+        entitlementsClient.consumeBooleanEntitlements(arrayOf("sudoplatform.test.testEntitlement-2"))
     }
 
     private fun checkEntitlementsSet(entitlementsSet: EntitlementsSet) {

@@ -16,6 +16,7 @@ import com.apollographql.apollo.exception.ApolloException
 import com.sudoplatform.sudoapiclient.ApiClientManager
 import com.sudoplatform.sudoentitlements.appsync.enqueue
 import com.sudoplatform.sudoentitlements.appsync.enqueueFirst
+import com.sudoplatform.sudoentitlements.graphql.ConsumeBooleanEntitlementsMutation
 import com.sudoplatform.sudoentitlements.graphql.GetEntitlementsConsumptionQuery
 import com.sudoplatform.sudoentitlements.graphql.GetEntitlementsQuery
 import com.sudoplatform.sudoentitlements.graphql.GetExternalIdQuery
@@ -52,7 +53,9 @@ internal class DefaultSudoEntitlementsClient(
         /** Exception messages */
         private const val ENTITLEMENTS_NOT_FOUND_MSG = "No entitlements returned in response"
         private const val AMBIGUOUS_ENTITLEMENTS_MSG = "Multiple conflicting entitlement sets have been recognized"
+        private const val INVALID_ARGUMENT_MSG = "Invalid argument provided"
         private const val INVALID_TOKEN_MSG = "Invalid identity token recognized"
+        private const val INSUFFICIENT_ENTITLEMENTS_MSG = "Insufficient entitlements"
         private const val NO_ENTITLEMENTS_MSG = "No entitlements assigned to user"
         private const val SERVICE_ERROR_MSG = "Service error"
 
@@ -60,7 +63,9 @@ internal class DefaultSudoEntitlementsClient(
         private const val ERROR_TYPE = "errorType"
 
         private const val ERROR_SERVICE = "sudoplatform.ServiceError"
+        private const val ERROR_INVALID_ARGUMENT = "sudoplatform.InvalidArgumentError"
         private const val ERROR_INVALID_TOKEN = "sudoplatform.InvalidTokenError"
+        private const val ERROR_INSUFFICIENT_ENTITLEMENTS = "sudoplatform.InsufficientEntitlementsError"
         private const val ERROR_NO_ENTITLEMENTS = "sudoplatform.NoEntitlementsError"
         private const val ERROR_AMBIGUOUS_ENTITLEMENTS = "sudoplatform.entitlements.AmbiguousEntitlementsError"
     }
@@ -181,13 +186,43 @@ internal class DefaultSudoEntitlementsClient(
         }
     }
 
+    @Throws(SudoEntitlementsClient.EntitlementsException::class)
+    override suspend fun consumeBooleanEntitlements(entitlementNames: Array<String>) {
+        if (!this.sudoUserClient.isSignedIn()) {
+            throw SudoEntitlementsClient.EntitlementsException.NotSignedInException()
+        }
+
+        try {
+            val mutation = ConsumeBooleanEntitlementsMutation.builder()
+                .entitlementNames(entitlementNames.toList())
+                .build()
+
+            val mutationResponse = appSyncClient.mutate(mutation)
+                .enqueue()
+
+            if (mutationResponse.hasErrors()) {
+                logger.warning("errors = ${mutationResponse.errors()}")
+                throw interpretEntitlementsError(mutationResponse.errors().first())
+            }
+        } catch (e: Throwable) {
+            logger.debug("unexpected error $e")
+            throw recognizeError(e)
+        }
+    }
+
     private fun interpretEntitlementsError(e: Error): SudoEntitlementsClient.EntitlementsException {
         val error = e.customAttributes()[ERROR_TYPE]?.toString() ?: ""
         if (error.contains(ERROR_AMBIGUOUS_ENTITLEMENTS)) {
             return SudoEntitlementsClient.EntitlementsException.AmbiguousEntitlementsException(AMBIGUOUS_ENTITLEMENTS_MSG)
         }
+        if (error.contains(ERROR_INVALID_ARGUMENT)) {
+            return SudoEntitlementsClient.EntitlementsException.InvalidArgumentException(INVALID_ARGUMENT_MSG)
+        }
         if (error.contains(ERROR_INVALID_TOKEN)) {
             return SudoEntitlementsClient.EntitlementsException.InvalidTokenException(INVALID_TOKEN_MSG)
+        }
+        if (error.contains(ERROR_INSUFFICIENT_ENTITLEMENTS)) {
+            return SudoEntitlementsClient.EntitlementsException.InsufficientEntitlementsException(INSUFFICIENT_ENTITLEMENTS_MSG)
         }
         if (error.contains(ERROR_NO_ENTITLEMENTS)) {
             return SudoEntitlementsClient.EntitlementsException.NoEntitlementsException(NO_ENTITLEMENTS_MSG)

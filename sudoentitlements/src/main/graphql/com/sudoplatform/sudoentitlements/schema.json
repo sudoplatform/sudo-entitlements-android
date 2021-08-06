@@ -584,10 +584,59 @@
                             },
                             "isDeprecated": false,
                             "deprecationReason": null
+                        },
+                        {
+                            "name": "consumeBooleanEntitlements",
+                            "description": null,
+                            "args": [
+                                {
+                                    "name": "entitlementNames",
+                                    "description": null,
+                                    "type": {
+                                        "kind": "NON_NULL",
+                                        "name": null,
+                                        "ofType": {
+                                            "kind": "LIST",
+                                            "name": null,
+                                            "ofType": {
+                                                "kind": "NON_NULL",
+                                                "name": null,
+                                                "ofType": {
+                                                    "kind": "SCALAR",
+                                                    "name": "String",
+                                                    "ofType": null
+                                                }
+                                            }
+                                        }
+                                    },
+                                    "defaultValue": null
+                                }
+                            ],
+                            "type": {
+                                "kind": "NON_NULL",
+                                "name": null,
+                                "ofType": {
+                                    "kind": "SCALAR",
+                                    "name": "Boolean",
+                                    "ofType": null
+                                }
+                            },
+                            "isDeprecated": false,
+                            "deprecationReason": null
                         }
                     ],
                     "inputFields": null,
                     "interfaces": [],
+                    "enumValues": null,
+                    "possibleTypes": null
+                },
+                {
+                    "kind": "SCALAR",
+                    "name": "Boolean",
+                    "description": "Built-in Boolean",
+                    "fields": null,
+                    "inputFields": null,
+                    "interfaces": null,
                     "enumValues": null,
                     "possibleTypes": null
                 },
@@ -616,31 +665,6 @@
                 },
                 {
                     "kind": "INPUT_OBJECT",
-                    "name": "InternalGetEntitlementsForUserInput",
-                    "description": null,
-                    "fields": null,
-                    "inputFields": [
-                        {
-                            "name": "userId",
-                            "description": null,
-                            "type": {
-                                "kind": "NON_NULL",
-                                "name": null,
-                                "ofType": {
-                                    "kind": "SCALAR",
-                                    "name": "ID",
-                                    "ofType": null
-                                }
-                            },
-                            "defaultValue": null
-                        }
-                    ],
-                    "interfaces": null,
-                    "enumValues": null,
-                    "possibleTypes": null
-                },
-                {
-                    "kind": "INPUT_OBJECT",
                     "name": "ConsumeBooleanEntitlementInput",
                     "description": null,
                     "fields": null,
@@ -654,6 +678,31 @@
                                 "ofType": {
                                     "kind": "SCALAR",
                                     "name": "String",
+                                    "ofType": null
+                                }
+                            },
+                            "defaultValue": null
+                        }
+                    ],
+                    "interfaces": null,
+                    "enumValues": null,
+                    "possibleTypes": null
+                },
+                {
+                    "kind": "INPUT_OBJECT",
+                    "name": "InternalGetEntitlementsForUserInput",
+                    "description": null,
+                    "fields": null,
+                    "inputFields": [
+                        {
+                            "name": "userId",
+                            "description": null,
+                            "type": {
+                                "kind": "NON_NULL",
+                                "name": null,
+                                "ofType": {
+                                    "kind": "SCALAR",
+                                    "name": "ID",
                                     "ofType": null
                                 }
                             },
@@ -1182,16 +1231,6 @@
                     "possibleTypes": null
                 },
                 {
-                    "kind": "SCALAR",
-                    "name": "Boolean",
-                    "description": "Built-in Boolean",
-                    "fields": null,
-                    "inputFields": null,
-                    "interfaces": null,
-                    "enumValues": null,
-                    "possibleTypes": null
-                },
-                {
                     "kind": "OBJECT",
                     "name": "__EnumValue",
                     "description": null,
@@ -1633,6 +1672,29 @@
                     "onField": false
                 },
                 {
+                    "name": "deprecated",
+                    "description": null,
+                    "locations": [
+                        "FIELD_DEFINITION",
+                        "ENUM_VALUE"
+                    ],
+                    "args": [
+                        {
+                            "name": "reason",
+                            "description": null,
+                            "type": {
+                                "kind": "SCALAR",
+                                "name": "String",
+                                "ofType": null
+                            },
+                            "defaultValue": "\"No longer supported\""
+                        }
+                    ],
+                    "onOperation": false,
+                    "onFragment": false,
+                    "onField": false
+                },
+                {
                     "name": "aws_lambda",
                     "description": "Tells the service this field/object has access authorized by a Lambda Authorizer.",
                     "locations": [
@@ -1702,29 +1764,6 @@
                                 }
                             },
                             "defaultValue": null
-                        }
-                    ],
-                    "onOperation": false,
-                    "onFragment": false,
-                    "onField": false
-                },
-                {
-                    "name": "deprecated",
-                    "description": null,
-                    "locations": [
-                        "FIELD_DEFINITION",
-                        "ENUM_VALUE"
-                    ],
-                    "args": [
-                        {
-                            "name": "reason",
-                            "description": null,
-                            "type": {
-                                "kind": "SCALAR",
-                                "name": "String",
-                                "ofType": null
-                            },
-                            "defaultValue": "\"No longer supported\""
                         }
                     ],
                     "onOperation": false,

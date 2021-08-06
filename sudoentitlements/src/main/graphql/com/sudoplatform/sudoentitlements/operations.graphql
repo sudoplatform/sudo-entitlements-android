@@ -55,3 +55,6 @@ mutation RedeemEntitlements {
     }
   }
 }
+mutation ConsumeBooleanEntitlements($entitlementNames: [String!]!) {
+  consumeBooleanEntitlements(entitlementNames: $entitlementNames)
+}

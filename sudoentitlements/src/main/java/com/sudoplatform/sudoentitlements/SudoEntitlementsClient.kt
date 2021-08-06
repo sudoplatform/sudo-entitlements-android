@@ -12,6 +12,11 @@ import com.sudoplatform.sudoapiclient.ApiClientManager
 import com.sudoplatform.sudoentitlements.logging.LogConstants
 import com.sudoplatform.sudoentitlements.types.EntitlementsConsumption
 import com.sudoplatform.sudoentitlements.types.EntitlementsSet
+import com.sudoplatform.sudoentitlements.types.UserEntitlements
+import com.sudoplatform.sudoentitlements.SudoEntitlementsClient.EntitlementsException.InsufficientEntitlementsException
+import com.sudoplatform.sudoentitlements.SudoEntitlementsClient.EntitlementsException.InvalidArgumentException
+import com.sudoplatform.sudoentitlements.SudoEntitlementsClient.EntitlementsException.NotSignedInException
+import com.sudoplatform.sudoentitlements.SudoEntitlementsClient.EntitlementsException.ServiceException
 import com.sudoplatform.sudologging.AndroidUtilsLogDriver
 import com.sudoplatform.sudologging.LogLevel
 import com.sudoplatform.sudologging.Logger
@@ -107,6 +112,10 @@ interface SudoEntitlementsClient {
             EntitlementsException(message = message, cause = cause)
         class FailedException(message: String? = null, cause: Throwable? = null) :
             EntitlementsException(message = message, cause = cause)
+        class InsufficientEntitlementsException(message: String? = null, cause: Throwable? = null) :
+            EntitlementsException(message = message, cause = cause)
+        class InvalidArgumentException(message: String? = null, cause: Throwable? = null) :
+            EntitlementsException(message = message, cause = cause)
         class InvalidTokenException(message: String? = null, cause: Throwable? = null) :
             EntitlementsException(message = message, cause = cause)
         class NoEntitlementsException(message: String? = null, cause: Throwable? = null) :
@@ -151,6 +160,34 @@ interface SudoEntitlementsClient {
      */
     @Throws(EntitlementsException::class)
     suspend fun redeemEntitlements(): EntitlementsSet
+
+    /**
+     * Record consumption of a set of boolean entitlements.
+     *
+     * This is to support services that want a record of
+     * usage recorded but have no service side enforcement
+     * point.
+     *
+     * @param entitlementNames Boolean entitlement names to record consumption of
+     *
+     * @throws NotSignedInException
+     *   User is not signed in
+     *
+     * @throws InsufficientEntitlementsException
+     *   User is not entitled to one or more of the boolean entitlements.
+     *   Check entitlements and that redeemEntitlements has been called
+     *   for the user.
+     *
+     * @throws InvalidArgumentException
+     *   One or more of the specified entitlement names does not correspond
+     *   to a boolean entitlement defined to the entitlements service
+     *
+     * @throws ServiceException
+     *   An error occurred within the entitlements service that indicates an
+     *   issue with the configuration or operation of the service.
+     */
+    @Throws(EntitlementsException::class)
+    suspend fun consumeBooleanEntitlements(entitlementNames: Array<String>)
 }
 
 /**
