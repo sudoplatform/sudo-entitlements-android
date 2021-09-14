@@ -6,33 +6,11 @@
             ]]></notes>
         <cve>CVE-2018-20200</cve>
     </suppress>
-    <suppress until="2021-08-30">
-        <notes><![CDATA[
-            Kotlin script is not used in the Sudo Platform Entitlements SDK. Set suppression to expire in
-            2 months. We can re-evaluate and possible move to Kotlin 1.4.0 if it's out of RC by then.
-            ]]></notes>
-        <cve>CVE-2020-15824</cve>
-    </suppress>
     <suppress>
         <notes><![CDATA[
             Guava temporary file creation is not used in the Sudo Entitlements SDK.
             ]]></notes>
         <cve>CVE-2020-8908</cve>
-    </suppress>
-    <suppress until="2021-08-30">
-        <notes><![CDATA[
-            False positive. We're at Kotlin 1.4.30 which is beyond 1.4.21 when fix was available. False positive
-            occurs because the kotlin coroutines libraries are at 1.4.2 and match the broad CPE pattern.
-            ]]></notes>
-        <cve>CVE-2020-29582</cve>
-    </suppress>
-    <suppress until="2021-08-15">
-        <notes>
-            <![CDATA[
-            vulnerability is A comparison error in OpenBSDBCrypt.checkPassword(). checkPassword is not used.
-            ]]>
-        </notes>
-        <cve>CVE-2020-28052</cve>
     </suppress>
     <suppress>
         <notes>
@@ -50,4 +28,18 @@
         </notes>
         <cve>CVE-2019-17571</cve>
     </suppress>
+    <suppress until="2021-12-13">
+        <notes><![CDATA[
+        file name: junit-4.12.jar
+        ]]></notes>
+        <packageUrl regex="true">^pkg:maven/junit/junit@.*$</packageUrl>
+        <cve>CVE-2020-15250</cve>
+    </suppress>
+    <suppress until="2021-12-13">
+        <notes><![CDATA[
+        file name: jsoup-1.13.1.jar
+        ]]></notes>
+        <packageUrl regex="true">^pkg:maven/org\.jsoup/jsoup@.*$</packageUrl>
+        <cve>CVE-2021-37714</cve>
+    </suppress>    
 </suppressions>

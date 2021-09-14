@@ -381,12 +381,6 @@
   license: The Apache Software License, Version 2.0
   licenseUrl: https://github.com/square/retrofit/blob/master/LICENSE.txt
   url: https://mvnrepository.com/artifact/com.google.code.gson/gson
-- artifact: org.jetbrains.kotlin:kotlin-parcelize-runtime:+
-  name: Parcelize Runtime
-  copyrightHolder: Jetbrains, Inc.
-  license: The Apache License, Version 2.0
-  licenseUrl: http://www.apache.org/licenses/LICENSE-2.0.txt
-  url: https://kotlinlang.org/
 - artifact: com.squareup.okio:okio:+
   name: Okio
   copyrightHolder: Square, Inc.
@@ -471,3 +465,21 @@
   license: The Apache Software License, Version 2.0
   licenseUrl: http://www.apache.org/licenses/LICENSE-2.0.txt
   url: https://developer.android.com/jetpack/androidx
+- artifact: org.hamcrest:hamcrest-core:+
+  name: Hamcrest Core
+  copyrightHolder: hamcrest.org
+  license: BSD License
+  licenseUrl: https://opensource.org/licenses/BSD-3-Clause
+  url: http://hamcrest.org
+- artifact: junit:junit:+
+  name: JUnit
+  copyrightHolder: JUnit
+  license: Eclipse Public License 1.0
+  licenseUrl: http://www.eclipse.org/legal/epl-v10.html
+  url: http://junit.org
+- artifact: org.bouncycastle:bcutil-jdk15to18:+
+  name: Bouncy Castle ASN.1 Extension and Utility APIs
+  copyrightHolder: The JSR-330 Expert Group
+  license: Bouncy Castle Licence
+  licenseUrl: http://www.bouncycastle.org/licence.html
+  url: http://www.bouncycastle.org/java.html
