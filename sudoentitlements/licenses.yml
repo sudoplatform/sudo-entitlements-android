@@ -263,124 +263,36 @@
   license: Apache License 2.0
   licenseUrl: https://www.apache.org/licenses/LICENSE-2.0
   url: https://github.com/awslabs/aws-mobile-appsync-sdk-android
-- artifact: androidx.documentfile:documentfile:+
-  name: Android Support Library Document File
-  copyrightHolder: Google, Inc.
-  license: The Apache Software License, Version 2.0
-  licenseUrl: http://www.apache.org/licenses/LICENSE-2.0.txt
-  url: https://developer.android.com/jetpack/androidx
-- artifact: com.amazonaws:aws-android-sdk-s3:+
-  name: AWS SDK for Android - Amazon S3
-  copyrightHolder: Amazon
-  license: Amazon Software License
-  url: http://aws.amazon.com/sdkforandroid
 - artifact: com.madgag.spongycastle:prov:+
   name: Spongy Castle
   copyrightHolder: The JSR-330 Expert Group
   license: Bouncy Castle Licence
   licenseUrl: http://www.bouncycastle.org/licence.html
   url: http://rtyley.github.io/spongycastle/
-- artifact: androidx.coordinatorlayout:coordinatorlayout:+
-  name: Android Support Library Coordinator Layout
-  copyrightHolder: Google, Inc.
-  license: The Apache Software License, Version 2.0
-  licenseUrl: http://www.apache.org/licenses/LICENSE-2.0.txt
-  url: http://developer.android.com/tools/extras/support-library.html
-- artifact: androidx.legacy:legacy-support-core-ui:+
-  name: Android Support Library core UI
-  copyrightHolder: Google, Inc.
-  license: The Apache Software License, Version 2.0
-  licenseUrl: http://www.apache.org/licenses/LICENSE-2.0.txt
-  url: http://developer.android.com/tools/extras/support-library.html
-- artifact: com.amazonaws:aws-android-sdk-cognitoauth:+
-  name: AWS SDK for Android - Amazon Cognito Auth
-  copyrightHolder: Amazon
-  license: Apache License, Version 2.0
-  licenseUrl: http://aws.amazon.com/apache2.0
-  url: http://aws.amazon.com/sdkforandroid
-- artifact: androidx.browser:browser:+
-  name: Android Support Custom Tabs
-  copyrightHolder: Google, Inc.
-  license: The Apache Software License, Version 2.0
-  licenseUrl: http://www.apache.org/licenses/LICENSE-2.0.txt
-  url: http://developer.android.com/tools/extras/support-library.html
-- artifact: androidx.asynclayoutinflater:asynclayoutinflater:+
-  name: Android Support Library Async Layout Inflater
-  copyrightHolder: Google, Inc.
-  license: The Apache Software License, Version 2.0
-  licenseUrl: http://www.apache.org/licenses/LICENSE-2.0.txt
-  url: http://developer.android.com/tools/extras/support-library.html
 - artifact: org.jetbrains.kotlinx:kotlinx-coroutines-android:+
   name: kotlinx-coroutines-android
   copyrightHolder: JetBrains s.r.o.
   license: The Apache Software License, Version 2.0
   licenseUrl: https://www.apache.org/licenses/LICENSE-2.0.txt
   url: https://github.com/Kotlin/kotlinx.coroutines
-- artifact: com.amazonaws:aws-android-sdk-kms:+
-  name: AWS SDK for Android - AWS KMS
-  copyrightHolder: Amazon
-  license: Amazon Software License
-  url: http://aws.amazon.com/sdkforandroid
 - artifact: com.madgag.spongycastle:bcpkix-jdk15on:+
   name: Spongy Castle
   copyrightHolder: The JSR-330 Expert Group
   license: Bouncy Castle Licence
   licenseUrl: http://www.bouncycastle.org/licence.html
   url: http://rtyley.github.io/spongycastle/
-- artifact: androidx.slidingpanelayout:slidingpanelayout:+
-  name: Android Support Library Sliding Pane Layout
-  copyrightHolder: Google, Inc.
-  license: The Apache Software License, Version 2.0
-  licenseUrl: http://www.apache.org/licenses/LICENSE-2.0.txt
-  url: http://developer.android.com/tools/extras/support-library.html
-- artifact: androidx.swiperefreshlayout:swiperefreshlayout:+
-  name: Android Support Library Custom View
-  copyrightHolder: Google, Inc.
-  license: The Apache Software License, Version 2.0
-  licenseUrl: http://www.apache.org/licenses/LICENSE-2.0.txt
-  url: http://developer.android.com/tools/extras/support-library.html
 - artifact: androidx.core:core-ktx:+
   name: Core Kotlin Extensions
   copyrightHolder: Google, Inc.
   license: The Apache Software License, Version 2.0
   licenseUrl: http://www.apache.org/licenses/LICENSE-2.0.txt
   url: https://developer.android.com/jetpack/androidx
-- artifact: androidx.legacy:legacy-support-core-utils:+
-  name: Android Support Library core utils
-  copyrightHolder: Google, Inc.
-  license: The Apache Software License, Version 2.0
-  licenseUrl: http://www.apache.org/licenses/LICENSE-2.0.txt
-  url: http://developer.android.com/tools/extras/support-library.html
-- artifact: androidx.localbroadcastmanager:localbroadcastmanager:+
-  name: Android Support Library Local Broadcast Manager
-  copyrightHolder: Google, Inc.
-  license: The Apache Software License, Version 2.0
-  licenseUrl: http://www.apache.org/licenses/LICENSE-2.0.txt
-  url: http://developer.android.com/tools/extras/support-library.html
 - artifact: com.madgag.spongycastle:core:+
   name: Spongy Castle
   copyrightHolder: The JSR-330 Expert Group
   license: Bouncy Castle Licence
   licenseUrl: http://www.bouncycastle.org/licence.html
   url: http://rtyley.github.io/spongycastle/
-- artifact: androidx.print:print:+
-  name: Android Support Library Print
-  copyrightHolder: Google, Inc.
-  license: The Apache Software License, Version 2.0
-  licenseUrl: http://www.apache.org/licenses/LICENSE-2.0.txt
-  url: http://developer.android.com/tools/extras/support-library.html
-- artifact: com.squareup.retrofit2:retrofit:+
-  name: Retrofit
-  copyrightHolder: Square, Inc.
-  license: The Apache Software License, Version 2.0
-  licenseUrl: https://github.com/square/retrofit/blob/master/LICENSE.txt
-  url: https://github.com/square/retrofit
-- artifact: com.squareup.retrofit2:converter-gson:+
-  name: Converter Gson
-  copyrightHolder: Square, Inc.
-  license: The Apache Software License, Version 2.0
-  licenseUrl: https://github.com/square/retrofit/blob/master/LICENSE.txt
-  url: https://mvnrepository.com/artifact/com.google.code.gson/gson
 - artifact: com.squareup.okio:okio:+
   name: Okio
   copyrightHolder: Square, Inc.
@@ -483,3 +395,91 @@
   license: Bouncy Castle Licence
   licenseUrl: http://www.bouncycastle.org/licence.html
   url: http://www.bouncycastle.org/java.html
+- artifact: org.jetbrains.kotlinx:kotlinx-serialization-core-jvm:+
+  name: kotlinx-serialization-core
+  copyrightHolder: JetBrains, Inc.
+  license: The Apache Software License, Version 2.0
+  licenseUrl: https://www.apache.org/licenses/LICENSE-2.0.txt
+  url: https://github.com/Kotlin/kotlinx.serialization
+- artifact: org.jetbrains.kotlinx:kotlinx-serialization-json-jvm:+
+  name: kotlinx-serialization-json
+  copyrightHolder: JetBrains, Inc.
+  license: The Apache Software License, Version 2.0
+  licenseUrl: https://www.apache.org/licenses/LICENSE-2.0.txt
+  url: https://github.com/Kotlin/kotlinx.serialization
+- artifact: androidx.localbroadcastmanager:localbroadcastmanager:+
+  name: Android Support Library Local Broadcast Manager
+  copyrightHolder: Google, Inc.
+  license: The Apache Software License, Version 2.0
+  licenseUrl: http://www.apache.org/licenses/LICENSE-2.0.txt
+  url: http://developer.android.com/tools/extras/support-library.html
+- artifact: com.amazonaws:aws-android-sdk-kms:+
+  name: AWS SDK for Android - AWS KMS
+  copyrightHolder: Amazon
+  license: Amazon Software License
+  url: http://aws.amazon.com/sdkforandroid
+- artifact: com.amazonaws:aws-android-sdk-s3:+
+  name: AWS SDK for Android - Amazon S3
+  copyrightHolder: Amazon
+  license: Amazon Software License
+  url: http://aws.amazon.com/sdkforandroid
+- artifact: androidx.documentfile:documentfile:+
+  name: Android Support Library Document File
+  copyrightHolder: Google, Inc.
+  license: The Apache Software License, Version 2.0
+  licenseUrl: http://www.apache.org/licenses/LICENSE-2.0.txt
+  url: http://developer.android.com/tools/extras/support-library.html
+- artifact: androidx.legacy:legacy-support-core-utils:+
+  name: Android Support Library core utils
+  copyrightHolder: Google, Inc.
+  license: The Apache Software License, Version 2.0
+  licenseUrl: http://www.apache.org/licenses/LICENSE-2.0.txt
+  url: http://developer.android.com/tools/extras/support-library.html
+- artifact: androidx.swiperefreshlayout:swiperefreshlayout:+
+  name: Android Support Library Custom View
+  copyrightHolder: Google, Inc.
+  license: The Apache Software License, Version 2.0
+  licenseUrl: http://www.apache.org/licenses/LICENSE-2.0.txt
+  url: http://developer.android.com/tools/extras/support-library.html
+- artifact: com.amazonaws:aws-android-sdk-cognitoauth:+
+  name: AWS SDK for Android - Amazon Cognito Auth
+  copyrightHolder: Amazon
+  license: Apache License, Version 2.0
+  licenseUrl: http://aws.amazon.com/apache2.0
+  url: http://aws.amazon.com/sdkforandroid
+- artifact: androidx.browser:browser:+
+  name: Android Support Custom Tabs
+  copyrightHolder: Google, Inc.
+  license: The Apache Software License, Version 2.0
+  licenseUrl: http://www.apache.org/licenses/LICENSE-2.0.txt
+  url: http://developer.android.com/tools/extras/support-library.html
+- artifact: androidx.coordinatorlayout:coordinatorlayout:+
+  name: Android Support Library Coordinator Layout
+  copyrightHolder: Google, Inc.
+  license: The Apache Software License, Version 2.0
+  licenseUrl: http://www.apache.org/licenses/LICENSE-2.0.txt
+  url: http://developer.android.com/tools/extras/support-library.html
+- artifact: androidx.legacy:legacy-support-core-ui:+
+  name: Android Support Library core UI
+  copyrightHolder: Google, Inc.
+  license: The Apache Software License, Version 2.0
+  licenseUrl: http://www.apache.org/licenses/LICENSE-2.0.txt
+  url: http://developer.android.com/tools/extras/support-library.html
+- artifact: androidx.print:print:+
+  name: Android Support Library Print
+  copyrightHolder: Google, Inc.
+  license: The Apache Software License, Version 2.0
+  licenseUrl: http://www.apache.org/licenses/LICENSE-2.0.txt
+  url: http://developer.android.com/tools/extras/support-library.html
+- artifact: androidx.asynclayoutinflater:asynclayoutinflater:+
+  name: Android Support Library Async Layout Inflater
+  copyrightHolder: Google, Inc.
+  license: The Apache Software License, Version 2.0
+  licenseUrl: http://www.apache.org/licenses/LICENSE-2.0.txt
+  url: http://developer.android.com/tools/extras/support-library.html
+- artifact: androidx.slidingpanelayout:slidingpanelayout:+
+  name: Android Support Library Sliding Pane Layout
+  copyrightHolder: Google, Inc.
+  license: The Apache Software License, Version 2.0
+  licenseUrl: http://www.apache.org/licenses/LICENSE-2.0.txt
+  url: http://developer.android.com/tools/extras/support-library.html
