@@ -292,7 +292,7 @@ class SudoEntitlementsRedeemEntitlementsTest : BaseTests() {
     }
 
     @Test
-    fun `redeemEntitlements() should throw when response has an invalid token error`() = runBlocking<Unit> {
+    fun `redeemEntitlements() should throw when response has a NoExternalIdError`() = runBlocking<Unit> {
 
         mutationHolder.callback shouldBe null
 
@@ -300,7 +300,7 @@ class SudoEntitlementsRedeemEntitlementsTest : BaseTests() {
             val error = com.apollographql.apollo.api.Error(
                 "mock",
                 emptyList(),
-                mapOf("errorType" to "sudoplatform.InvalidTokenError")
+                mapOf("errorType" to "sudoplatform.entitlements.NoExternalIdError")
             )
             Response.builder<RedeemEntitlementsMutation.Data>(RedeemEntitlementsMutation())
                 .errors(listOf(error))
@@ -309,7 +309,109 @@ class SudoEntitlementsRedeemEntitlementsTest : BaseTests() {
         }
 
         val deferredResult = async(Dispatchers.IO) {
-            shouldThrow<SudoEntitlementsClient.EntitlementsException.InvalidTokenException> {
+            shouldThrow<SudoEntitlementsClient.EntitlementsException.NoExternalIdException> {
+                client.redeemEntitlements()
+            }
+        }
+        deferredResult.start()
+        delay(100L)
+
+        mutationHolder.callback shouldNotBe null
+        mutationHolder.callback?.onResponse(errorMutationResponse)
+
+        deferredResult.await()
+
+        verify(mockSudoUserClient).isSignedIn()
+        verify(mockAppSyncClient).mutate(any<RedeemEntitlementsMutation>())
+    }
+
+    @Test
+    fun `redeemEntitlements() should throw when response has a NoBillingGroupError`() = runBlocking<Unit> {
+
+        mutationHolder.callback shouldBe null
+
+        val errorMutationResponse by before {
+            val error = com.apollographql.apollo.api.Error(
+                "mock",
+                emptyList(),
+                mapOf("errorType" to "sudoplatform.entitlements.NoBillingGroupError")
+            )
+            Response.builder<RedeemEntitlementsMutation.Data>(RedeemEntitlementsMutation())
+                .errors(listOf(error))
+                .data(null)
+                .build()
+        }
+
+        val deferredResult = async(Dispatchers.IO) {
+            shouldThrow<SudoEntitlementsClient.EntitlementsException.NoBillingGroupException> {
+                client.redeemEntitlements()
+            }
+        }
+        deferredResult.start()
+        delay(100L)
+
+        mutationHolder.callback shouldNotBe null
+        mutationHolder.callback?.onResponse(errorMutationResponse)
+
+        deferredResult.await()
+
+        verify(mockSudoUserClient).isSignedIn()
+        verify(mockAppSyncClient).mutate(any<RedeemEntitlementsMutation>())
+    }
+
+    @Test
+    fun `redeemEntitlements() should throw when response has a EntitlementsSetNotFoundError`() = runBlocking<Unit> {
+
+        mutationHolder.callback shouldBe null
+
+        val errorMutationResponse by before {
+            val error = com.apollographql.apollo.api.Error(
+                "mock",
+                emptyList(),
+                mapOf("errorType" to "sudoplatform.entitlements.EntitlementsSetNotFoundError")
+            )
+            Response.builder<RedeemEntitlementsMutation.Data>(RedeemEntitlementsMutation())
+                .errors(listOf(error))
+                .data(null)
+                .build()
+        }
+
+        val deferredResult = async(Dispatchers.IO) {
+            shouldThrow<SudoEntitlementsClient.EntitlementsException.EntitlementsSetNotFoundException> {
+                client.redeemEntitlements()
+            }
+        }
+        deferredResult.start()
+        delay(100L)
+
+        mutationHolder.callback shouldNotBe null
+        mutationHolder.callback?.onResponse(errorMutationResponse)
+
+        deferredResult.await()
+
+        verify(mockSudoUserClient).isSignedIn()
+        verify(mockAppSyncClient).mutate(any<RedeemEntitlementsMutation>())
+    }
+
+    @Test
+    fun `redeemEntitlements() should throw when response has a EntitlementsSequenceNotFoundError`() = runBlocking<Unit> {
+
+        mutationHolder.callback shouldBe null
+
+        val errorMutationResponse by before {
+            val error = com.apollographql.apollo.api.Error(
+                "mock",
+                emptyList(),
+                mapOf("errorType" to "sudoplatform.entitlements.EntitlementsSequenceNotFoundError")
+            )
+            Response.builder<RedeemEntitlementsMutation.Data>(RedeemEntitlementsMutation())
+                .errors(listOf(error))
+                .data(null)
+                .build()
+        }
+
+        val deferredResult = async(Dispatchers.IO) {
+            shouldThrow<SudoEntitlementsClient.EntitlementsException.EntitlementsSequenceNotFoundException> {
                 client.redeemEntitlements()
             }
         }

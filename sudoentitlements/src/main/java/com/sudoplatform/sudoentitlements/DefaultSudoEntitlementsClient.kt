@@ -54,24 +54,30 @@ internal class DefaultSudoEntitlementsClient(
         private const val ENTITLEMENTS_NOT_FOUND_MSG = "No entitlements returned in response"
         private const val AMBIGUOUS_ENTITLEMENTS_MSG = "Multiple conflicting entitlement sets have been recognized"
         private const val INVALID_ARGUMENT_MSG = "Invalid argument provided"
-        private const val INVALID_TOKEN_MSG = "Invalid identity token recognized"
         private const val INSUFFICIENT_ENTITLEMENTS_MSG = "Insufficient entitlements"
         private const val NO_ENTITLEMENTS_MSG = "No entitlements assigned to user"
         private const val SERVICE_ERROR_MSG = "Service error"
+        private const val NO_EXTERNAL_ID_ERROR_MSG = "Token does not contain required claims to identify user's external ID"
+        private const val NO_BILLING_GROUP_ERROR_MSG = "Token does not contain required claims to identify user's billing group"
+        private const val ENTITLEMENTS_SEQUENCE_NOT_FOUND_ERROR_MSG = "Entitlements sequence specified in token was not found"
+        private const val ENTITLEMENTS_SET_NOT_FOUND_ERROR_MSG = "Entitlements set specified in token was not found"
 
         /** Errors returned from the service */
         private const val ERROR_TYPE = "errorType"
 
         private const val ERROR_SERVICE = "sudoplatform.ServiceError"
         private const val ERROR_INVALID_ARGUMENT = "sudoplatform.InvalidArgumentError"
-        private const val ERROR_INVALID_TOKEN = "sudoplatform.InvalidTokenError"
         private const val ERROR_INSUFFICIENT_ENTITLEMENTS = "sudoplatform.InsufficientEntitlementsError"
         private const val ERROR_NO_ENTITLEMENTS = "sudoplatform.NoEntitlementsError"
         private const val ERROR_AMBIGUOUS_ENTITLEMENTS = "sudoplatform.entitlements.AmbiguousEntitlementsError"
+        private const val ERROR_NO_EXTERNAL_ID = "sudoplatform.entitlements.NoExternalIdError"
+        private const val ERROR_NO_BILLING_GROUP = "sudoplatform.entitlements.NoBillingGroupError"
+        private const val ERROR_ENTITLEMENTS_SEQUENCE_NOT_FOUND = "sudoplatform.entitlements.EntitlementsSequenceNotFoundError"
+        private const val ERROR_ENTITLEMENTS_SET_NOT_FOUND = "sudoplatform.entitlements.EntitlementsSetNotFoundError"
     }
 
     /**
-     * Checksum's for each file are generated and are used to create a checksum that is used when
+     * Checksums for each file are generated and are used to create a checksum that is used when
      * publishing to maven central. In order to retry a failed publish without needing to change any
      * functionality, we need a way to generate a different checksum for the source code.  We can
      * change the value of this property which will generate a different checksum for publishing
@@ -80,14 +86,11 @@ internal class DefaultSudoEntitlementsClient(
      */
     private val version: String = "2.3.1"
 
-    private val appSyncClient: AWSAppSyncClient
-
-    init {
-        this.appSyncClient = appSyncClient ?: ApiClientManager.getClient(
+    private val appSyncClient: AWSAppSyncClient =
+        appSyncClient ?: ApiClientManager.getClient(
             context,
             this.sudoUserClient
         )
-    }
 
     @Throws(SudoEntitlementsClient.EntitlementsException::class)
     override suspend fun getEntitlementsConsumption(): EntitlementsConsumption {
@@ -134,9 +137,8 @@ internal class DefaultSudoEntitlementsClient(
                 throw interpretEntitlementsError(queryResponse.errors().first())
             }
 
-            val result = queryResponse.data()?.externalId
+            return queryResponse.data()?.externalId
                 ?: throw SudoEntitlementsClient.EntitlementsException.FailedException(ENTITLEMENTS_NOT_FOUND_MSG)
-            return result
         } catch (e: Throwable) {
             logger.debug("unexpected error $e")
             throw recognizeError(e)
@@ -228,14 +230,27 @@ internal class DefaultSudoEntitlementsClient(
         if (error.contains(ERROR_INVALID_ARGUMENT)) {
             return SudoEntitlementsClient.EntitlementsException.InvalidArgumentException(INVALID_ARGUMENT_MSG)
         }
-        if (error.contains(ERROR_INVALID_TOKEN)) {
-            return SudoEntitlementsClient.EntitlementsException.InvalidTokenException(INVALID_TOKEN_MSG)
-        }
         if (error.contains(ERROR_INSUFFICIENT_ENTITLEMENTS)) {
             return SudoEntitlementsClient.EntitlementsException.InsufficientEntitlementsException(INSUFFICIENT_ENTITLEMENTS_MSG)
         }
         if (error.contains(ERROR_NO_ENTITLEMENTS)) {
             return SudoEntitlementsClient.EntitlementsException.NoEntitlementsException(NO_ENTITLEMENTS_MSG)
+        }
+        if (error.contains(ERROR_NO_EXTERNAL_ID)) {
+            return SudoEntitlementsClient.EntitlementsException.NoExternalIdException(NO_EXTERNAL_ID_ERROR_MSG)
+        }
+        if (error.contains(ERROR_NO_BILLING_GROUP)) {
+            return SudoEntitlementsClient.EntitlementsException.NoBillingGroupException(NO_BILLING_GROUP_ERROR_MSG)
+        }
+        if (error.contains(ERROR_ENTITLEMENTS_SEQUENCE_NOT_FOUND)) {
+            return SudoEntitlementsClient.EntitlementsException.EntitlementsSequenceNotFoundException(
+                ENTITLEMENTS_SEQUENCE_NOT_FOUND_ERROR_MSG
+            )
+        }
+        if (error.contains(ERROR_ENTITLEMENTS_SET_NOT_FOUND)) {
+            return SudoEntitlementsClient.EntitlementsException.EntitlementsSetNotFoundException(
+                ENTITLEMENTS_SET_NOT_FOUND_ERROR_MSG
+            )
         }
         if (error.contains(ERROR_SERVICE)) {
             return SudoEntitlementsClient.EntitlementsException.ServiceException(SERVICE_ERROR_MSG)

@@ -28,18 +28,36 @@
         </notes>
         <cve>CVE-2019-17571</cve>
     </suppress>
-    <suppress until="2021-12-13">
+    <suppress until="2022-05-31">
         <notes><![CDATA[
         file name: junit-4.12.jar
         ]]></notes>
         <packageUrl regex="true">^pkg:maven/junit/junit@.*$</packageUrl>
         <cve>CVE-2020-15250</cve>
     </suppress>
-    <suppress until="2021-12-13">
+    <suppress until="2022-05-31">
         <notes><![CDATA[
         file name: jsoup-1.13.1.jar
         ]]></notes>
         <packageUrl regex="true">^pkg:maven/org\.jsoup/jsoup@.*$</packageUrl>
         <cve>CVE-2021-37714</cve>
+    </suppress>
+    <suppress until="2022-05-31">
+        <notes><![CDATA[
+        file name: kotlin-analysis-intellij-1.5.0.jar (shaded: log4j:log4j:1.2.17)
+        ]]></notes>
+        <packageUrl regex="true">^pkg:maven/log4j/log4j@.*$</packageUrl>
+        <cve>CVE-2021-4104</cve>
+        <cve>CVE-2021-44228</cve>
+        <cve>CVE-2022-23302</cve>
+        <cve>CVE-2022-23305</cve>
+        <cve>CVE-2022-23307</cve>
+    </suppress>    
+    <suppress until="2022-05-31">
+        <notes><![CDATA[
+        file name: kotlin-analysis-intellij-1.5.0.jar (shaded: google:protobuf-java:2.6.1)
+        ]]></notes>
+        <packageUrl regex="true">^pkg:maven/com.google.protobuf/protobuf-java@.*$</packageUrl>
+        <cve>CVE-2021-22569</cve>
     </suppress>    
 </suppressions>

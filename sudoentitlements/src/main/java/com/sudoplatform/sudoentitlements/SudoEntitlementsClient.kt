@@ -120,6 +120,14 @@ interface SudoEntitlementsClient {
             EntitlementsException(message = message, cause = cause)
         class NoEntitlementsException(message: String? = null, cause: Throwable? = null) :
             EntitlementsException(message = message, cause = cause)
+        class NoExternalIdException(message: String? = null, cause: Throwable? = null) :
+            EntitlementsException(message = message, cause = cause)
+        class NoBillingGroupException(message: String? = null, cause: Throwable? = null) :
+            EntitlementsException(message = message, cause = cause)
+        class EntitlementsSequenceNotFoundException(message: String? = null, cause: Throwable? = null) :
+            EntitlementsException(message = message, cause = cause)
+        class EntitlementsSetNotFoundException(message: String? = null, cause: Throwable? = null) :
+            EntitlementsException(message = message, cause = cause)
         class ServiceException(message: String? = null, cause: Throwable? = null) :
             EntitlementsException(message = message, cause = cause)
         class NotSignedInException(message: String? = null, cause: Throwable? = null) :

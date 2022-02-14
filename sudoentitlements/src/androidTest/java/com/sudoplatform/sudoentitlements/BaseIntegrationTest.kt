@@ -9,20 +9,14 @@ package com.sudoplatform.sudoentitlements
 import android.content.Context
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.platform.app.InstrumentationRegistry
-import com.amazonaws.auth.BasicSessionCredentials
-import com.amazonaws.services.cognitoidentityprovider.AmazonCognitoIdentityProviderClient
-import com.amazonaws.services.cognitoidentityprovider.model.AdminUpdateUserAttributesRequest
-import com.amazonaws.services.cognitoidentityprovider.model.AttributeType
 import com.sudoplatform.sudoconfigmanager.DefaultSudoConfigManager
+import com.sudoplatform.sudoentitlementsadmin.SudoEntitlementsAdminClient
 import com.sudoplatform.sudokeymanager.KeyManagerFactory
 import com.sudoplatform.sudouser.JWT
 import com.sudoplatform.sudouser.SudoUserClient
 import com.sudoplatform.sudouser.TESTAuthenticationProvider
 import io.kotlintest.shouldBe
 import io.kotlintest.shouldNotBe
-import java.util.Date
-import java.util.UUID
-import org.json.JSONObject
 import timber.log.Timber
 
 /**
@@ -46,6 +40,12 @@ abstract class BaseIntegrationTest {
 
     protected val configManager by lazy {
         DefaultSudoConfigManager(context)
+    }
+
+    protected val entitlementsAdminClient by lazy {
+        val value = InstrumentationRegistry.getArguments().getString("ADMIN_API_KEY")
+        val apiKey = value ?: readTextFile("api.key")
+        SudoEntitlementsAdminClient.builder(context, apiKey).build()
     }
 
     private suspend fun register() {
@@ -83,41 +83,6 @@ abstract class BaseIntegrationTest {
         return identityToken!!.payload.has(name)
     }
 
-    protected suspend fun setCustomAttributesAndSignInAgain(attributes: Map<String, String>) {
-        userClient.isSignedIn() shouldBe true
-
-        val identityServiceConfig = configManager.getConfigSet("identityService")
-        identityServiceConfig shouldNotBe null
-
-        val region = identityServiceConfig!!.getString("region")
-        region shouldNotBe null
-
-        val userPoolId = identityServiceConfig.getString("poolId")
-        userPoolId shouldNotBe null
-
-        val sessionCredentials = BasicSessionCredentials(
-            InstrumentationRegistry.getArguments().getString("AWS_ACCESS_KEY_ID"),
-            InstrumentationRegistry.getArguments().getString("AWS_SECRET_ACCESS_KEY"),
-            InstrumentationRegistry.getArguments().getString("AWS_SESSION_TOKEN")
-        )
-        val identityProvider = AmazonCognitoIdentityProviderClient(sessionCredentials)
-
-        identityProvider.adminUpdateUserAttributes(
-            AdminUpdateUserAttributesRequest()
-                .withUserPoolId(userPoolId)
-                .withUsername(userClient.getUserName())
-                .withUserAttributes(attributes.map { AttributeType().withName(it.key).withValue(it.value) })
-        )
-
-        val latest = Date(Date().time + 30000)
-        while (Date().before(latest) && !attributes.keys.all { identityTokenHasAttribute(it) }) {
-            // Keep signing in until we see the attributes
-            userClient.signInWithKey()
-        }
-
-        attributes.keys.all { identityTokenHasAttribute(it) } shouldBe true
-    }
-
     protected suspend fun signInAndRegister() {
         if (!userClient.isRegistered()) {
             register()
@@ -146,35 +111,14 @@ abstract class BaseIntegrationTest {
         return (integrationTestEntitlementsSet ?: "false").toBoolean()
     }
 
-    protected fun defaultEntitlementsSetForTestUsers(): Boolean {
-        val defaultEntitlementsSetForTestUsers = InstrumentationRegistry.getArguments().getString("DEFAULT_ENTITLEMENTS_SET_FOR_TEST_USERS")
-        return (defaultEntitlementsSetForTestUsers ?: "false").toBoolean()
-    }
-
-    protected suspend fun enableUserForExternalIdMapping(externalId: String = UUID.randomUUID().toString()): String {
-        val customTest = mapOf("ent" to mapOf("externalId" to externalId))
-        setCustomAttributesAndSignInAgain(
-            mapOf(
-                "custom:test" to JSONObject(customTest).toString()
-            )
-        )
-
-        return externalId
-    }
-
     /**
      * @return external ID of user
      */
     protected suspend fun enableUserForEntitlementsRedemption(entitlementsSet: String = "integration-test"): String {
-        val externalId = UUID.randomUUID().toString()
-        val customTest = mapOf("ent" to mapOf("externalId" to externalId))
-        setCustomAttributesAndSignInAgain(
-            mapOf(
-                "custom:entitlementsSet" to entitlementsSet,
-                "custom:test" to JSONObject(customTest).toString()
-            )
-        )
-
-        return externalId
+        userClient.isSignedIn() shouldBe true
+        val username = userClient.getUserName()
+        require(username != null) { "Username is null" }
+        entitlementsAdminClient.applyEntitlementsSetToUser(username, entitlementsSet)
+        return username
     }
 }

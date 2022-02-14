@@ -261,7 +261,7 @@ class SudoEntitlementsGetEntitlementsTest : BaseTests() {
     }
 
     @Test
-    fun `getEntitlements() should throw when response has an invalid token error`() = runBlocking<Unit> {
+    fun `getEntitlements() should throw when response has a NoExternalIdError`() = runBlocking<Unit> {
 
         queryHolder.callback shouldBe null
 
@@ -269,7 +269,7 @@ class SudoEntitlementsGetEntitlementsTest : BaseTests() {
             val error = com.apollographql.apollo.api.Error(
                 "mock",
                 emptyList(),
-                mapOf("errorType" to "sudoplatform.InvalidTokenError")
+                mapOf("errorType" to "sudoplatform.entitlements.NoExternalIdError")
             )
             Response.builder<GetEntitlementsQuery.Data>(GetEntitlementsQuery())
                 .errors(listOf(error))
@@ -278,7 +278,109 @@ class SudoEntitlementsGetEntitlementsTest : BaseTests() {
         }
 
         val deferredResult = async(Dispatchers.IO) {
-            shouldThrow<SudoEntitlementsClient.EntitlementsException.InvalidTokenException> {
+            shouldThrow<SudoEntitlementsClient.EntitlementsException.NoExternalIdException> {
+                client.getEntitlements()
+            }
+        }
+        deferredResult.start()
+        delay(100L)
+
+        queryHolder.callback shouldNotBe null
+        queryHolder.callback?.onResponse(errorQueryResponse)
+
+        deferredResult.await()
+
+        verify(mockSudoUserClient).isSignedIn()
+        verify(mockAppSyncClient).query(any<GetEntitlementsQuery>())
+    }
+
+    @Test
+    fun `getEntitlements() should throw when response has a NoBillingGroupError`() = runBlocking<Unit> {
+
+        queryHolder.callback shouldBe null
+
+        val errorQueryResponse by before {
+            val error = com.apollographql.apollo.api.Error(
+                "mock",
+                emptyList(),
+                mapOf("errorType" to "sudoplatform.entitlements.NoBillingGroupError")
+            )
+            Response.builder<GetEntitlementsQuery.Data>(GetEntitlementsQuery())
+                .errors(listOf(error))
+                .data(null)
+                .build()
+        }
+
+        val deferredResult = async(Dispatchers.IO) {
+            shouldThrow<SudoEntitlementsClient.EntitlementsException.NoBillingGroupException> {
+                client.getEntitlements()
+            }
+        }
+        deferredResult.start()
+        delay(100L)
+
+        queryHolder.callback shouldNotBe null
+        queryHolder.callback?.onResponse(errorQueryResponse)
+
+        deferredResult.await()
+
+        verify(mockSudoUserClient).isSignedIn()
+        verify(mockAppSyncClient).query(any<GetEntitlementsQuery>())
+    }
+
+    @Test
+    fun `getEntitlements() should throw when response has a EntitlementsSetNotFoundError`() = runBlocking<Unit> {
+
+        queryHolder.callback shouldBe null
+
+        val errorQueryResponse by before {
+            val error = com.apollographql.apollo.api.Error(
+                "mock",
+                emptyList(),
+                mapOf("errorType" to "sudoplatform.entitlements.EntitlementsSetNotFoundError")
+            )
+            Response.builder<GetEntitlementsQuery.Data>(GetEntitlementsQuery())
+                .errors(listOf(error))
+                .data(null)
+                .build()
+        }
+
+        val deferredResult = async(Dispatchers.IO) {
+            shouldThrow<SudoEntitlementsClient.EntitlementsException.EntitlementsSetNotFoundException> {
+                client.getEntitlements()
+            }
+        }
+        deferredResult.start()
+        delay(100L)
+
+        queryHolder.callback shouldNotBe null
+        queryHolder.callback?.onResponse(errorQueryResponse)
+
+        deferredResult.await()
+
+        verify(mockSudoUserClient).isSignedIn()
+        verify(mockAppSyncClient).query(any<GetEntitlementsQuery>())
+    }
+
+    @Test
+    fun `getEntitlements() should throw when response has a EntitlementsSequenceNotFoundError`() = runBlocking<Unit> {
+
+        queryHolder.callback shouldBe null
+
+        val errorQueryResponse by before {
+            val error = com.apollographql.apollo.api.Error(
+                "mock",
+                emptyList(),
+                mapOf("errorType" to "sudoplatform.entitlements.EntitlementsSequenceNotFoundError")
+            )
+            Response.builder<GetEntitlementsQuery.Data>(GetEntitlementsQuery())
+                .errors(listOf(error))
+                .data(null)
+                .build()
+        }
+
+        val deferredResult = async(Dispatchers.IO) {
+            shouldThrow<SudoEntitlementsClient.EntitlementsException.EntitlementsSequenceNotFoundException> {
                 client.getEntitlements()
             }
         }
