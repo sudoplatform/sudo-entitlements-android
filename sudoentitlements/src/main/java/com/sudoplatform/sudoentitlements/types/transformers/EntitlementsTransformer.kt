@@ -1,5 +1,5 @@
 /*
- * Copyright © 2020 - Anonyome Labs, Inc. - All rights reserved
+ * Copyright © 2022 Anonyome Labs, Inc. All rights reserved.
  *
  * SPDX-License-Identifier: Apache-2.0
  */
@@ -19,8 +19,6 @@ import com.sudoplatform.sudoentitlements.types.UserEntitlements
 /**
  * Transformer responsible for transforming the [EntitlementsSet] GraphQL data
  * types to the entity type that is exposed to users.
- *
- * @since 2020-08-26
  */
 internal object EntitlementsTransformer {
     /**

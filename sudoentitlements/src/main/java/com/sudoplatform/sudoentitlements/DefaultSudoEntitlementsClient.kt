@@ -1,5 +1,5 @@
 /*
- * Copyright © 2020 Anonyome Labs, Inc. All rights reserved.
+ * Copyright © 2022 Anonyome Labs, Inc. All rights reserved.
  *
  * SPDX-License-Identifier: Apache-2.0
  */
@@ -35,12 +35,10 @@ import java.util.concurrent.CancellationException
 /**
  * Default implementation of the [SudoEntitlementsClient] interface.
  *
- * @property context Application context.
- * @property sudoUserClient `SudoUserClient` instance required to issue authentication tokens
- * @property appSyncClient optional AppSync client to use. Mainly used for unit testing.
- * @property logger Errors and warnings will be logged here.
- *
- * @since 2020-08-26
+ * @property context [Context] Application context.
+ * @property sudoUserClient [SudoUserClient] Instance required to issue authentication tokens
+ * @property appSyncClient [AWSAppSyncClient] Optional AppSync client to use. Mainly used for unit testing.
+ * @property logger [Logger] Errors and warnings will be logged here.
  */
 internal class DefaultSudoEntitlementsClient(
     private val context: Context,
@@ -84,7 +82,7 @@ internal class DefaultSudoEntitlementsClient(
      * and allow us to retry.  The value of `version` doesn't need to be kept up-to-date with the
      * version of the code.
      */
-    private val version: String = "2.3.1"
+    private val version: String = "3.1.0"
 
     private val appSyncClient: AWSAppSyncClient =
         appSyncClient ?: ApiClientManager.getClient(

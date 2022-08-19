@@ -1,5 +1,5 @@
 /*
- * Copyright © 2020 Anonyome Labs, Inc. All rights reserved.
+ * Copyright © 2022 Anonyome Labs, Inc. All rights reserved.
  *
  * SPDX-License-Identifier: Apache-2.0
  */
@@ -27,7 +27,6 @@ import java.util.Objects
  * Interface encapsulating a library for interacting with the Sudo Platform Entitlements service.
  *
  * @sample com.sudoplatform.sudoentitlements.samples.Samples.sudoEntitlementsClient
- * @since 2020-08-26
  */
 interface SudoEntitlementsClient {
 

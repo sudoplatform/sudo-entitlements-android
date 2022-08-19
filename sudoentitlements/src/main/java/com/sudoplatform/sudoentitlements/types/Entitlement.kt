@@ -1,5 +1,5 @@
 /*
- * Copyright © 2020 Anonyome Labs, Inc. All rights reserved.
+ * Copyright © 2022 Anonyome Labs, Inc. All rights reserved.
  *
  * SPDX-License-Identifier: Apache-2.0
  */
@@ -12,11 +12,9 @@ import kotlinx.parcelize.Parcelize
 /**
  * A representation of a single entitlement possessed by a user.
  *
- * @property name Name of the entitlement.
- * @property description Human readable description of the entitlement.
- * @property value The quantity of the entitlement.
- *
- * @since 2020-08-26
+ * @property name [String] Name of the entitlement.
+ * @property description [String] Human readable description of the entitlement.
+ * @property value [Int] The quantity of the entitlement.
  */
 @Parcelize
 data class Entitlement(

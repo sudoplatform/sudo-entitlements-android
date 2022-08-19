@@ -1,5 +1,5 @@
 /*
- * Copyright © 2020 Anonyome Labs, Inc. All rights reserved.
+ * Copyright © 2022 Anonyome Labs, Inc. All rights reserved.
  *
  * SPDX-License-Identifier: Apache-2.0
  */
@@ -15,8 +15,6 @@ import org.junit.Test
 
 /**
  * Test the correct operation of [SudoEntitlementsClient.getEntitlements] using mocks and spies.
- *
- * @since 2020-08-26
  */
 class SplitUserEntitlementsVersionTest {
 

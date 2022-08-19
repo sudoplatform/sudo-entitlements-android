@@ -1,5 +1,5 @@
 /*
- * Copyright © 2020 Anonyome Labs, Inc. All rights reserved.
+ * Copyright © 2022 Anonyome Labs, Inc. All rights reserved.
  *
  * SPDX-License-Identifier: Apache-2.0
  */
@@ -43,8 +43,6 @@ import java.net.HttpURLConnection
 
 /**
  * Test the correct operation of [SudoEntitlementsClient.consumeBooleanEntitlements] using mocks and spies.
- *
- * @since 2021-08-06
  */
 class SudoEntitlementsConsumeBooleanEntitlementsTest : BaseTests() {
 

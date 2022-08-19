@@ -1,5 +1,5 @@
 /*
- * Copyright © 2020 Anonyome Labs, Inc. All rights reserved.
+ * Copyright © 2022 Anonyome Labs, Inc. All rights reserved.
  *
  * SPDX-License-Identifier: Apache-2.0
  */
@@ -28,8 +28,6 @@ import java.util.UUID
 
 /**
  * Test the operation of the [SudoEntitlementsClient].
- *
- * @since 2020-08-26
  */
 @RunWith(AndroidJUnit4::class)
 class SudoEntitlementsClientIntegrationTest : BaseIntegrationTest() {
