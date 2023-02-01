@@ -82,7 +82,7 @@ internal class DefaultSudoEntitlementsClient(
      * and allow us to retry.  The value of `version` doesn't need to be kept up-to-date with the
      * version of the code.
      */
-    private val version: String = "4.0.0"
+    private val version: String = "5.0.0"
 
     private val appSyncClient: AWSAppSyncClient =
         appSyncClient ?: ApiClientManager.getClient(
@@ -143,6 +143,7 @@ internal class DefaultSudoEntitlementsClient(
         }
     }
 
+    @Deprecated("Use getEntitlementsConsumption instead")
     @Throws(SudoEntitlementsClient.EntitlementsException::class)
     override suspend fun getEntitlements(): EntitlementsSet? {
         if (!this.sudoUserClient.isSignedIn()) {
