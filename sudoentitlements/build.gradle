@@ -87,8 +87,8 @@ dependencies {
     implementation "com.sudoplatform:sudologging:2.1.0"
     implementation "com.sudoplatform:sudokeymanager:5.0.0"
     implementation 'com.sudoplatform:sudoconfigmanager:4.0.0'
-    implementation 'com.sudoplatform:sudouser:13.0.0'
-    implementation 'com.sudoplatform:sudoapiclient:5.0.0'
+    implementation 'com.sudoplatform:sudouser:13.0.1'
+    implementation 'com.sudoplatform:sudoapiclient:5.0.1'
 
     // Testing
     testImplementation "junit:junit:4.13.2"
@@ -105,7 +105,7 @@ dependencies {
     androidTestImplementation 'androidx.test:core:1.4.0'
     androidTestImplementation "io.kotlintest:kotlintest-assertions:$kotlintest_version"
     androidTestImplementation "com.jakewharton.timber:timber:4.7.1"
-    androidTestImplementation "com.sudoplatform:sudoentitlementsadmin:2.2.0"
+    androidTestImplementation "com.sudoplatform:sudoentitlementsadmin:4.0.0"
 }
 
 configurations.all {
