@@ -87,22 +87,22 @@ dependencies {
     implementation "com.sudoplatform:sudologging:2.1.0"
     implementation "com.sudoplatform:sudokeymanager:5.0.0"
     implementation 'com.sudoplatform:sudoconfigmanager:4.0.0'
-    implementation 'com.sudoplatform:sudouser:13.0.1'
-    implementation 'com.sudoplatform:sudoapiclient:5.0.1'
+    implementation 'com.sudoplatform:sudouser:13.1.0'
+    implementation 'com.sudoplatform:sudoapiclient:5.1.0'
 
     // Testing
     testImplementation "junit:junit:4.13.2"
     testImplementation "io.kotlintest:kotlintest-assertions:$kotlintest_version"
     testImplementation "org.jetbrains.kotlinx:kotlinx-coroutines-test:$coroutine_version"
-    testImplementation "org.jetbrains.kotlin:kotlin-reflect:1.6.21"
-    testImplementation "org.mockito.kotlin:mockito-kotlin:4.0.0"
-    testImplementation 'androidx.test:core:1.4.0'
+    testImplementation "org.jetbrains.kotlin:kotlin-reflect:1.7.20"
+    testImplementation "org.mockito.kotlin:mockito-kotlin:4.1.0"
+    testImplementation 'androidx.test:core:1.5.0'
     testImplementation 'org.robolectric:robolectric:4.8.2'
     testImplementation "com.jakewharton.timber:timber:4.7.1"
 
     androidTestImplementation 'androidx.test.ext:junit:1.1.5'
     androidTestImplementation 'androidx.test:runner:1.5.2'
-    androidTestImplementation 'androidx.test:core:1.4.0'
+    androidTestImplementation 'androidx.test:core:1.5.0'
     androidTestImplementation "io.kotlintest:kotlintest-assertions:$kotlintest_version"
     androidTestImplementation "com.jakewharton.timber:timber:4.7.1"
     androidTestImplementation "com.sudoplatform:sudoentitlementsadmin:4.0.0"
