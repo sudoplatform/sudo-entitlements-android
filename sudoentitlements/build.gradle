@@ -87,8 +87,8 @@ dependencies {
     implementation "com.sudoplatform:sudologging:2.1.0"
     implementation "com.sudoplatform:sudokeymanager:5.0.0"
     implementation 'com.sudoplatform:sudoconfigmanager:4.0.0'
-    implementation 'com.sudoplatform:sudouser:13.1.0'
-    implementation 'com.sudoplatform:sudoapiclient:5.1.0'
+    implementation 'com.sudoplatform:sudouser:14.0.0'
+    implementation 'com.sudoplatform:sudoapiclient:6.0.0'
 
     // Testing
     testImplementation "junit:junit:4.13.2"
