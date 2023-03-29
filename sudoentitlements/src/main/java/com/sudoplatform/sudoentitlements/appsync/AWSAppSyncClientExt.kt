@@ -37,7 +37,9 @@ internal suspend fun <T> GraphQLCall<T>.enqueueFirst(): Response<T> = suspendCor
             }
         }
         override fun onFailure(e: ApolloException) {
-            cont.resumeWithException(e)
+            if (counter.getAndIncrement() == 0) {
+                cont.resumeWithException(e)
+            }
         }
     })
 }
