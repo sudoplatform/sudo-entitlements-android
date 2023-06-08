@@ -95,7 +95,6 @@ class SudoEntitlementsConsumeBooleanEntitlementsTest : BaseTests() {
 
     @Test
     fun `consumeBooleanEntitlements() should return results when no error present`() = runBlocking<Unit> {
-
         mutationHolder.callback shouldBe null
 
         val deferredResult = async(Dispatchers.IO) {
@@ -136,7 +135,6 @@ class SudoEntitlementsConsumeBooleanEntitlementsTest : BaseTests() {
 
     @Test
     fun `consumeBooleanEntitlements() should throw when response has an invalid argument error`() = runBlocking<Unit> {
-
         mutationHolder.callback shouldBe null
 
         val errorMutationResponse by before {
@@ -170,7 +168,6 @@ class SudoEntitlementsConsumeBooleanEntitlementsTest : BaseTests() {
 
     @Test
     fun `consumeBooleanEntitlements() should throw when response has an insufficient entitlements error`() = runBlocking<Unit> {
-
         mutationHolder.callback shouldBe null
 
         val errorMutationResponse by before {
@@ -204,7 +201,6 @@ class SudoEntitlementsConsumeBooleanEntitlementsTest : BaseTests() {
 
     @Test
     fun `consumeBooleanEntitlements() should throw when http error occurs`() = runBlocking<Unit> {
-
         mutationHolder.callback shouldBe null
 
         val deferredResult = async(Dispatchers.IO) {
@@ -239,7 +235,6 @@ class SudoEntitlementsConsumeBooleanEntitlementsTest : BaseTests() {
 
     @Test
     fun `consumeBooleanEntitlements() should throw when unknown error occurs`() = runBlocking<Unit> {
-
         mutationHolder.callback shouldBe null
 
         mockAppSyncClient.stub {
@@ -262,7 +257,6 @@ class SudoEntitlementsConsumeBooleanEntitlementsTest : BaseTests() {
 
     @Test
     fun `consumeBooleanEntitlements() should find error when unauthorized error occurs`() = runBlocking<Unit> {
-
         mutationHolder.callback shouldBe null
 
         val exceptionToThrow = RuntimeException(ApolloException("", IOException(NotAuthorizedException(""))))
@@ -286,7 +280,6 @@ class SudoEntitlementsConsumeBooleanEntitlementsTest : BaseTests() {
 
     @Test
     fun `consumeBooleanEntitlements() should not suppress CancellationException`() = runBlocking<Unit> {
-
         mockAppSyncClient.stub {
             on { mutate(any<ConsumeBooleanEntitlementsMutation>()) } doThrow CancellationException("Mock Cancellation Exception")
         }

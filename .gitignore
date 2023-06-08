@@ -63,3 +63,5 @@ sudoplatformconfig.json
 .settings/
 jacoco.exec
 .vscode/
+
+sudoentitlements/src/main/assets/

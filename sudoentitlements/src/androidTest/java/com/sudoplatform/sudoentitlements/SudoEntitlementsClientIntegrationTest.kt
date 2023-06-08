@@ -18,6 +18,7 @@ import io.kotlintest.shouldBe
 import io.kotlintest.shouldNotBe
 import io.kotlintest.shouldThrow
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withTimeout
 import org.junit.After
 import org.junit.Assume.assumeTrue
 import org.junit.Before
@@ -47,6 +48,7 @@ class SudoEntitlementsClientIntegrationTest : BaseIntegrationTest() {
             java.util.logging.Logger.getLogger("org.apache.http").level = java.util.logging.Level.FINEST
         }
 
+        userClient.reset()
         entitlementsClient = SudoEntitlementsClient.builder()
             .setContext(context)
             .setSudoUserClient(userClient)
@@ -56,13 +58,20 @@ class SudoEntitlementsClientIntegrationTest : BaseIntegrationTest() {
 
     @After
     fun fini() = runBlocking {
+        withTimeout(30000) {
+            if (userClient.isRegistered()) {
+                if (!userClient.isSignedIn()) {
+                    userClient.signInWithKey()
+                }
+                userClient.deregister()
+            }
+        }
         userClient.reset()
         Timber.uprootAll()
     }
 
     @Test
     fun shouldThrowIfRequiredItemsNotProvidedToBuilder() {
-
         // Can only run if client config files are present
         assumeTrue(clientConfigFilesPresent())
 
@@ -88,7 +97,6 @@ class SudoEntitlementsClientIntegrationTest : BaseIntegrationTest() {
 
     @Test
     fun shouldNotThrowIfTheRequiredItemsAreProvidedToBuilder() {
-
         // Can only run if client config files are present
         assumeTrue(clientConfigFilesPresent())
 
@@ -100,7 +108,6 @@ class SudoEntitlementsClientIntegrationTest : BaseIntegrationTest() {
 
     @Test
     fun shouldNotThrowIfAllItemsAreProvidedToBuilder() {
-
         // Can only run if client config files are present
         assumeTrue(clientConfigFilesPresent())
 

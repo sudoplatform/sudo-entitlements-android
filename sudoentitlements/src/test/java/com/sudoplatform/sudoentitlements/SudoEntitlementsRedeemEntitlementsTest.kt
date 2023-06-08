@@ -110,7 +110,6 @@ class SudoEntitlementsRedeemEntitlementsTest : BaseTests() {
 
     @Test
     fun `redeemEntitlements() should return results when no error present`() = runBlocking<Unit> {
-
         mutationHolder.callback shouldBe null
 
         val deferredResult = async(Dispatchers.IO) {
@@ -161,7 +160,6 @@ class SudoEntitlementsRedeemEntitlementsTest : BaseTests() {
 
     @Test
     fun `redeemEntitlements() should throw when mutation response is null`() = runBlocking<Unit> {
-
         mutationHolder.callback shouldBe null
 
         val nullResponse by before {
@@ -189,7 +187,6 @@ class SudoEntitlementsRedeemEntitlementsTest : BaseTests() {
 
     @Test
     fun `redeemEntitlements() should throw when response has an entitlement not found error`() = runBlocking<Unit> {
-
         mutationHolder.callback shouldBe null
 
         val errorMutationResponse by before {
@@ -223,7 +220,6 @@ class SudoEntitlementsRedeemEntitlementsTest : BaseTests() {
 
     @Test
     fun `redeemEntitlements() should throw when response has an unauthorized user error`() = runBlocking<Unit> {
-
         mutationHolder.callback shouldBe null
 
         val errorMutationResponse by before {
@@ -257,7 +253,6 @@ class SudoEntitlementsRedeemEntitlementsTest : BaseTests() {
 
     @Test
     fun `redeemEntitlements() should throw when response has an ambiguous entitlements error`() = runBlocking<Unit> {
-
         mutationHolder.callback shouldBe null
 
         val errorMutationResponse by before {
@@ -291,7 +286,6 @@ class SudoEntitlementsRedeemEntitlementsTest : BaseTests() {
 
     @Test
     fun `redeemEntitlements() should throw when response has a NoExternalIdError`() = runBlocking<Unit> {
-
         mutationHolder.callback shouldBe null
 
         val errorMutationResponse by before {
@@ -325,7 +319,6 @@ class SudoEntitlementsRedeemEntitlementsTest : BaseTests() {
 
     @Test
     fun `redeemEntitlements() should throw when response has a NoBillingGroupError`() = runBlocking<Unit> {
-
         mutationHolder.callback shouldBe null
 
         val errorMutationResponse by before {
@@ -359,7 +352,6 @@ class SudoEntitlementsRedeemEntitlementsTest : BaseTests() {
 
     @Test
     fun `redeemEntitlements() should throw when response has a EntitlementsSetNotFoundError`() = runBlocking<Unit> {
-
         mutationHolder.callback shouldBe null
 
         val errorMutationResponse by before {
@@ -393,7 +385,6 @@ class SudoEntitlementsRedeemEntitlementsTest : BaseTests() {
 
     @Test
     fun `redeemEntitlements() should throw when response has a EntitlementsSequenceNotFoundError`() = runBlocking<Unit> {
-
         mutationHolder.callback shouldBe null
 
         val errorMutationResponse by before {
@@ -427,7 +418,6 @@ class SudoEntitlementsRedeemEntitlementsTest : BaseTests() {
 
     @Test
     fun `redeemEntitlements() should throw when http error occurs`() = runBlocking<Unit> {
-
         mutationHolder.callback shouldBe null
 
         val deferredResult = async(Dispatchers.IO) {
@@ -462,7 +452,6 @@ class SudoEntitlementsRedeemEntitlementsTest : BaseTests() {
 
     @Test
     fun `redeemEntitlements() should throw when unknown error occurs`() = runBlocking<Unit> {
-
         mutationHolder.callback shouldBe null
 
         mockAppSyncClient.stub {
@@ -485,7 +474,6 @@ class SudoEntitlementsRedeemEntitlementsTest : BaseTests() {
 
     @Test
     fun `redeemEntitlements() should find error when unauthorized error occurs`() = runBlocking<Unit> {
-
         mutationHolder.callback shouldBe null
 
         val exceptionToThrow = RuntimeException(ApolloException("", IOException(NotAuthorizedException(""))))
@@ -509,7 +497,6 @@ class SudoEntitlementsRedeemEntitlementsTest : BaseTests() {
 
     @Test
     fun `redeemEntitlements() should not suppress CancellationException`() = runBlocking<Unit> {
-
         mockAppSyncClient.stub {
             on { mutate(any<RedeemEntitlementsMutation>()) } doThrow CancellationException("Mock Cancellation Exception")
         }

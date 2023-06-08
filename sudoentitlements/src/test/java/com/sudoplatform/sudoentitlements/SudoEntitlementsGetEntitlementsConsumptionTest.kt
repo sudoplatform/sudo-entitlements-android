@@ -128,7 +128,6 @@ class SudoEntitlementsGetEntitlementsConsumptionTest : BaseTests() {
 
     @Test
     fun `getEntitlementsConsumption() should return results when no error present`() = runBlocking<Unit> {
-
         queryHolder.callback shouldBe null
 
         val deferredResult = async(Dispatchers.IO) {
@@ -186,7 +185,6 @@ class SudoEntitlementsGetEntitlementsConsumptionTest : BaseTests() {
 
     @Test
     fun `getEntitlementsConsumption() should throw when query response is null`() = runBlocking<Unit> {
-
         queryHolder.callback shouldBe null
 
         val nullResponse by before {
@@ -212,7 +210,6 @@ class SudoEntitlementsGetEntitlementsConsumptionTest : BaseTests() {
 
     @Test
     fun `getEntitlementsConsumption() should throw when response has a NoExternalIdError`() = runBlocking<Unit> {
-
         queryHolder.callback shouldBe null
 
         val errorQueryResponse by before {
@@ -246,7 +243,6 @@ class SudoEntitlementsGetEntitlementsConsumptionTest : BaseTests() {
 
     @Test
     fun `getEntitlementsConsumption() should throw when response has a NoBillingGroupError`() = runBlocking<Unit> {
-
         queryHolder.callback shouldBe null
 
         val errorQueryResponse by before {
@@ -280,7 +276,6 @@ class SudoEntitlementsGetEntitlementsConsumptionTest : BaseTests() {
 
     @Test
     fun `getEntitlementsConsumption() should throw when response has a EntitlementsSetNotFoundError`() = runBlocking<Unit> {
-
         queryHolder.callback shouldBe null
 
         val errorQueryResponse by before {
@@ -314,7 +309,6 @@ class SudoEntitlementsGetEntitlementsConsumptionTest : BaseTests() {
 
     @Test
     fun `getEntitlementsConsumption() should throw when response has a EntitlementsSequenceNotFoundError`() = runBlocking<Unit> {
-
         queryHolder.callback shouldBe null
 
         val errorQueryResponse by before {
@@ -348,7 +342,6 @@ class SudoEntitlementsGetEntitlementsConsumptionTest : BaseTests() {
 
     @Test
     fun `getEntitlementsConsumption() should throw when response has error`() = runBlocking<Unit> {
-
         queryHolder.callback shouldBe null
 
         val error = com.apollographql.apollo.api.Error(
@@ -382,7 +375,6 @@ class SudoEntitlementsGetEntitlementsConsumptionTest : BaseTests() {
 
     @Test
     fun `getEntitlementsConsumption() should throw when http error occurs`() = runBlocking<Unit> {
-
         queryHolder.callback shouldBe null
 
         val deferredResult = async(Dispatchers.IO) {
@@ -417,7 +409,6 @@ class SudoEntitlementsGetEntitlementsConsumptionTest : BaseTests() {
 
     @Test
     fun `getEntitlementsConsumption() should throw when unknown error occurs`() = runBlocking<Unit> {
-
         queryHolder.callback shouldBe null
 
         mockAppSyncClient.stub {
@@ -440,7 +431,6 @@ class SudoEntitlementsGetEntitlementsConsumptionTest : BaseTests() {
 
     @Test
     fun `getEntitlementsConsumption() should find error when unauthorized error occurs`() = runBlocking<Unit> {
-
         queryHolder.callback shouldBe null
 
         val exceptionToThrow = RuntimeException(ApolloException("", IOException(NotAuthorizedException(""))))
@@ -464,7 +454,6 @@ class SudoEntitlementsGetEntitlementsConsumptionTest : BaseTests() {
 
     @Test
     fun `getEntitlementsConsumption() should not suppress CancellationException`() = runBlocking<Unit> {
-
         mockAppSyncClient.stub {
             on { query(any<GetEntitlementsConsumptionQuery>()) } doThrow CancellationException("Mock Cancellation Exception")
         }
