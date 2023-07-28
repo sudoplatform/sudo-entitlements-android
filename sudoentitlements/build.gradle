@@ -14,10 +14,10 @@ android {
     compileSdkVersion 31
 
     defaultConfig {
-        minSdkVersion 24
+        minSdkVersion 26
         targetSdkVersion 31
         versionCode = 1
-        versionName = "4.0.0"
+        versionName = "8.0.0"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         testApplicationId = "com.sudoplatform.sudoentitlements.test"
         consumerProguardFiles 'consumer-rules.pro'
@@ -61,6 +61,13 @@ android {
             }
         }
     }
+
+    publishing {
+        singleVariant("release") {
+            withSourcesJar()
+            withJavadocJar()
+        }
+    }
 }
 
 ext {
@@ -82,10 +89,10 @@ dependencies {
     implementation "com.amazonaws:aws-android-sdk-appsync:$appsync_version!!"
 
     // Sudo Platform
-    implementation "com.sudoplatform:sudologging:2.1.0"
-    implementation "com.sudoplatform:sudokeymanager:5.2.1"
-    implementation 'com.sudoplatform:sudoconfigmanager:5.0.0'
-    implementation 'com.sudoplatform:sudouser:16.0.0'
+    implementation "com.sudoplatform:sudologging:3.0.0"
+    implementation "com.sudoplatform:sudokeymanager:6.0.0"
+    implementation 'com.sudoplatform:sudoconfigmanager:6.0.0'
+    implementation 'com.sudoplatform:sudouser:17.0.0'
     implementation 'com.sudoplatform:sudoapiclient:7.0.0'
 
     // Testing
