@@ -93,7 +93,7 @@ dependencies {
     implementation "com.sudoplatform:sudokeymanager:6.0.0"
     implementation 'com.sudoplatform:sudoconfigmanager:6.0.0'
     implementation 'com.sudoplatform:sudouser:17.0.0'
-    implementation 'com.sudoplatform:sudoapiclient:7.0.0'
+    implementation 'com.sudoplatform:sudoapiclient:8.0.0'
 
     // Testing
     testImplementation "junit:junit:4.13.2"
