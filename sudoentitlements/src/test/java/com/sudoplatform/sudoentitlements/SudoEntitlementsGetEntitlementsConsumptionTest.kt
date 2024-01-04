@@ -19,8 +19,6 @@ import com.sudoplatform.sudouser.SudoUserClient
 import io.kotlintest.shouldBe
 import io.kotlintest.shouldNotBe
 import io.kotlintest.shouldThrow
-import java.net.HttpURLConnection
-import java.util.concurrent.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.delay
@@ -38,10 +36,12 @@ import org.mockito.kotlin.doThrow
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.never
 import org.mockito.kotlin.stub
-import org.mockito.kotlin.whenever
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.verifyNoMoreInteractions
+import org.mockito.kotlin.whenever
 import java.io.IOException
+import java.net.HttpURLConnection
+import java.util.concurrent.CancellationException
 
 /**
  * Test the correct operation of [SudoEntitlementsClient.getEntitlements] using mocks and spies.
@@ -60,9 +60,9 @@ class SudoEntitlementsGetEntitlementsConsumptionTest : BaseTests() {
                         "typename",
                         "e.name",
                         "e.description",
-                        42
-                    )
-                )
+                        42,
+                    ),
+                ),
             ),
             listOf(
                 GetEntitlementsConsumptionQuery.Consumption(
@@ -70,16 +70,16 @@ class SudoEntitlementsGetEntitlementsConsumptionTest : BaseTests() {
                     GetEntitlementsConsumptionQuery.Consumer(
                         "typename",
                         "consumer-id",
-                        "consumer-issuer"
+                        "consumer-issuer",
                     ),
                     "e.name",
                     42,
                     32,
                     10,
                     50.0,
-                    100.0
-                )
-            )
+                    100.0,
+                ),
+            ),
         )
     }
 
@@ -110,7 +110,7 @@ class SudoEntitlementsGetEntitlementsConsumptionTest : BaseTests() {
             mockContext,
             mockSudoUserClient,
             mockAppSyncClient,
-            mockLogger
+            mockLogger,
         )
     }
 
@@ -216,7 +216,7 @@ class SudoEntitlementsGetEntitlementsConsumptionTest : BaseTests() {
             val error = com.apollographql.apollo.api.Error(
                 "mock",
                 emptyList(),
-                mapOf("errorType" to "sudoplatform.entitlements.NoExternalIdError")
+                mapOf("errorType" to "sudoplatform.entitlements.NoExternalIdError"),
             )
             Response.builder<GetEntitlementsConsumptionQuery.Data>(GetEntitlementsConsumptionQuery())
                 .errors(listOf(error))
@@ -249,7 +249,7 @@ class SudoEntitlementsGetEntitlementsConsumptionTest : BaseTests() {
             val error = com.apollographql.apollo.api.Error(
                 "mock",
                 emptyList(),
-                mapOf("errorType" to "sudoplatform.entitlements.NoBillingGroupError")
+                mapOf("errorType" to "sudoplatform.entitlements.NoBillingGroupError"),
             )
             Response.builder<GetEntitlementsConsumptionQuery.Data>(GetEntitlementsConsumptionQuery())
                 .errors(listOf(error))
@@ -282,7 +282,7 @@ class SudoEntitlementsGetEntitlementsConsumptionTest : BaseTests() {
             val error = com.apollographql.apollo.api.Error(
                 "mock",
                 emptyList(),
-                mapOf("errorType" to "sudoplatform.entitlements.EntitlementsSetNotFoundError")
+                mapOf("errorType" to "sudoplatform.entitlements.EntitlementsSetNotFoundError"),
             )
             Response.builder<GetEntitlementsConsumptionQuery.Data>(GetEntitlementsConsumptionQuery())
                 .errors(listOf(error))
@@ -315,7 +315,7 @@ class SudoEntitlementsGetEntitlementsConsumptionTest : BaseTests() {
             val error = com.apollographql.apollo.api.Error(
                 "mock",
                 emptyList(),
-                mapOf("errorType" to "sudoplatform.entitlements.EntitlementsSequenceNotFoundError")
+                mapOf("errorType" to "sudoplatform.entitlements.EntitlementsSequenceNotFoundError"),
             )
             Response.builder<GetEntitlementsConsumptionQuery.Data>(GetEntitlementsConsumptionQuery())
                 .errors(listOf(error))
@@ -347,7 +347,7 @@ class SudoEntitlementsGetEntitlementsConsumptionTest : BaseTests() {
         val error = com.apollographql.apollo.api.Error(
             "mock",
             emptyList(),
-            mapOf("errorType" to "DilithiumCrystalsOutOfAlignment")
+            mapOf("errorType" to "DilithiumCrystalsOutOfAlignment"),
         )
 
         val responseWithNullData by before {

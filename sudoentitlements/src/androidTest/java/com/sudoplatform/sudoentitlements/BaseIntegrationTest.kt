@@ -9,7 +9,6 @@ package com.sudoplatform.sudoentitlements
 import android.content.Context
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.platform.app.InstrumentationRegistry
-import com.sudoplatform.sudoconfigmanager.DefaultSudoConfigManager
 import com.sudoplatform.sudoentitlementsadmin.SudoEntitlementsAdminClient
 import com.sudoplatform.sudokeymanager.KeyManagerFactory
 import com.sudoplatform.sudouser.JWT
@@ -24,7 +23,7 @@ import timber.log.Timber
  */
 abstract class BaseIntegrationTest {
 
-    protected val context: Context = ApplicationProvider.getApplicationContext<Context>()
+    protected val context: Context = ApplicationProvider.getApplicationContext()
 
     protected val userClient by lazy {
         SudoUserClient.builder(context)
@@ -34,10 +33,6 @@ abstract class BaseIntegrationTest {
 
     protected val keyManager by lazy {
         KeyManagerFactory(context).createAndroidKeyManager()
-    }
-
-    protected val configManager by lazy {
-        DefaultSudoConfigManager(context)
     }
 
     protected val entitlementsAdminClient by lazy {
@@ -57,7 +52,7 @@ abstract class BaseIntegrationTest {
             privateKey = privateKey,
             publicKey = null,
             keyManager = keyManager,
-            keyId = keyId
+            keyId = keyId,
         )
 
         userClient.registerWithAuthenticationProvider(authProvider, "ent-client-test")

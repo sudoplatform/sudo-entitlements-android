@@ -9,14 +9,14 @@ package com.sudoplatform.sudoentitlements
 import android.content.Context
 import com.amazonaws.mobileconnectors.appsync.AWSAppSyncClient
 import com.sudoplatform.sudoapiclient.ApiClientManager
-import com.sudoplatform.sudoentitlements.logging.LogConstants
-import com.sudoplatform.sudoentitlements.types.EntitlementsConsumption
-import com.sudoplatform.sudoentitlements.types.EntitlementsSet
-import com.sudoplatform.sudoentitlements.types.UserEntitlements
 import com.sudoplatform.sudoentitlements.SudoEntitlementsClient.EntitlementsException.InsufficientEntitlementsException
 import com.sudoplatform.sudoentitlements.SudoEntitlementsClient.EntitlementsException.InvalidArgumentException
 import com.sudoplatform.sudoentitlements.SudoEntitlementsClient.EntitlementsException.NotSignedInException
 import com.sudoplatform.sudoentitlements.SudoEntitlementsClient.EntitlementsException.ServiceException
+import com.sudoplatform.sudoentitlements.logging.LogConstants
+import com.sudoplatform.sudoentitlements.types.EntitlementsConsumption
+import com.sudoplatform.sudoentitlements.types.EntitlementsSet
+import com.sudoplatform.sudoentitlements.types.UserEntitlements
 import com.sudoplatform.sudologging.AndroidUtilsLogDriver
 import com.sudoplatform.sudologging.LogLevel
 import com.sudoplatform.sudologging.Logger
@@ -93,7 +93,7 @@ interface SudoEntitlementsClient {
                 context = context!!,
                 sudoUserClient = this@Builder.sudoUserClient!!,
                 appSyncClient = appSyncClient,
-                logger = logger
+                logger = logger,
             )
         }
     }

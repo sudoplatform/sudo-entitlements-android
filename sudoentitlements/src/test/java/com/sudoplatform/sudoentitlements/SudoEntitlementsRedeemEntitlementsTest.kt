@@ -35,9 +35,9 @@ import org.mockito.kotlin.doThrow
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.never
 import org.mockito.kotlin.stub
-import org.mockito.kotlin.whenever
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.verifyNoMoreInteractions
+import org.mockito.kotlin.whenever
 import java.io.IOException
 import java.net.HttpURLConnection
 
@@ -59,9 +59,9 @@ class SudoEntitlementsRedeemEntitlementsTest : BaseTests() {
                     "typename",
                     "e.name",
                     "e.description",
-                    42
-                )
-            )
+                    42,
+                ),
+            ),
         )
     }
 
@@ -92,7 +92,7 @@ class SudoEntitlementsRedeemEntitlementsTest : BaseTests() {
             mockContext,
             mockSudoUserClient,
             mockAppSyncClient,
-            mockLogger
+            mockLogger,
         )
     }
 
@@ -193,7 +193,7 @@ class SudoEntitlementsRedeemEntitlementsTest : BaseTests() {
             val error = com.apollographql.apollo.api.Error(
                 "mock",
                 emptyList(),
-                mapOf("errorType" to "Failed")
+                mapOf("errorType" to "Failed"),
             )
             Response.builder<RedeemEntitlementsMutation.Data>(RedeemEntitlementsMutation())
                 .errors(listOf(error))
@@ -226,7 +226,7 @@ class SudoEntitlementsRedeemEntitlementsTest : BaseTests() {
             val error = com.apollographql.apollo.api.Error(
                 "mock",
                 emptyList(),
-                mapOf("errorType" to "UnauthorisedUser")
+                mapOf("errorType" to "UnauthorisedUser"),
             )
             Response.builder<RedeemEntitlementsMutation.Data>(RedeemEntitlementsMutation())
                 .errors(listOf(error))
@@ -259,7 +259,7 @@ class SudoEntitlementsRedeemEntitlementsTest : BaseTests() {
             val error = com.apollographql.apollo.api.Error(
                 "mock",
                 emptyList(),
-                mapOf("errorType" to "sudoplatform.entitlements.AmbiguousEntitlementsError")
+                mapOf("errorType" to "sudoplatform.entitlements.AmbiguousEntitlementsError"),
             )
             Response.builder<RedeemEntitlementsMutation.Data>(RedeemEntitlementsMutation())
                 .errors(listOf(error))
@@ -292,7 +292,7 @@ class SudoEntitlementsRedeemEntitlementsTest : BaseTests() {
             val error = com.apollographql.apollo.api.Error(
                 "mock",
                 emptyList(),
-                mapOf("errorType" to "sudoplatform.entitlements.NoExternalIdError")
+                mapOf("errorType" to "sudoplatform.entitlements.NoExternalIdError"),
             )
             Response.builder<RedeemEntitlementsMutation.Data>(RedeemEntitlementsMutation())
                 .errors(listOf(error))
@@ -325,7 +325,7 @@ class SudoEntitlementsRedeemEntitlementsTest : BaseTests() {
             val error = com.apollographql.apollo.api.Error(
                 "mock",
                 emptyList(),
-                mapOf("errorType" to "sudoplatform.entitlements.NoBillingGroupError")
+                mapOf("errorType" to "sudoplatform.entitlements.NoBillingGroupError"),
             )
             Response.builder<RedeemEntitlementsMutation.Data>(RedeemEntitlementsMutation())
                 .errors(listOf(error))
@@ -358,7 +358,7 @@ class SudoEntitlementsRedeemEntitlementsTest : BaseTests() {
             val error = com.apollographql.apollo.api.Error(
                 "mock",
                 emptyList(),
-                mapOf("errorType" to "sudoplatform.entitlements.EntitlementsSetNotFoundError")
+                mapOf("errorType" to "sudoplatform.entitlements.EntitlementsSetNotFoundError"),
             )
             Response.builder<RedeemEntitlementsMutation.Data>(RedeemEntitlementsMutation())
                 .errors(listOf(error))
@@ -391,7 +391,7 @@ class SudoEntitlementsRedeemEntitlementsTest : BaseTests() {
             val error = com.apollographql.apollo.api.Error(
                 "mock",
                 emptyList(),
-                mapOf("errorType" to "sudoplatform.entitlements.EntitlementsSequenceNotFoundError")
+                mapOf("errorType" to "sudoplatform.entitlements.EntitlementsSequenceNotFoundError"),
             )
             Response.builder<RedeemEntitlementsMutation.Data>(RedeemEntitlementsMutation())
                 .errors(listOf(error))

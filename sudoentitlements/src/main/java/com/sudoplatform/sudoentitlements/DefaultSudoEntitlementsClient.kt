@@ -44,7 +44,7 @@ internal class DefaultSudoEntitlementsClient(
     private val context: Context,
     private val sudoUserClient: SudoUserClient,
     appSyncClient: AWSAppSyncClient? = null,
-    private val logger: Logger = Logger(LogConstants.SUDOLOG_TAG, AndroidUtilsLogDriver(LogLevel.INFO))
+    private val logger: Logger = Logger(LogConstants.SUDOLOG_TAG, AndroidUtilsLogDriver(LogLevel.INFO)),
 ) : SudoEntitlementsClient {
 
     companion object {
@@ -82,12 +82,12 @@ internal class DefaultSudoEntitlementsClient(
      * and allow us to retry.  The value of `version` doesn't need to be kept up-to-date with the
      * version of the code.
      */
-    private val version: String = "8.0.1"
+    private val version: String = "9.0.0"
 
     private val appSyncClient: AWSAppSyncClient =
         appSyncClient ?: ApiClientManager.getClient(
             context,
-            this.sudoUserClient
+            this.sudoUserClient,
         )
 
     @Throws(SudoEntitlementsClient.EntitlementsException::class)
@@ -243,12 +243,12 @@ internal class DefaultSudoEntitlementsClient(
         }
         if (error.contains(ERROR_ENTITLEMENTS_SEQUENCE_NOT_FOUND)) {
             return SudoEntitlementsClient.EntitlementsException.EntitlementsSequenceNotFoundException(
-                ENTITLEMENTS_SEQUENCE_NOT_FOUND_ERROR_MSG
+                ENTITLEMENTS_SEQUENCE_NOT_FOUND_ERROR_MSG,
             )
         }
         if (error.contains(ERROR_ENTITLEMENTS_SET_NOT_FOUND)) {
             return SudoEntitlementsClient.EntitlementsException.EntitlementsSetNotFoundException(
-                ENTITLEMENTS_SET_NOT_FOUND_ERROR_MSG
+                ENTITLEMENTS_SET_NOT_FOUND_ERROR_MSG,
             )
         }
         if (error.contains(ERROR_SERVICE)) {

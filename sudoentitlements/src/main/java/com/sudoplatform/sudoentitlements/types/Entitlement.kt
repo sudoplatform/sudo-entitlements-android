@@ -20,5 +20,5 @@ import kotlinx.parcelize.Parcelize
 data class Entitlement(
     val name: String,
     val description: String? = null,
-    val value: Int
+    val value: Int,
 ) : Parcelable

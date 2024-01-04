@@ -26,5 +26,5 @@ import kotlinx.parcelize.Parcelize
 @Parcelize
 data class EntitlementsConsumption(
     val entitlements: UserEntitlements,
-    val consumption: List<EntitlementConsumption>
+    val consumption: List<EntitlementConsumption>,
 ) : Parcelable

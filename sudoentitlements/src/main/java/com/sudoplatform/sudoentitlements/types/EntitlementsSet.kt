@@ -27,5 +27,5 @@ data class EntitlementsSet(
     val entitlements: Set<Entitlement>,
     val version: Double,
     val createdAt: Date,
-    val updatedAt: Date
+    val updatedAt: Date,
 ) : Parcelable

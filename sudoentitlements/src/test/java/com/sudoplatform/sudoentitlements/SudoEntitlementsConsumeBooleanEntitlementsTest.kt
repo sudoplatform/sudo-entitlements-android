@@ -35,9 +35,9 @@ import org.mockito.kotlin.doThrow
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.never
 import org.mockito.kotlin.stub
-import org.mockito.kotlin.whenever
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.verifyNoMoreInteractions
+import org.mockito.kotlin.whenever
 import java.io.IOException
 import java.net.HttpURLConnection
 
@@ -77,7 +77,7 @@ class SudoEntitlementsConsumeBooleanEntitlementsTest : BaseTests() {
             mockContext,
             mockSudoUserClient,
             mockAppSyncClient,
-            mockLogger
+            mockLogger,
         )
     }
 
@@ -141,7 +141,7 @@ class SudoEntitlementsConsumeBooleanEntitlementsTest : BaseTests() {
             val error = com.apollographql.apollo.api.Error(
                 "mock",
                 emptyList(),
-                mapOf("errorType" to "sudoplatform.InvalidArgumentError")
+                mapOf("errorType" to "sudoplatform.InvalidArgumentError"),
             )
             Response.builder<ConsumeBooleanEntitlementsMutation.Data>(ConsumeBooleanEntitlementsMutation(listOf("some-entitlement")))
                 .errors(listOf(error))
@@ -174,7 +174,7 @@ class SudoEntitlementsConsumeBooleanEntitlementsTest : BaseTests() {
             val error = com.apollographql.apollo.api.Error(
                 "mock",
                 emptyList(),
-                mapOf("errorType" to "sudoplatform.InsufficientEntitlementsError")
+                mapOf("errorType" to "sudoplatform.InsufficientEntitlementsError"),
             )
             Response.builder<ConsumeBooleanEntitlementsMutation.Data>(ConsumeBooleanEntitlementsMutation(listOf("some-entitlement")))
                 .errors(listOf(error))

@@ -15,9 +15,9 @@ buildscript {
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
         classpath "org.owasp:dependency-check-gradle:8.2.1"
         classpath "com.cookpad.android.licensetools:license-tools-plugin:1.7.0"
-        classpath "org.jmailen.gradle:kotlinter-gradle:3.13.0"
+        classpath "org.jmailen.gradle:kotlinter-gradle:3.16.0"
         classpath "com.amazonaws:aws-android-sdk-appsync-gradle-plugin:$appsync_version"
-        classpath "org.sonarsource.scanner.gradle:sonarqube-gradle-plugin:3.3"
+        classpath "org.sonarsource.scanner.gradle:sonarqube-gradle-plugin:4.0.0.2929"
         classpath "org.jetbrains.dokka:dokka-gradle-plugin:${dokka_version}"
     }
 }
@@ -48,7 +48,6 @@ if (project.findProperty("tag") && sonatypeStagingProfileId) {
         repositories {
             sonatype {
                 stagingProfileId = sonatypeStagingProfileId
-
                 username = nexusUsername
                 password = nexusPassword
             }

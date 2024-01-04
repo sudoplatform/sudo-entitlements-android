@@ -7,11 +7,11 @@
 package com.sudoplatform.sudoentitlements.samples
 
 import android.content.Context
-import org.mockito.kotlin.mock
 import com.sudoplatform.sudoentitlements.BaseTests
 import com.sudoplatform.sudoentitlements.SudoEntitlementsClient
 import com.sudoplatform.sudouser.SudoUserClient
 import org.junit.Test
+import org.mockito.kotlin.mock
 
 /**
  * These are sample snippets of code that are included in the generated documentation. They are

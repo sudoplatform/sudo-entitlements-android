@@ -44,5 +44,5 @@ data class EntitlementConsumption(
     val consumed: Int,
     val available: Int,
     val firstConsumedAtEpochMs: Double?,
-    val lastConsumedAtEpochMs: Double?
+    val lastConsumedAtEpochMs: Double?,
 ) : Parcelable
