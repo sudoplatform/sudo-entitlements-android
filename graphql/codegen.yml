@@ -1,0 +1,9 @@
+overwrite: true
+schema:
+  - "./schema/**/*.graphql"
+documents:
+  - "../sudoentitlements/src/main/graphql/com/sudoplatform/sudoentitlements/*.graphql"
+generates:
+  "../sudoentitlements/src/main/graphql/com/sudoplatform/sudoentitlements/schema.json":
+    plugins:
+      - introspection

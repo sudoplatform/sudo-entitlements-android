@@ -20,13 +20,13 @@ import kotlinx.parcelize.Parcelize
  *     level resource responsible for consumption of the entitlement. If not present,
  *     the entitlement is consumed directly by the user.
  *
- * @property value [Int]
+ * @property value [Long]
  *     The maximum amount of the entitlement that can be consumed by the consumer
  *
- * @property consumed [Int]
+ * @property consumed [Long]
  *     The amount of the entitlement that has been consumed
  *
- * @property available [Int]
+ * @property available [Long]
  *     The amount of the entitlement that is yet to be consumed. Provided for convenience.
  *     `available` + `consumed` always equals `value`
  *
@@ -40,9 +40,9 @@ import kotlinx.parcelize.Parcelize
 data class EntitlementConsumption(
     val name: String,
     val consumer: EntitlementConsumer?,
-    val value: Int,
-    val consumed: Int,
-    val available: Int,
+    val value: Long,
+    val consumed: Long,
+    val available: Long,
     val firstConsumedAtEpochMs: Double?,
     val lastConsumedAtEpochMs: Double?,
 ) : Parcelable

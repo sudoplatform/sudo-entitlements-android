@@ -2,7 +2,7 @@ $dokka.format:html-v1
 $dokka.linkExtension:html
 $dokka.location:com.sudoplatform.sudoentitlements.types////PointingToDeclaration/sudoentitlements/com.sudoplatform.sudoentitlements.types/index.html
 $dokka.location:com.sudoplatform.sudoentitlements.types/Entitlement///PointingToDeclaration/sudoentitlements/com.sudoplatform.sudoentitlements.types/-entitlement/index.html
-$dokka.location:com.sudoplatform.sudoentitlements.types/Entitlement/Entitlement/#kotlin.String#kotlin.String?#kotlin.Int/PointingToDeclaration/sudoentitlements/com.sudoplatform.sudoentitlements.types/-entitlement/-entitlement.html
+$dokka.location:com.sudoplatform.sudoentitlements.types/Entitlement/Entitlement/#kotlin.String#kotlin.String?#kotlin.Long/PointingToDeclaration/sudoentitlements/com.sudoplatform.sudoentitlements.types/-entitlement/-entitlement.html
 $dokka.location:com.sudoplatform.sudoentitlements.types/Entitlement/description/#/PointingToDeclaration/sudoentitlements/com.sudoplatform.sudoentitlements.types/-entitlement/description.html
 $dokka.location:com.sudoplatform.sudoentitlements.types/Entitlement/name/#/PointingToDeclaration/sudoentitlements/com.sudoplatform.sudoentitlements.types/-entitlement/name.html
 $dokka.location:com.sudoplatform.sudoentitlements.types/Entitlement/value/#/PointingToDeclaration/sudoentitlements/com.sudoplatform.sudoentitlements.types/-entitlement/value.html
@@ -11,7 +11,7 @@ $dokka.location:com.sudoplatform.sudoentitlements.types/EntitlementConsumer/Enti
 $dokka.location:com.sudoplatform.sudoentitlements.types/EntitlementConsumer/id/#/PointingToDeclaration/sudoentitlements/com.sudoplatform.sudoentitlements.types/-entitlement-consumer/id.html
 $dokka.location:com.sudoplatform.sudoentitlements.types/EntitlementConsumer/issuer/#/PointingToDeclaration/sudoentitlements/com.sudoplatform.sudoentitlements.types/-entitlement-consumer/issuer.html
 $dokka.location:com.sudoplatform.sudoentitlements.types/EntitlementConsumption///PointingToDeclaration/sudoentitlements/com.sudoplatform.sudoentitlements.types/-entitlement-consumption/index.html
-$dokka.location:com.sudoplatform.sudoentitlements.types/EntitlementConsumption/EntitlementConsumption/#kotlin.String#com.sudoplatform.sudoentitlements.types.EntitlementConsumer?#kotlin.Int#kotlin.Int#kotlin.Int#kotlin.Double?#kotlin.Double?/PointingToDeclaration/sudoentitlements/com.sudoplatform.sudoentitlements.types/-entitlement-consumption/-entitlement-consumption.html
+$dokka.location:com.sudoplatform.sudoentitlements.types/EntitlementConsumption/EntitlementConsumption/#kotlin.String#com.sudoplatform.sudoentitlements.types.EntitlementConsumer?#kotlin.Long#kotlin.Long#kotlin.Long#kotlin.Double?#kotlin.Double?/PointingToDeclaration/sudoentitlements/com.sudoplatform.sudoentitlements.types/-entitlement-consumption/-entitlement-consumption.html
 $dokka.location:com.sudoplatform.sudoentitlements.types/EntitlementConsumption/available/#/PointingToDeclaration/sudoentitlements/com.sudoplatform.sudoentitlements.types/-entitlement-consumption/available.html
 $dokka.location:com.sudoplatform.sudoentitlements.types/EntitlementConsumption/consumed/#/PointingToDeclaration/sudoentitlements/com.sudoplatform.sudoentitlements.types/-entitlement-consumption/consumed.html
 $dokka.location:com.sudoplatform.sudoentitlements.types/EntitlementConsumption/consumer/#/PointingToDeclaration/sudoentitlements/com.sudoplatform.sudoentitlements.types/-entitlement-consumption/consumer.html

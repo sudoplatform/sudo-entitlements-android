@@ -14,11 +14,11 @@ import kotlinx.parcelize.Parcelize
  *
  * @property name [String] Name of the entitlement.
  * @property description [String] Human readable description of the entitlement.
- * @property value [Int] The quantity of the entitlement.
+ * @property value [Long] The quantity of the entitlement.
  */
 @Parcelize
 data class Entitlement(
     val name: String,
     val description: String? = null,
-    val value: Int,
+    val value: Long,
 ) : Parcelable

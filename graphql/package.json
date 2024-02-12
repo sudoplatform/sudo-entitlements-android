@@ -1,0 +1,20 @@
+{
+  "name": "@sudoplatform/internal-virtualcards-codegen",
+  "version": "0.0.1",
+  "author": "Anonyome Labs, Inc.",
+  "license": "Apache-2.0",
+  "scripts": {
+    "codegen": "graphql-codegen -c codegen.yml"
+  },
+  "engines": {
+    "node": ">=18 <19"
+  },
+  "devDependencies": {
+    "@graphql-codegen/add": "^5.0.0",
+    "@graphql-codegen/cli": "^4.0.1",
+    "@graphql-codegen/introspection": "^4.0.0",
+    "@types/node": "^16.18.34",
+    "graphql": "^16.6.0",
+    "typescript": "^5.1.3"
+  }
+}

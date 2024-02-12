@@ -45,7 +45,7 @@ internal object EntitlementsTransformer {
             Entitlement(
                 name = item.name(),
                 description = item.description(),
-                value = item.value(),
+                value = item.value().toLong(),
             )
         }
     }
@@ -55,9 +55,9 @@ internal object EntitlementsTransformer {
             EntitlementConsumption(
                 name = item.name(),
                 consumer = item.consumer()?.let { EntitlementConsumer(id = it.id(), issuer = it.issuer()) },
-                value = item.value(),
-                consumed = item.consumed(),
-                available = item.available(),
+                value = item.value().toLong(),
+                consumed = item.consumed().toLong(),
+                available = item.available().toLong(),
                 firstConsumedAtEpochMs = item.firstConsumedAtEpochMs(),
                 lastConsumedAtEpochMs = item.lastConsumedAtEpochMs(),
             )
@@ -88,7 +88,7 @@ internal object EntitlementsTransformer {
             Entitlement(
                 name = item.name(),
                 description = item.description(),
-                value = item.value(),
+                value = item.value().toLong(),
             )
         }.toSet()
     }
@@ -117,7 +117,7 @@ internal object EntitlementsTransformer {
             Entitlement(
                 name = item.name(),
                 description = item.description(),
-                value = item.value(),
+                value = item.value().toLong(),
             )
         }.toSet()
     }

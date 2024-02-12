@@ -10,6 +10,7 @@ import android.content.Context
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.platform.app.InstrumentationRegistry
 import com.sudoplatform.sudoentitlementsadmin.SudoEntitlementsAdminClient
+import com.sudoplatform.sudoentitlementsadmin.types.Entitlement
 import com.sudoplatform.sudokeymanager.KeyManagerFactory
 import com.sudoplatform.sudouser.JWT
 import com.sudoplatform.sudouser.SudoUserClient
@@ -112,6 +113,17 @@ abstract class BaseIntegrationTest {
         val username = userClient.getUserName()
         require(username != null) { "Username is null" }
         entitlementsAdminClient.applyEntitlementsSetToUser(username, entitlementsSet)
+        return username
+    }
+
+    /**
+     * @return external ID of user
+     */
+    protected suspend fun enableUserForEntitlementsRedemption(entitlement: Entitlement): String {
+        userClient.isSignedIn() shouldBe true
+        val username = userClient.getUserName()
+        require(username != null) { "Username is null" }
+        entitlementsAdminClient.applyEntitlementsToUser(username, listOf(entitlement))
         return username
     }
 }

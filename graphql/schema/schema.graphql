@@ -1,0 +1,110 @@
+## See ../common.graphql for additional types referenced here
+
+# A set of entitlements
+type EntitlementsSet @aws_cognito_user_pools {
+  # Time of initial creation of an entitlements set in milliseconds
+  # since epoch. Number is integral, float type provides sufficient
+  # precision.
+  createdAtEpochMs: Float!
+
+  # Time of most recent update of an entitlements set in milliseconds
+  # since epoch. Number is integral, float type provides sufficient
+  # precision.
+  updatedAtEpochMs: Float!
+
+  # Version number of the user's entitlements. This is incremented every
+  # time there is a change of entitlements set or explicit entitlements
+  # for this user.
+  #
+  # For users entitled by entitlement set, the fractional part of this version
+  # specifies the version of the entitlements set itself.
+  #
+  version: Float!
+
+  # Name of the entitlements set.
+  name: String!
+
+  # Optional description of the entitlements set.
+  description: String
+
+  # Entitlements conferred by this entitlements set.
+  entitlements: [Entitlement!]!
+}
+
+type Query {
+  # Return any entitlements for the currently logged in user or null if none.
+  #
+  # This query will return null for any of the conditions that return errors
+  # for the redeemEntitlements mutation.
+  getEntitlements: EntitlementsSet @aws_cognito_user_pools
+
+  # Return any entitlements and their consumption level for the currently logged in user.
+  #
+  # The following errors may be returned:
+  #
+  # sudoplatform.InvalidTokenError:
+  #   - Identity token contains no FSSO user identity information
+  #   - Identity token contains no claims recognized as entitling the user
+  #   - Identity token claims that are recognized specify unrecognized entitlements sets
+  #
+  # sudoplatform.NoEntitlementsError:
+  #   - redeemEntitlements has not been called for the user
+  #
+  # sudoplatform.ServiceError:
+  #   - An error occurred within the entitlements service that indicates an issue with
+  #     the configuration or operation of the service.
+  #
+  getEntitlementsConsumption: EntitlementsConsumption! @aws_cognito_user_pools
+
+  # Retrieve user's external ID. Useful for test users only to avoid
+  # having to be aware of external ID mapping rules when setting
+  # entitlements for a test user by external ID.
+  getExternalId: String! @aws_cognito_user_pools
+}
+
+type Mutation {
+  # Redeem entitlements for an FSSO user according to configured identity
+  # provider claim mappings.
+  #
+  # If the user has already redeemed entitlements then the users current
+  # entitlements as determined by the original redemption and any subsequent
+  # administrative modifications are returned rather than entitlements
+  # corresponding to the user's current identity token claims.
+  #
+  # The following errors may be returned:
+  #
+  # sudoplatform.InvalidTokenError:
+  #   - Identity token contains no FSSO user identity information
+  #   - Identity token contains no claims recognized as entitling the user
+  #   - Identity token claims that are recognized specify unrecognized entitlements sets
+  #
+  # sudoplatform.ServiceError:
+  #   - An error occurred within the entitlements service that indicates an issue with
+  #     the configuration or operation of the service.
+  #
+  # sudoplatform.entitlements.AmbiguousEntitlementsError:
+  #   - Multiple identity token claims are recognized and specify conflicting entitlement sets
+  redeemEntitlements: EntitlementsSet! @aws_cognito_user_pools
+
+  # Record consumption of a set of boolean entitlements.
+  #
+  # This is to support services that want a record of
+  # usage recorded but have no service side enforcement
+  # point.
+  #
+  # Returns true if user is entitled to all boolean entitlements listed
+  # Never returns false but returns the following errors.
+  #
+  # sudoplatform.InsufficientEntitlementsError:
+  #   - User is not entitled to one or more of the boolean entitlements
+  #
+  # sudoplatform.InvalidArgumentError:
+  #   - One or more of the specified entitlement names does not correspond
+  #     to a boolean entitlement defined to the entitlements service
+  #
+  # sudoplatform.ServiceError:
+  #   - An error occurred within the entitlements service that indicates an issue with
+  #     the configuration or operation of the service.
+  consumeBooleanEntitlements(entitlementNames: [String!]!): Boolean!
+    @aws_cognito_user_pools
+}

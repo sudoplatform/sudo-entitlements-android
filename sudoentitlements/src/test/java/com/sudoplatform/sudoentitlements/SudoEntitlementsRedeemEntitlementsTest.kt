@@ -59,7 +59,7 @@ class SudoEntitlementsRedeemEntitlementsTest : BaseTests() {
                     "typename",
                     "e.name",
                     "e.description",
-                    42,
+                    42.0,
                 ),
             ),
         )

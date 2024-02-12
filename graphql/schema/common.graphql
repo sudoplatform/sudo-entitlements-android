@@ -1,0 +1,86 @@
+# An entitlement
+type Entitlement @aws_api_key @aws_iam @aws_cognito_user_pools {
+  # Name of the entitlement
+  name: String!
+
+  # Optional description of the entitlement
+  description: String
+
+  # Value of the entitlement.
+  value: Float!
+}
+
+# Effective entitlements for a user
+type UserEntitlements @aws_api_key @aws_iam @aws_cognito_user_pools {
+  # Version number of the user's entitlements. This is incremented every
+  # time there is a change of entitlements set or explicit entitlements
+  # for this user.
+  #
+  # For users entitled by entitlement set, the fractional part of this version
+  # specifies the version of the entitlements set itself. Entitlements set version
+  # is divided by 100000 then added to the user entitlements version
+  #
+  # This ensures that the version of user entitlements always increases mon
+  version: Float!
+
+  # Name of the entitlements set specified for this user. Will be undefined
+  # if entitlements have been specified explicitly rather than by an
+  # entitlements set name.
+  entitlementsSetName: String
+
+  # Effective entitlements for the user either obtained from the entitlements
+  # set or as specified explicitly for this user.
+  entitlements: [Entitlement!]!
+}
+
+# Sub-resource consumer of the entitlement
+# For example some entitlements are per-Sudo
+type EntitlementConsumer @aws_api_key @aws_iam @aws_cognito_user_pools {
+  # ID of the consuming resource
+  id: ID!
+
+  # Issuer of the consuming resource ID e.g. sudoplatform.sudoservice for Sudos
+  issuer: String!
+}
+
+type EntitlementConsumption @aws_api_key @aws_iam @aws_cognito_user_pools {
+  # Consumer of entitlement. If not present, entitlement is consumed
+  # at the user level
+  consumer: EntitlementConsumer
+
+  # Name of the entitlement
+  name: String!
+
+  # Entitled amount
+  value: Float!
+
+  # Consumed amount
+  consumed: Float!
+
+  # Available amount
+  available: Float!
+
+  # time this entitlement was first consumed
+  firstConsumedAtEpochMs: Float
+
+  # time of most recent consumption of this entitlement
+  lastConsumedAtEpochMs: Float
+}
+
+type EntitlementsConsumption @aws_api_key @aws_iam @aws_cognito_user_pools {
+  # Current active entitlements for the user
+  entitlements: UserEntitlements!
+
+  # Current entitlements consumption for the user. Absence of a specific
+  # entitlement in this array implies no consumption of that entitlement.
+  consumption: [EntitlementConsumption!]!
+}
+
+input InternalGetEntitlementsForUserInput {
+  userId: ID!
+}
+
+input ConsumeBooleanEntitlementInput {
+  # Name of boolean entitlement to consume
+  entitlementName: String!
+}

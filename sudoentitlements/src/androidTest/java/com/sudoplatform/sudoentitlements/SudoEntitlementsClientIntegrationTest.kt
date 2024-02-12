@@ -8,6 +8,7 @@ package com.sudoplatform.sudoentitlements
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.sudoplatform.sudoapiclient.ApiClientManager
+import com.sudoplatform.sudoentitlements.types.Entitlement
 import com.sudoplatform.sudoentitlements.types.EntitlementsSet
 import com.sudoplatform.sudologging.AndroidUtilsLogDriver
 import com.sudoplatform.sudologging.LogLevel
@@ -26,6 +27,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import timber.log.Timber
 import java.util.UUID
+import com.sudoplatform.sudoentitlementsadmin.types.Entitlement as AdminEntitlement
 
 /**
  * Test the operation of the [SudoEntitlementsClient].
@@ -294,6 +296,37 @@ class SudoEntitlementsClientIntegrationTest : BaseIntegrationTest() {
         entitlementsClient.redeemEntitlements()
 
         entitlementsClient.consumeBooleanEntitlements(arrayOf("sudoplatform.test.testEntitlement-2"))
+    }
+
+    @Test
+    fun largeEntitlementShouldBeObservable() = runBlocking {
+        assumeTrue(clientConfigFilesPresent())
+        assumeTrue(integrationTestEntitlementsSetAvailable())
+
+        signInAndRegister()
+
+        val largeAdminEntitlement = AdminEntitlement(
+            name = "sudoplatform.test.testEntitlement-1",
+            description = "",
+            value = 2L shl 51 - 1,
+        )
+        val largeEntitlement = Entitlement(
+            name = largeAdminEntitlement.name,
+            description = largeAdminEntitlement.description,
+            value = largeAdminEntitlement.value,
+        )
+
+        enableUserForEntitlementsRedemption(largeAdminEntitlement)
+
+        val redeemResult = entitlementsClient.redeemEntitlements()
+        with(redeemResult) {
+            entitlements shouldBe setOf(largeEntitlement)
+        }
+
+        val getEntitlementsConsumptionResult = entitlementsClient.getEntitlementsConsumption()
+        with(getEntitlementsConsumptionResult) {
+            entitlements.entitlements shouldBe listOf(largeEntitlement)
+        }
     }
 
     private fun checkEntitlementsSet(entitlementsSet: EntitlementsSet) {
