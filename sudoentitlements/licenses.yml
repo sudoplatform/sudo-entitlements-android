@@ -118,12 +118,6 @@
   license: The Apache Software License, Version 2.0
   licenseUrl: http://www.apache.org/licenses/LICENSE-2.0.txt
   url: https://developer.android.com/jetpack/androidx
-- artifact: org.jetbrains.kotlin:kotlin-stdlib-common:+
-  name: org.jetbrains.kotlin:kotlin-stdlib-common
-  copyrightHolder: JetBrains s.r.o.
-  license: The Apache License, Version 2.0
-  licenseUrl: http://www.apache.org/licenses/LICENSE-2.0.txt
-  url: https://kotlinlang.org/
 - artifact: org.checkerframework:checker-compat-qual:+
   name: Checker Qual
   copyrightHolder: checkerframework
