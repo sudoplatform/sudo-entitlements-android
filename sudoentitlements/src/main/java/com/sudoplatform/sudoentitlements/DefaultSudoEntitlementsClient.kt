@@ -1,5 +1,5 @@
 /*
- * Copyright © 2022 Anonyome Labs, Inc. All rights reserved.
+ * Copyright © 2024 Anonyome Labs, Inc. All rights reserved.
  *
  * SPDX-License-Identifier: Apache-2.0
  */
@@ -8,14 +8,9 @@ package com.sudoplatform.sudoentitlements
 
 import android.content.Context
 import androidx.annotation.VisibleForTesting
-import com.amazonaws.mobileconnectors.appsync.AWSAppSyncClient
-import com.amazonaws.mobileconnectors.appsync.fetcher.AppSyncResponseFetchers
 import com.amazonaws.services.cognitoidentity.model.NotAuthorizedException
-import com.apollographql.apollo.api.Error
-import com.apollographql.apollo.exception.ApolloException
+import com.amplifyframework.api.graphql.GraphQLResponse
 import com.sudoplatform.sudoapiclient.ApiClientManager
-import com.sudoplatform.sudoentitlements.appsync.enqueue
-import com.sudoplatform.sudoentitlements.appsync.enqueueFirst
 import com.sudoplatform.sudoentitlements.graphql.ConsumeBooleanEntitlementsMutation
 import com.sudoplatform.sudoentitlements.graphql.GetEntitlementsConsumptionQuery
 import com.sudoplatform.sudoentitlements.graphql.GetEntitlementsQuery
@@ -29,7 +24,10 @@ import com.sudoplatform.sudologging.AndroidUtilsLogDriver
 import com.sudoplatform.sudologging.LogLevel
 import com.sudoplatform.sudologging.Logger
 import com.sudoplatform.sudouser.SudoUserClient
+import com.sudoplatform.sudouser.amplify.GraphQLClient
+import com.sudoplatform.sudouser.exceptions.HTTP_STATUS_CODE_KEY
 import java.io.IOException
+import java.net.HttpURLConnection
 import java.util.concurrent.CancellationException
 
 /**
@@ -37,13 +35,13 @@ import java.util.concurrent.CancellationException
  *
  * @property context [Context] Application context.
  * @property sudoUserClient [SudoUserClient] Instance required to issue authentication tokens
- * @property appSyncClient [AWSAppSyncClient] Optional AppSync client to use. Mainly used for unit testing.
+ * @property graphQLClient [GraphQLClient] Optional GraphQL client to use. Mainly used for unit testing.
  * @property logger [Logger] Errors and warnings will be logged here.
  */
 internal class DefaultSudoEntitlementsClient(
     private val context: Context,
     private val sudoUserClient: SudoUserClient,
-    appSyncClient: AWSAppSyncClient? = null,
+    graphQLClient: GraphQLClient? = null,
     private val logger: Logger = Logger(LogConstants.SUDOLOG_TAG, AndroidUtilsLogDriver(LogLevel.INFO)),
 ) : SudoEntitlementsClient {
 
@@ -82,10 +80,10 @@ internal class DefaultSudoEntitlementsClient(
      * and allow us to retry.  The value of `version` doesn't need to be kept up-to-date with the
      * version of the code.
      */
-    private val version: String = "11.0.0"
+    private val version: String = "12.0.2"
 
-    private val appSyncClient: AWSAppSyncClient =
-        appSyncClient ?: ApiClientManager.getClient(
+    private val graphQLClient: GraphQLClient =
+        graphQLClient ?: ApiClientManager.getClient(
             context,
             this.sudoUserClient,
         )
@@ -97,18 +95,17 @@ internal class DefaultSudoEntitlementsClient(
         }
 
         try {
-            val query = GetEntitlementsConsumptionQuery.builder().build()
-
-            val queryResponse = appSyncClient.query(query)
-                .responseFetcher(AppSyncResponseFetchers.NETWORK_ONLY)
-                .enqueueFirst()
+            val queryResponse = graphQLClient.query<GetEntitlementsConsumptionQuery, GetEntitlementsConsumptionQuery.Data>(
+                GetEntitlementsConsumptionQuery.OPERATION_DOCUMENT,
+                emptyMap(),
+            )
 
             if (queryResponse.hasErrors()) {
-                logger.warning("errors = ${queryResponse.errors()}")
-                throw interpretEntitlementsError(queryResponse.errors().first())
+                logger.warning("errors = ${queryResponse.errors}")
+                throw interpretEntitlementsError(queryResponse.errors.first())
             }
 
-            val result = queryResponse.data()?.entitlementsConsumption
+            val result = queryResponse.data?.getEntitlementsConsumption
                 ?: throw SudoEntitlementsClient.EntitlementsException.FailedException(ENTITLEMENTS_NOT_FOUND_MSG)
             return result.let { EntitlementsTransformer.toEntityFromGetEntitlementsConsumptionQueryResult(it) }
         } catch (e: Throwable) {
@@ -124,18 +121,17 @@ internal class DefaultSudoEntitlementsClient(
         }
 
         try {
-            val query = GetExternalIdQuery.builder().build()
-
-            val queryResponse = appSyncClient.query(query)
-                .responseFetcher(AppSyncResponseFetchers.NETWORK_ONLY)
-                .enqueueFirst()
+            val queryResponse = graphQLClient.query<GetExternalIdQuery, GetExternalIdQuery.Data>(
+                GetExternalIdQuery.OPERATION_DOCUMENT,
+                emptyMap(),
+            )
 
             if (queryResponse.hasErrors()) {
-                logger.warning("errors = ${queryResponse.errors()}")
-                throw interpretEntitlementsError(queryResponse.errors().first())
+                logger.warning("errors = ${queryResponse.errors}")
+                throw interpretEntitlementsError(queryResponse.errors.first())
             }
 
-            return queryResponse.data()?.externalId
+            return queryResponse.data?.getExternalId
                 ?: throw SudoEntitlementsClient.EntitlementsException.FailedException(ENTITLEMENTS_NOT_FOUND_MSG)
         } catch (e: Throwable) {
             logger.debug("unexpected error $e")
@@ -151,18 +147,17 @@ internal class DefaultSudoEntitlementsClient(
         }
 
         try {
-            val query = GetEntitlementsQuery.builder().build()
-
-            val queryResponse = appSyncClient.query(query)
-                .responseFetcher(AppSyncResponseFetchers.NETWORK_ONLY)
-                .enqueueFirst()
+            val queryResponse = graphQLClient.query<GetEntitlementsQuery, GetEntitlementsQuery.Data>(
+                GetEntitlementsQuery.OPERATION_DOCUMENT,
+                emptyMap(),
+            )
 
             if (queryResponse.hasErrors()) {
-                logger.warning("errors = ${queryResponse.errors()}")
-                throw interpretEntitlementsError(queryResponse.errors().first())
+                logger.warning("errors = ${queryResponse.errors}")
+                throw interpretEntitlementsError(queryResponse.errors.first())
             }
 
-            val result = queryResponse.data()?.entitlements
+            val result = queryResponse.data?.getEntitlements
             return result?.let { EntitlementsTransformer.toEntityFromGetEntitlementsQueryResult(it) }
         } catch (e: Throwable) {
             logger.debug("unexpected error $e")
@@ -177,18 +172,17 @@ internal class DefaultSudoEntitlementsClient(
         }
 
         try {
-            val mutation = RedeemEntitlementsMutation.builder()
-                .build()
-
-            val mutationResponse = appSyncClient.mutate(mutation)
-                .enqueue()
+            val mutationResponse = graphQLClient.mutate<RedeemEntitlementsMutation, RedeemEntitlementsMutation.Data>(
+                RedeemEntitlementsMutation.OPERATION_DOCUMENT,
+                emptyMap(),
+            )
 
             if (mutationResponse.hasErrors()) {
-                logger.warning("errors = ${mutationResponse.errors()}")
-                throw interpretEntitlementsError(mutationResponse.errors().first())
+                logger.warning("errors = ${mutationResponse.errors}")
+                throw interpretEntitlementsError(mutationResponse.errors.first())
             }
 
-            val result = mutationResponse.data()?.redeemEntitlements()
+            val result = mutationResponse.data?.redeemEntitlements
                 ?: throw SudoEntitlementsClient.EntitlementsException.FailedException(ENTITLEMENTS_NOT_FOUND_MSG)
             return EntitlementsTransformer.toEntityFromRedeemEntitlementsMutationResult(result)
         } catch (e: Throwable) {
@@ -204,16 +198,14 @@ internal class DefaultSudoEntitlementsClient(
         }
 
         try {
-            val mutation = ConsumeBooleanEntitlementsMutation.builder()
-                .entitlementNames(entitlementNames.toList())
-                .build()
-
-            val mutationResponse = appSyncClient.mutate(mutation)
-                .enqueue()
+            val mutationResponse = graphQLClient.mutate<ConsumeBooleanEntitlementsMutation, ConsumeBooleanEntitlementsMutation.Data>(
+                ConsumeBooleanEntitlementsMutation.OPERATION_DOCUMENT,
+                mapOf("entitlementNames" to entitlementNames.toList()),
+            )
 
             if (mutationResponse.hasErrors()) {
-                logger.warning("errors = ${mutationResponse.errors()}")
-                throw interpretEntitlementsError(mutationResponse.errors().first())
+                logger.warning("errors = ${mutationResponse.errors}")
+                throw interpretEntitlementsError(mutationResponse.errors.first())
             }
         } catch (e: Throwable) {
             logger.debug("unexpected error $e")
@@ -221,8 +213,16 @@ internal class DefaultSudoEntitlementsClient(
         }
     }
 
-    private fun interpretEntitlementsError(e: Error): SudoEntitlementsClient.EntitlementsException {
-        val error = e.customAttributes()[ERROR_TYPE]?.toString() ?: ""
+    private fun interpretEntitlementsError(e: GraphQLResponse.Error): SudoEntitlementsClient.EntitlementsException {
+        val httpStatusCode = e.extensions?.get(HTTP_STATUS_CODE_KEY) as Int?
+        val error = e.extensions?.get(ERROR_TYPE)?.toString() ?: ""
+
+        if (httpStatusCode == HttpURLConnection.HTTP_UNAUTHORIZED) {
+            return SudoEntitlementsClient.EntitlementsException.AuthenticationException("$e")
+        }
+        if (httpStatusCode != null && httpStatusCode >= HttpURLConnection.HTTP_INTERNAL_ERROR) {
+            return SudoEntitlementsClient.EntitlementsException.FailedException("$e")
+        }
         if (error.contains(ERROR_AMBIGUOUS_ENTITLEMENTS)) {
             return SudoEntitlementsClient.EntitlementsException.AmbiguousEntitlementsException(AMBIGUOUS_ENTITLEMENTS_MSG)
         }
@@ -260,10 +260,8 @@ internal class DefaultSudoEntitlementsClient(
 
 @VisibleForTesting
 fun recognizeError(e: Throwable): Throwable {
-    return recognizeRootCause(e) ?: when (e) {
-        is ApolloException -> SudoEntitlementsClient.EntitlementsException.FailedException(cause = e)
-        else -> SudoEntitlementsClient.EntitlementsException.UnknownException(e)
-    }
+    return recognizeRootCause(e)
+        ?: SudoEntitlementsClient.EntitlementsException.UnknownException(e)
 }
 
 private fun recognizeRootCause(e: Throwable?): Throwable? {
@@ -274,7 +272,6 @@ private fun recognizeRootCause(e: Throwable?): Throwable? {
 
     return when (e) {
         is NotAuthorizedException -> SudoEntitlementsClient.EntitlementsException.AuthenticationException(cause = e)
-        is ApolloException -> recognizeRootCause(e.cause)
         is CancellationException -> e
         is IOException -> recognizeRootCause(e.cause)
         is RuntimeException -> recognizeRootCause(e.cause)

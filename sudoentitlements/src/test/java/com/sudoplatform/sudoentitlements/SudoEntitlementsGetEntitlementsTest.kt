@@ -1,5 +1,5 @@
 /*
- * Copyright © 2022 Anonyome Labs, Inc. All rights reserved.
+ * Copyright © 2024 Anonyome Labs, Inc. All rights reserved.
  *
  * SPDX-License-Identifier: Apache-2.0
  */
@@ -7,14 +7,13 @@
 package com.sudoplatform.sudoentitlements
 
 import android.content.Context
-import com.amazonaws.mobileconnectors.appsync.AWSAppSyncClient
-import com.amazonaws.services.cognitoidentity.model.NotAuthorizedException
-import com.apollographql.apollo.api.Response
-import com.apollographql.apollo.exception.ApolloException
-import com.apollographql.apollo.exception.ApolloHttpException
-import com.sudoplatform.sudoentitlements.graphql.CallbackHolder
+import com.amplifyframework.api.ApiCategory
+import com.amplifyframework.api.graphql.GraphQLOperation
+import com.amplifyframework.api.graphql.GraphQLResponse
+import com.amplifyframework.core.Consumer
 import com.sudoplatform.sudoentitlements.graphql.GetEntitlementsQuery
 import com.sudoplatform.sudouser.SudoUserClient
+import com.sudoplatform.sudouser.amplify.GraphQLClient
 import io.kotlintest.shouldBe
 import io.kotlintest.shouldNotBe
 import io.kotlintest.shouldThrow
@@ -22,15 +21,15 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
-import okhttp3.MediaType.Companion.toMediaType
-import okhttp3.Protocol
-import okhttp3.Request
-import okhttp3.ResponseBody.Companion.toResponseBody
+import org.json.JSONObject
 import org.junit.After
+import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
 import org.mockito.kotlin.any
-import org.mockito.kotlin.doReturn
+import org.mockito.kotlin.argThat
+import org.mockito.kotlin.check
+import org.mockito.kotlin.doAnswer
 import org.mockito.kotlin.doThrow
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.never
@@ -38,7 +37,6 @@ import org.mockito.kotlin.stub
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.verifyNoMoreInteractions
 import org.mockito.kotlin.whenever
-import java.io.IOException
 import java.net.HttpURLConnection
 import java.util.concurrent.CancellationException
 
@@ -46,33 +44,27 @@ import java.util.concurrent.CancellationException
  * Test the correct operation of [SudoEntitlementsClient.getEntitlements] using mocks and spies.
  */
 class SudoEntitlementsGetEntitlementsTest : BaseTests() {
+    private val queryResponse by before {
+        JSONObject(
+            """
+            {
+                'getEntitlements': {
+                    'createdAtEpochMs': 1.0,
+                    'updatedAtEpochMs': 2.0,
+                    'version': 1.0,
+                    'name': 'name',
+                    'description': 'description',
+                    'entitlements': [{
+                        'name': 'e.name',
+                        'description': 'e.description',
+                        'value': 42.0
+                    }]
 
-    private val queryResult by before {
-        GetEntitlementsQuery.GetEntitlements(
-            "typename",
-            1.0,
-            1.0,
-            1.0,
-            "name",
-            "description",
-            listOf(
-                GetEntitlementsQuery.Entitlement(
-                    "typename",
-                    "e.name",
-                    "e.description",
-                    42.0,
-                ),
-            ),
+                }
+            }
+            """.trimIndent(),
         )
     }
-
-    private val queryResponse by before {
-        Response.builder<GetEntitlementsQuery.Data>(GetEntitlementsQuery())
-            .data(GetEntitlementsQuery.Data(queryResult))
-            .build()
-    }
-
-    private val queryHolder = CallbackHolder<GetEntitlementsQuery.Data>()
 
     private val mockContext by before {
         mock<Context>()
@@ -82,9 +74,20 @@ class SudoEntitlementsGetEntitlementsTest : BaseTests() {
         mock<SudoUserClient>()
     }
 
-    private val mockAppSyncClient by before {
-        mock<AWSAppSyncClient>().stub {
-            on { query(any<GetEntitlementsQuery>()) } doReturn queryHolder.queryOperation
+    private val mockApiCategory by before {
+        mock<ApiCategory>().stub {
+            on {
+                query<String>(
+                    argThat { this.query.equals(GetEntitlementsQuery.OPERATION_DOCUMENT) },
+                    any(), any(),
+                )
+            } doAnswer {
+                @Suppress("UNCHECKED_CAST")
+                (it.arguments[1] as Consumer<GraphQLResponse<String>>).accept(
+                    GraphQLResponse(queryResponse.toString(), null),
+                )
+                mock<GraphQLOperation<String>>()
+            }
         }
     }
 
@@ -92,7 +95,7 @@ class SudoEntitlementsGetEntitlementsTest : BaseTests() {
         DefaultSudoEntitlementsClient(
             mockContext,
             mockSudoUserClient,
-            mockAppSyncClient,
+            GraphQLClient(mockApiCategory),
             mockLogger,
         )
     }
@@ -100,27 +103,21 @@ class SudoEntitlementsGetEntitlementsTest : BaseTests() {
     @Before
     fun init() {
         whenever(mockSudoUserClient.isSignedIn()).thenReturn(true)
-
-        queryHolder.callback = null
     }
 
     @After
     fun fini() {
-        verifyNoMoreInteractions(mockContext, mockSudoUserClient, mockAppSyncClient)
+        verifyNoMoreInteractions(mockContext, mockSudoUserClient, mockApiCategory)
     }
 
     @Test
     fun `getEntitlements() should return results when no error present`() = runBlocking<Unit> {
-        queryHolder.callback shouldBe null
-
         val deferredResult = async(Dispatchers.IO) {
             client.getEntitlements()
         }
         deferredResult.start()
 
         delay(100L)
-        queryHolder.callback shouldNotBe null
-        queryHolder.callback?.onResponse(queryResponse)
 
         val optionalResult = deferredResult.await()
         optionalResult shouldNotBe null
@@ -138,39 +135,49 @@ class SudoEntitlementsGetEntitlementsTest : BaseTests() {
         }
 
         verify(mockSudoUserClient).isSignedIn()
-        verify(mockAppSyncClient).query(any<GetEntitlementsQuery>())
+        verify(mockApiCategory).query<String>(
+            check { assertEquals(it.query, GetEntitlementsQuery.OPERATION_DOCUMENT) },
+            any(),
+            any(),
+        )
     }
 
     @Test
-    fun `getEntitlements() should return empty list output when query result data is empty`() = runBlocking<Unit> {
-        queryHolder.callback shouldBe null
+    fun `getEntitlements() should return empty list output when query result list is empty`() = runBlocking<Unit> {
+        val queryResponseWithEmptyList = JSONObject(
+            """
+            {
+                'getEntitlements': {
+                    'createdAtEpochMs': 1.0,
+                    'updatedAtEpochMs': 2.0,
+                    'version': 1.0,
+                    'name': 'name',
+                    'description': 'description',
+                    'entitlements': []
 
-        val queryResultWithEmptyList by before {
-            GetEntitlementsQuery.GetEntitlements(
-                "typename",
-                1.0,
-                1.0,
-                1.0,
-                "name",
-                "description",
-                emptyList(),
+                }
+            }
+            """.trimIndent(),
+        )
+        whenever(
+            mockApiCategory.query<String>(
+                argThat { this.query.equals(GetEntitlementsQuery.OPERATION_DOCUMENT) },
+                any(),
+                any(),
+            ),
+        ).thenAnswer {
+            @Suppress("UNCHECKED_CAST")
+            (it.arguments[1] as Consumer<GraphQLResponse<String>>).accept(
+                GraphQLResponse(queryResponseWithEmptyList.toString(), null),
             )
+            mock<GraphQLOperation<String>>()
         }
-
-        val responseWithEmptyList by before {
-            Response.builder<GetEntitlementsQuery.Data>(GetEntitlementsQuery())
-                .data(GetEntitlementsQuery.Data(queryResultWithEmptyList))
-                .build()
-        }
-
         val deferredResult = async(Dispatchers.IO) {
             client.getEntitlements()
         }
         deferredResult.start()
 
         delay(100L)
-        queryHolder.callback shouldNotBe null
-        queryHolder.callback?.onResponse(responseWithEmptyList)
 
         val optionalResult = deferredResult.await()
         optionalResult shouldNotBe null
@@ -179,14 +186,16 @@ class SudoEntitlementsGetEntitlementsTest : BaseTests() {
         result.entitlements.size shouldBe 0
 
         verify(mockSudoUserClient).isSignedIn()
-        verify(mockAppSyncClient).query(any<GetEntitlementsQuery>())
+        verify(mockApiCategory).query<String>(
+            check { assertEquals(it.query, GetEntitlementsQuery.OPERATION_DOCUMENT) },
+            any(),
+            any(),
+        )
     }
 
     @Test
     fun `getEntitlements() should throw if not signed in`() = runBlocking<Unit> {
         whenever(mockSudoUserClient.isSignedIn()).thenReturn(false)
-
-        queryHolder.callback shouldBe null
 
         val deferredResult = async(Dispatchers.IO) {
             shouldThrow<SudoEntitlementsClient.EntitlementsException.NotSignedInException> {
@@ -194,22 +203,37 @@ class SudoEntitlementsGetEntitlementsTest : BaseTests() {
             }
         }
         deferredResult.start()
-
         delay(100L)
-        queryHolder.callback shouldBe null
 
         verify(mockSudoUserClient).isSignedIn()
-        verify(mockAppSyncClient, never()).query(any<GetEntitlementsQuery>())
+        verify(mockApiCategory, never()).query<String>(
+            check { assertEquals(it.query, GetEntitlementsQuery.OPERATION_DOCUMENT) },
+            any(),
+            any(),
+        )
     }
 
     @Test
     fun `getEntitlements() should return null when query response data is null`() = runBlocking<Unit> {
-        queryHolder.callback shouldBe null
-
-        val responseWithNullResult by before {
-            Response.builder<GetEntitlementsQuery.Data>(GetEntitlementsQuery())
-                .data(GetEntitlementsQuery.Data(null))
-                .build()
+        val queryResponseWithEmptyData = JSONObject(
+            """
+            {
+                'getEntitlements': null
+            }
+            """.trimIndent(),
+        )
+        whenever(
+            mockApiCategory.query<String>(
+                argThat { this.query.equals(GetEntitlementsQuery.OPERATION_DOCUMENT) },
+                any(),
+                any(),
+            ),
+        ).thenAnswer {
+            @Suppress("UNCHECKED_CAST")
+            (it.arguments[1] as Consumer<GraphQLResponse<String>>).accept(
+                GraphQLResponse(queryResponseWithEmptyData.toString(), null),
+            )
+            mock<GraphQLOperation<String>>()
         }
 
         val deferredResult = async(Dispatchers.IO) {
@@ -218,24 +242,32 @@ class SudoEntitlementsGetEntitlementsTest : BaseTests() {
         deferredResult.start()
 
         delay(100L)
-        queryHolder.callback shouldNotBe null
-        queryHolder.callback?.onResponse(responseWithNullResult)
 
         val optionalResult = deferredResult.await()
         optionalResult shouldBe null
 
         verify(mockSudoUserClient).isSignedIn()
-        verify(mockAppSyncClient).query(any<GetEntitlementsQuery>())
+        verify(mockApiCategory).query<String>(
+            check { assertEquals(it.query, GetEntitlementsQuery.OPERATION_DOCUMENT) },
+            any(),
+            any(),
+        )
     }
 
     @Test
     fun `getEntitlements() should return null when query response is null`() = runBlocking<Unit> {
-        queryHolder.callback shouldBe null
-
-        val nullResponse by before {
-            Response.builder<GetEntitlementsQuery.Data>(GetEntitlementsQuery())
-                .data(null)
-                .build()
+        whenever(
+            mockApiCategory.query<String>(
+                argThat { this.query.equals(GetEntitlementsQuery.OPERATION_DOCUMENT) },
+                any(),
+                any(),
+            ),
+        ).thenAnswer {
+            @Suppress("UNCHECKED_CAST")
+            (it.arguments[1] as Consumer<GraphQLResponse<String>>).accept(
+                GraphQLResponse(null, null),
+            )
+            mock<GraphQLOperation<String>>()
         }
 
         val deferredResult = async(Dispatchers.IO) {
@@ -244,30 +276,38 @@ class SudoEntitlementsGetEntitlementsTest : BaseTests() {
         deferredResult.start()
 
         delay(100L)
-        queryHolder.callback shouldNotBe null
-        queryHolder.callback?.onResponse(nullResponse)
 
         val optionalResult = deferredResult.await()
         optionalResult shouldBe null
 
         verify(mockSudoUserClient).isSignedIn()
-        verify(mockAppSyncClient).query(any<GetEntitlementsQuery>())
+        verify(mockApiCategory).query<String>(
+            check { assertEquals(it.query, GetEntitlementsQuery.OPERATION_DOCUMENT) },
+            any(),
+            any(),
+        )
     }
 
     @Test
     fun `getEntitlements() should throw when response has a NoExternalIdError`() = runBlocking<Unit> {
-        queryHolder.callback shouldBe null
-
-        val errorQueryResponse by before {
-            val error = com.apollographql.apollo.api.Error(
+        whenever(
+            mockApiCategory.query<String>(
+                argThat { this.query.equals(GetEntitlementsQuery.OPERATION_DOCUMENT) },
+                any(),
+                any(),
+            ),
+        ).thenAnswer {
+            val error = GraphQLResponse.Error(
                 "mock",
+                emptyList(),
                 emptyList(),
                 mapOf("errorType" to "sudoplatform.entitlements.NoExternalIdError"),
             )
-            Response.builder<GetEntitlementsQuery.Data>(GetEntitlementsQuery())
-                .errors(listOf(error))
-                .data(null)
-                .build()
+            @Suppress("UNCHECKED_CAST")
+            (it.arguments[1] as Consumer<GraphQLResponse<String>>).accept(
+                GraphQLResponse(null, listOf(error)),
+            )
+            mock<GraphQLOperation<String>>()
         }
 
         val deferredResult = async(Dispatchers.IO) {
@@ -278,29 +318,36 @@ class SudoEntitlementsGetEntitlementsTest : BaseTests() {
         deferredResult.start()
         delay(100L)
 
-        queryHolder.callback shouldNotBe null
-        queryHolder.callback?.onResponse(errorQueryResponse)
-
         deferredResult.await()
 
         verify(mockSudoUserClient).isSignedIn()
-        verify(mockAppSyncClient).query(any<GetEntitlementsQuery>())
+        verify(mockApiCategory).query<String>(
+            check { assertEquals(it.query, GetEntitlementsQuery.OPERATION_DOCUMENT) },
+            any(),
+            any(),
+        )
     }
 
     @Test
     fun `getEntitlements() should throw when response has a NoBillingGroupError`() = runBlocking<Unit> {
-        queryHolder.callback shouldBe null
-
-        val errorQueryResponse by before {
-            val error = com.apollographql.apollo.api.Error(
+        whenever(
+            mockApiCategory.query<String>(
+                argThat { this.query.equals(GetEntitlementsQuery.OPERATION_DOCUMENT) },
+                any(),
+                any(),
+            ),
+        ).thenAnswer {
+            val error = GraphQLResponse.Error(
                 "mock",
+                emptyList(),
                 emptyList(),
                 mapOf("errorType" to "sudoplatform.entitlements.NoBillingGroupError"),
             )
-            Response.builder<GetEntitlementsQuery.Data>(GetEntitlementsQuery())
-                .errors(listOf(error))
-                .data(null)
-                .build()
+            @Suppress("UNCHECKED_CAST")
+            (it.arguments[1] as Consumer<GraphQLResponse<String>>).accept(
+                GraphQLResponse(null, listOf(error)),
+            )
+            mock<GraphQLOperation<String>>()
         }
 
         val deferredResult = async(Dispatchers.IO) {
@@ -311,29 +358,36 @@ class SudoEntitlementsGetEntitlementsTest : BaseTests() {
         deferredResult.start()
         delay(100L)
 
-        queryHolder.callback shouldNotBe null
-        queryHolder.callback?.onResponse(errorQueryResponse)
-
         deferredResult.await()
 
         verify(mockSudoUserClient).isSignedIn()
-        verify(mockAppSyncClient).query(any<GetEntitlementsQuery>())
+        verify(mockApiCategory).query<String>(
+            check { assertEquals(it.query, GetEntitlementsQuery.OPERATION_DOCUMENT) },
+            any(),
+            any(),
+        )
     }
 
     @Test
     fun `getEntitlements() should throw when response has a EntitlementsSetNotFoundError`() = runBlocking<Unit> {
-        queryHolder.callback shouldBe null
-
-        val errorQueryResponse by before {
-            val error = com.apollographql.apollo.api.Error(
+        whenever(
+            mockApiCategory.query<String>(
+                argThat { this.query.equals(GetEntitlementsQuery.OPERATION_DOCUMENT) },
+                any(),
+                any(),
+            ),
+        ).thenAnswer {
+            val error = GraphQLResponse.Error(
                 "mock",
+                emptyList(),
                 emptyList(),
                 mapOf("errorType" to "sudoplatform.entitlements.EntitlementsSetNotFoundError"),
             )
-            Response.builder<GetEntitlementsQuery.Data>(GetEntitlementsQuery())
-                .errors(listOf(error))
-                .data(null)
-                .build()
+            @Suppress("UNCHECKED_CAST")
+            (it.arguments[1] as Consumer<GraphQLResponse<String>>).accept(
+                GraphQLResponse(null, listOf(error)),
+            )
+            mock<GraphQLOperation<String>>()
         }
 
         val deferredResult = async(Dispatchers.IO) {
@@ -344,29 +398,36 @@ class SudoEntitlementsGetEntitlementsTest : BaseTests() {
         deferredResult.start()
         delay(100L)
 
-        queryHolder.callback shouldNotBe null
-        queryHolder.callback?.onResponse(errorQueryResponse)
-
         deferredResult.await()
 
         verify(mockSudoUserClient).isSignedIn()
-        verify(mockAppSyncClient).query(any<GetEntitlementsQuery>())
+        verify(mockApiCategory).query<String>(
+            check { assertEquals(it.query, GetEntitlementsQuery.OPERATION_DOCUMENT) },
+            any(),
+            any(),
+        )
     }
 
     @Test
     fun `getEntitlements() should throw when response has a EntitlementsSequenceNotFoundError`() = runBlocking<Unit> {
-        queryHolder.callback shouldBe null
-
-        val errorQueryResponse by before {
-            val error = com.apollographql.apollo.api.Error(
+        whenever(
+            mockApiCategory.query<String>(
+                argThat { this.query.equals(GetEntitlementsQuery.OPERATION_DOCUMENT) },
+                any(),
+                any(),
+            ),
+        ).thenAnswer {
+            val error = GraphQLResponse.Error(
                 "mock",
+                emptyList(),
                 emptyList(),
                 mapOf("errorType" to "sudoplatform.entitlements.EntitlementsSequenceNotFoundError"),
             )
-            Response.builder<GetEntitlementsQuery.Data>(GetEntitlementsQuery())
-                .errors(listOf(error))
-                .data(null)
-                .build()
+            @Suppress("UNCHECKED_CAST")
+            (it.arguments[1] as Consumer<GraphQLResponse<String>>).accept(
+                GraphQLResponse(null, listOf(error)),
+            )
+            mock<GraphQLOperation<String>>()
         }
 
         val deferredResult = async(Dispatchers.IO) {
@@ -377,29 +438,36 @@ class SudoEntitlementsGetEntitlementsTest : BaseTests() {
         deferredResult.start()
         delay(100L)
 
-        queryHolder.callback shouldNotBe null
-        queryHolder.callback?.onResponse(errorQueryResponse)
-
         deferredResult.await()
 
         verify(mockSudoUserClient).isSignedIn()
-        verify(mockAppSyncClient).query(any<GetEntitlementsQuery>())
+        verify(mockApiCategory).query<String>(
+            check { assertEquals(it.query, GetEntitlementsQuery.OPERATION_DOCUMENT) },
+            any(),
+            any(),
+        )
     }
 
     @Test
     fun `getEntitlements() should throw when response has error`() = runBlocking<Unit> {
-        queryHolder.callback shouldBe null
-
-        val error = com.apollographql.apollo.api.Error(
-            "mock",
-            emptyList(),
-            mapOf("errorType" to "DilithiumCrystalsOutOfAlignment"),
-        )
-
-        val responseWithNullData by before {
-            Response.builder<GetEntitlementsQuery.Data>(GetEntitlementsQuery())
-                .errors(listOf(error))
-                .build()
+        whenever(
+            mockApiCategory.query<String>(
+                argThat { this.query.equals(GetEntitlementsQuery.OPERATION_DOCUMENT) },
+                any(),
+                any(),
+            ),
+        ).thenAnswer {
+            val error = GraphQLResponse.Error(
+                "mock",
+                emptyList(),
+                emptyList(),
+                mapOf("errorType" to "DilithiumCrystalsOutOfAlignment"),
+            )
+            @Suppress("UNCHECKED_CAST")
+            (it.arguments[1] as Consumer<GraphQLResponse<String>>).accept(
+                GraphQLResponse(null, listOf(error)),
+            )
+            mock<GraphQLOperation<String>>()
         }
 
         val deferredResult = async(Dispatchers.IO) {
@@ -410,19 +478,36 @@ class SudoEntitlementsGetEntitlementsTest : BaseTests() {
         deferredResult.start()
 
         delay(100L)
-        queryHolder.callback shouldNotBe null
-        queryHolder.callback?.onResponse(responseWithNullData)
 
         deferredResult.await()
 
         verify(mockSudoUserClient).isSignedIn()
-        verify(mockAppSyncClient).query(any<GetEntitlementsQuery>())
+        verify(
+            mockApiCategory,
+        ).query<String>(check { assertEquals(it.query, GetEntitlementsQuery.OPERATION_DOCUMENT) }, any(), any())
     }
 
     @Test
     fun `getEntitlements() should throw when http error occurs`() = runBlocking<Unit> {
-        queryHolder.callback shouldBe null
-
+        whenever(
+            mockApiCategory.query<String>(
+                argThat { this.query.equals(GetEntitlementsQuery.OPERATION_DOCUMENT) },
+                any(),
+                any(),
+            ),
+        ).thenAnswer {
+            val error = GraphQLResponse.Error(
+                "mock",
+                emptyList(),
+                emptyList(),
+                mapOf("httpStatus" to HttpURLConnection.HTTP_FORBIDDEN),
+            )
+            @Suppress("UNCHECKED_CAST")
+            (it.arguments[1] as Consumer<GraphQLResponse<String>>).accept(
+                GraphQLResponse(null, listOf(error)),
+            )
+            mock<GraphQLOperation<String>>()
+        }
         val deferredResult = async(Dispatchers.IO) {
             shouldThrow<SudoEntitlementsClient.EntitlementsException.FailedException> {
                 client.getEntitlements()
@@ -430,35 +515,23 @@ class SudoEntitlementsGetEntitlementsTest : BaseTests() {
         }
         deferredResult.start()
         delay(100L)
-
-        val request = Request.Builder()
-            .get()
-            .url("http://www.smh.com.au")
-            .build()
-        val responseBody = "{}".toResponseBody("application/json; charset=utf-8".toMediaType())
-        val forbidden = okhttp3.Response.Builder()
-            .protocol(Protocol.HTTP_1_1)
-            .code(HttpURLConnection.HTTP_FORBIDDEN)
-            .request(request)
-            .message("Forbidden")
-            .body(responseBody)
-            .build()
-
-        queryHolder.callback shouldNotBe null
-        queryHolder.callback?.onHttpError(ApolloHttpException(forbidden))
-
         deferredResult.await()
 
         verify(mockSudoUserClient).isSignedIn()
-        verify(mockAppSyncClient).query(any<GetEntitlementsQuery>())
+        verify(
+            mockApiCategory,
+        ).query<String>(check { assertEquals(it.query, GetEntitlementsQuery.OPERATION_DOCUMENT) }, any(), any())
     }
 
     @Test
     fun `getEntitlements() should throw when unknown error occurs`() = runBlocking<Unit> {
-        queryHolder.callback shouldBe null
-
-        mockAppSyncClient.stub {
-            on { query(any<GetEntitlementsQuery>()) } doThrow RuntimeException("Mock Runtime Exception")
+        mockApiCategory.stub {
+            on {
+                query<String>(
+                    argThat { this.query.equals(GetEntitlementsQuery.OPERATION_DOCUMENT) },
+                    any(), any(),
+                )
+            } doThrow RuntimeException("Mock Runtime Exception")
         }
 
         val deferredResult = async(Dispatchers.IO) {
@@ -472,17 +545,32 @@ class SudoEntitlementsGetEntitlementsTest : BaseTests() {
         deferredResult.await()
 
         verify(mockSudoUserClient).isSignedIn()
-        verify(mockAppSyncClient).query(any<GetEntitlementsQuery>())
+        verify(
+            mockApiCategory,
+        ).query<String>(check { assertEquals(it.query, GetEntitlementsQuery.OPERATION_DOCUMENT) }, any(), any())
     }
 
     @Test
     fun `getEntitlements() should find error when unauthorized error occurs`() = runBlocking<Unit> {
-        queryHolder.callback shouldBe null
-
-        mockAppSyncClient.stub {
-            on { query(any<GetEntitlementsQuery>()) } doThrow RuntimeException(ApolloException("", IOException(NotAuthorizedException(""))))
+        whenever(
+            mockApiCategory.query<String>(
+                argThat { this.query.equals(GetEntitlementsQuery.OPERATION_DOCUMENT) },
+                any(),
+                any(),
+            ),
+        ).thenAnswer {
+            val error = GraphQLResponse.Error(
+                "mock",
+                emptyList(),
+                emptyList(),
+                mapOf("httpStatus" to HttpURLConnection.HTTP_UNAUTHORIZED),
+            )
+            @Suppress("UNCHECKED_CAST")
+            (it.arguments[1] as Consumer<GraphQLResponse<String>>).accept(
+                GraphQLResponse(null, listOf(error)),
+            )
+            mock<GraphQLOperation<String>>()
         }
-
         val deferredResult = async(Dispatchers.IO) {
             shouldThrow<SudoEntitlementsClient.EntitlementsException.AuthenticationException> {
                 client.getEntitlements()
@@ -494,13 +582,20 @@ class SudoEntitlementsGetEntitlementsTest : BaseTests() {
         deferredResult.await()
 
         verify(mockSudoUserClient).isSignedIn()
-        verify(mockAppSyncClient).query(any<GetEntitlementsQuery>())
+        verify(
+            mockApiCategory,
+        ).query<String>(check { assertEquals(it.query, GetEntitlementsQuery.OPERATION_DOCUMENT) }, any(), any())
     }
 
     @Test
     fun `getEntitlements() should not suppress CancellationException`() = runBlocking<Unit> {
-        mockAppSyncClient.stub {
-            on { query(any<GetEntitlementsQuery>()) } doThrow CancellationException("Mock Cancellation Exception")
+        mockApiCategory.stub {
+            on {
+                query<String>(
+                    argThat { this.query.equals(GetEntitlementsQuery.OPERATION_DOCUMENT) },
+                    any(), any(),
+                )
+            } doThrow CancellationException("Mock Cancellation Exception")
         }
 
         shouldThrow<CancellationException> {
@@ -508,6 +603,10 @@ class SudoEntitlementsGetEntitlementsTest : BaseTests() {
         }
 
         verify(mockSudoUserClient).isSignedIn()
-        verify(mockAppSyncClient).query(any<GetEntitlementsQuery>())
+        verify(mockApiCategory).query<String>(
+            check { assertEquals(it.query, GetEntitlementsQuery.OPERATION_DOCUMENT) },
+            any(),
+            any(),
+        )
     }
 }

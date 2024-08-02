@@ -1,5 +1,5 @@
 /*
- * Copyright © 2022 Anonyome Labs, Inc. All rights reserved.
+ * Copyright © 2024 Anonyome Labs, Inc. All rights reserved.
  *
  * SPDX-License-Identifier: Apache-2.0
  */
@@ -113,12 +113,12 @@ class SudoEntitlementsClientIntegrationTest : BaseIntegrationTest() {
         // Can only run if client config files are present
         assumeTrue(clientConfigFilesPresent())
 
-        val appSyncClient = ApiClientManager.getClient(context, userClient)
+        val graphQLClient = ApiClientManager.getClient(context, userClient)
 
         SudoEntitlementsClient.builder()
             .setContext(context)
             .setSudoUserClient(userClient)
-            .setAppSyncClient(appSyncClient)
+            .setGraphQLClient(graphQLClient)
             .setLogger(logger)
             .build()
     }

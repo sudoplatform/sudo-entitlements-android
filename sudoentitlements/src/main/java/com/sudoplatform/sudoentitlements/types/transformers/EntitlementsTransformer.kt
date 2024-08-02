@@ -1,5 +1,5 @@
 /*
- * Copyright © 2022 Anonyome Labs, Inc. All rights reserved.
+ * Copyright © 2024 Anonyome Labs, Inc. All rights reserved.
  *
  * SPDX-License-Identifier: Apache-2.0
  */
@@ -32,20 +32,20 @@ internal object EntitlementsTransformer {
     ): EntitlementsConsumption {
         return EntitlementsConsumption(
             entitlements = UserEntitlements(
-                version = result.entitlements().version(),
-                entitlementsSetName = result.entitlements().entitlementsSetName(),
-                entitlements = fromQueryEntitlements(result.entitlements().entitlements()),
+                version = result.entitlements.version,
+                entitlementsSetName = result.entitlements.entitlementsSetName,
+                entitlements = fromQueryEntitlements(result.entitlements.entitlements),
             ),
-            consumption = fromQueryConsumption(result.consumption()),
+            consumption = fromQueryConsumption(result.consumption),
         )
     }
 
     private fun fromQueryEntitlements(items: List<GetEntitlementsConsumptionQuery.Entitlement>): List<Entitlement> {
         return items.map { item ->
             Entitlement(
-                name = item.name(),
-                description = item.description(),
-                value = item.value().toLong(),
+                name = item.name,
+                description = item.description,
+                value = item.value.toLong(),
             )
         }
     }
@@ -53,13 +53,13 @@ internal object EntitlementsTransformer {
     private fun fromQueryConsumption(items: List<GetEntitlementsConsumptionQuery.Consumption>): List<EntitlementConsumption> {
         return items.map { item ->
             EntitlementConsumption(
-                name = item.name(),
-                consumer = item.consumer()?.let { EntitlementConsumer(id = it.id(), issuer = it.issuer()) },
-                value = item.value().toLong(),
-                consumed = item.consumed().toLong(),
-                available = item.available().toLong(),
-                firstConsumedAtEpochMs = item.firstConsumedAtEpochMs(),
-                lastConsumedAtEpochMs = item.lastConsumedAtEpochMs(),
+                name = item.name,
+                consumer = item.consumer?.let { EntitlementConsumer(id = it.id, issuer = it.issuer) },
+                value = item.value.toLong(),
+                consumed = item.consumed.toLong(),
+                available = item.available.toLong(),
+                firstConsumedAtEpochMs = item.firstConsumedAtEpochMs,
+                lastConsumedAtEpochMs = item.lastConsumedAtEpochMs,
             )
         }
     }
@@ -74,21 +74,21 @@ internal object EntitlementsTransformer {
         result: GetEntitlementsQuery.GetEntitlements,
     ): EntitlementsSet {
         return EntitlementsSet(
-            name = result.name(),
-            description = result.description(),
-            entitlements = fromQuerySet(result.entitlements()),
-            version = result.version(),
-            createdAt = result.createdAtEpochMs().toDate(),
-            updatedAt = result.updatedAtEpochMs().toDate(),
+            name = result.name,
+            description = result.description,
+            entitlements = fromQuerySet(result.entitlements),
+            version = result.version,
+            createdAt = result.createdAtEpochMs.toDate(),
+            updatedAt = result.updatedAtEpochMs.toDate(),
         )
     }
 
     private fun fromQuerySet(items: List<GetEntitlementsQuery.Entitlement>): Set<Entitlement> {
         return items.map { item ->
             Entitlement(
-                name = item.name(),
-                description = item.description(),
-                value = item.value().toLong(),
+                name = item.name,
+                description = item.description,
+                value = item.value.toLong(),
             )
         }.toSet()
     }
@@ -103,21 +103,21 @@ internal object EntitlementsTransformer {
         result: RedeemEntitlementsMutation.RedeemEntitlements,
     ): EntitlementsSet {
         return EntitlementsSet(
-            name = result.name(),
-            description = result.description(),
-            entitlements = fromMutationSet(result.entitlements()),
-            version = result.version(),
-            createdAt = result.createdAtEpochMs().toDate(),
-            updatedAt = result.updatedAtEpochMs().toDate(),
+            name = result.name,
+            description = result.description,
+            entitlements = fromMutationSet(result.entitlements),
+            version = result.version,
+            createdAt = result.createdAtEpochMs.toDate(),
+            updatedAt = result.updatedAtEpochMs.toDate(),
         )
     }
 
     private fun fromMutationSet(items: List<RedeemEntitlementsMutation.Entitlement>): Set<Entitlement> {
         return items.map { item ->
             Entitlement(
-                name = item.name(),
-                description = item.description(),
-                value = item.value().toLong(),
+                name = item.name,
+                description = item.description,
+                value = item.value.toLong(),
             )
         }.toSet()
     }

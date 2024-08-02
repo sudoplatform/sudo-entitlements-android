@@ -1,5 +1,5 @@
 /*
- * Copyright © 2022 Anonyome Labs, Inc. All rights reserved.
+ * Copyright © 2024 Anonyome Labs, Inc. All rights reserved.
  *
  * SPDX-License-Identifier: Apache-2.0
  */
@@ -7,7 +7,6 @@
 package com.sudoplatform.sudoentitlements
 
 import android.content.Context
-import com.amazonaws.mobileconnectors.appsync.AWSAppSyncClient
 import com.sudoplatform.sudoapiclient.ApiClientManager
 import com.sudoplatform.sudoentitlements.SudoEntitlementsClient.EntitlementsException.InsufficientEntitlementsException
 import com.sudoplatform.sudoentitlements.SudoEntitlementsClient.EntitlementsException.InvalidArgumentException
@@ -21,6 +20,7 @@ import com.sudoplatform.sudologging.AndroidUtilsLogDriver
 import com.sudoplatform.sudologging.LogLevel
 import com.sudoplatform.sudologging.Logger
 import com.sudoplatform.sudouser.SudoUserClient
+import com.sudoplatform.sudouser.amplify.GraphQLClient
 import java.util.Objects
 
 /**
@@ -42,7 +42,7 @@ interface SudoEntitlementsClient {
     class Builder internal constructor() {
         private var context: Context? = null
         private var sudoUserClient: SudoUserClient? = null
-        private var appSyncClient: AWSAppSyncClient? = null
+        private var graphQLClient: GraphQLClient? = null
         private var logger: Logger = Logger(LogConstants.SUDOLOG_TAG, AndroidUtilsLogDriver(LogLevel.INFO))
 
         /**
@@ -61,12 +61,12 @@ interface SudoEntitlementsClient {
         }
 
         /**
-         * Provide an [AWSAppSyncClient] for the [SudoEntitlementsClient] to use
-         * (optional input). If this is not supplied, an [AWSAppSyncClient] will
+         * Provide a [GraphQLClient] for the [SudoEntitlementsClient] to use
+         * (optional input). If this is not supplied, a [GraphQLClient] will
          * be constructed and used.
          */
-        fun setAppSyncClient(appSyncClient: AWSAppSyncClient) = also {
-            this.appSyncClient = appSyncClient
+        fun setGraphQLClient(graphQLClient: GraphQLClient) = also {
+            this.graphQLClient = graphQLClient
         }
 
         /**
@@ -86,13 +86,13 @@ interface SudoEntitlementsClient {
             Objects.requireNonNull(context, "Context must be provided.")
             Objects.requireNonNull(sudoUserClient, "SudoUserClient must be provided.")
 
-            val appSyncClient = appSyncClient
+            val client = graphQLClient
                 ?: ApiClientManager.getClient(this@Builder.context!!, this@Builder.sudoUserClient!!)
 
             return DefaultSudoEntitlementsClient(
                 context = context!!,
                 sudoUserClient = this@Builder.sudoUserClient!!,
-                appSyncClient = appSyncClient,
+                graphQLClient = client,
                 logger = logger,
             )
         }

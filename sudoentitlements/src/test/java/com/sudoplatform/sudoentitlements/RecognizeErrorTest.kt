@@ -1,5 +1,5 @@
 /*
- * Copyright © 2022 Anonyome Labs, Inc. All rights reserved.
+ * Copyright © 2024 Anonyome Labs, Inc. All rights reserved.
  *
  * SPDX-License-Identifier: Apache-2.0
  */
@@ -7,8 +7,7 @@
 package com.sudoplatform.sudoentitlements
 
 import com.amazonaws.services.cognitoidentity.model.NotAuthorizedException
-import com.apollographql.apollo.exception.ApolloException
-import com.sudoplatform.sudouser.exceptions.AuthenticationException
+import com.sudoplatform.sudouser.exceptions.SudoUserException
 import io.kotlintest.matchers.beInstanceOf
 import io.kotlintest.matchers.types.shouldBeSameInstanceAs
 import io.kotlintest.should
@@ -24,7 +23,7 @@ class RecognizeErrorTest {
 
     private val cancellationException = CancellationException()
     private val noEntitlementsException = SudoEntitlementsClient.EntitlementsException.NoEntitlementsException()
-    private val sudoUserNotAuthorizedException = AuthenticationException.NotAuthorizedException()
+    private val sudoUserNotAuthorizedException = SudoUserException.NotAuthorizedException()
     private val awsNotAuthorizedException = NotAuthorizedException("AWS.NotAuthorizedException")
 
     @Test
@@ -59,36 +58,6 @@ class RecognizeErrorTest {
 
         recognized should beInstanceOf<SudoEntitlementsClient.EntitlementsException.AuthenticationException>()
         recognized.cause shouldBeSameInstanceAs awsNotAuthorizedException
-    }
-
-    @Test
-    fun `recognizeError() should find an AWS NotAuthorized exception buried in an ApolloException and map it`() {
-        val error = ApolloException("awsNotAuthorizedException", awsNotAuthorizedException)
-
-        val recognized = recognizeError(error)
-
-        recognized should beInstanceOf<SudoEntitlementsClient.EntitlementsException.AuthenticationException>()
-        recognized.cause shouldBeSameInstanceAs awsNotAuthorizedException
-    }
-
-    @Test
-    fun `recognizeError() should find an AWS NotAuthorized exception buried in an IOException within an ApolloException and map it`() {
-        val error = ApolloException("awsNotAuthorizedException", IOException(awsNotAuthorizedException))
-
-        val recognized = recognizeError(error)
-
-        recognized should beInstanceOf<SudoEntitlementsClient.EntitlementsException.AuthenticationException>()
-        recognized.cause shouldBeSameInstanceAs awsNotAuthorizedException
-    }
-
-    @Test
-    fun `recognizeError() should map an ApolloException with a nested unrecognized exception to a FailedException`() {
-        val error = ApolloException("awsNotAuthorizedException", IOException(IllegalArgumentException()))
-
-        val recognized = recognizeError(error)
-
-        recognized should beInstanceOf<SudoEntitlementsClient.EntitlementsException.FailedException>()
-        recognized.cause shouldBeSameInstanceAs error
     }
 
     @Test

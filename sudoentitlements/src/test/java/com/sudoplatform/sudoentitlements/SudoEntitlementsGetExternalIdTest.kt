@@ -1,5 +1,5 @@
 /*
- * Copyright © 2022 Anonyome Labs, Inc. All rights reserved.
+ * Copyright © 2024 Anonyome Labs, Inc. All rights reserved.
  *
  * SPDX-License-Identifier: Apache-2.0
  */
@@ -7,30 +7,28 @@
 package com.sudoplatform.sudoentitlements
 
 import android.content.Context
-import com.amazonaws.mobileconnectors.appsync.AWSAppSyncClient
-import com.amazonaws.services.cognitoidentity.model.NotAuthorizedException
-import com.apollographql.apollo.api.Response
-import com.apollographql.apollo.exception.ApolloException
-import com.apollographql.apollo.exception.ApolloHttpException
-import com.sudoplatform.sudoentitlements.graphql.CallbackHolder
+import com.amplifyframework.api.ApiCategory
+import com.amplifyframework.api.graphql.GraphQLOperation
+import com.amplifyframework.api.graphql.GraphQLResponse
+import com.amplifyframework.core.Consumer
 import com.sudoplatform.sudoentitlements.graphql.GetExternalIdQuery
 import com.sudoplatform.sudouser.SudoUserClient
+import com.sudoplatform.sudouser.amplify.GraphQLClient
 import io.kotlintest.shouldBe
-import io.kotlintest.shouldNotBe
 import io.kotlintest.shouldThrow
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
-import okhttp3.MediaType.Companion.toMediaType
-import okhttp3.Protocol
-import okhttp3.Request
-import okhttp3.ResponseBody.Companion.toResponseBody
+import org.json.JSONObject
 import org.junit.After
+import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
 import org.mockito.kotlin.any
-import org.mockito.kotlin.doReturn
+import org.mockito.kotlin.argThat
+import org.mockito.kotlin.check
+import org.mockito.kotlin.doAnswer
 import org.mockito.kotlin.doThrow
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.never
@@ -38,7 +36,6 @@ import org.mockito.kotlin.stub
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.verifyNoMoreInteractions
 import org.mockito.kotlin.whenever
-import java.io.IOException
 import java.net.HttpURLConnection
 import java.util.concurrent.CancellationException
 
@@ -49,13 +46,14 @@ class SudoEntitlementsGetExternalIdTest : BaseTests() {
 
     private val queryResult = "external-id"
 
+    // must match queryResult value...
     private val queryResponse by before {
-        Response.builder<GetExternalIdQuery.Data>(GetExternalIdQuery())
-            .data(GetExternalIdQuery.Data(queryResult))
-            .build()
+        JSONObject(
+            """
+            {'getExternalId': 'external-id'}
+            """.trimIndent(),
+        )
     }
-
-    private val queryHolder = CallbackHolder<GetExternalIdQuery.Data>()
 
     private val mockContext by before {
         mock<Context>()
@@ -65,9 +63,20 @@ class SudoEntitlementsGetExternalIdTest : BaseTests() {
         mock<SudoUserClient>()
     }
 
-    private val mockAppSyncClient by before {
-        mock<AWSAppSyncClient>().stub {
-            on { query(any<GetExternalIdQuery>()) } doReturn queryHolder.queryOperation
+    private val mockApiCategory by before {
+        mock<ApiCategory>().stub {
+            on {
+                query<String>(
+                    argThat { this.query.equals(GetExternalIdQuery.OPERATION_DOCUMENT) },
+                    any(), any(),
+                )
+            } doAnswer {
+                @Suppress("UNCHECKED_CAST")
+                (it.arguments[1] as Consumer<GraphQLResponse<String>>).accept(
+                    GraphQLResponse(queryResponse.toString(), null),
+                )
+                mock<GraphQLOperation<String>>()
+            }
         }
     }
 
@@ -75,7 +84,7 @@ class SudoEntitlementsGetExternalIdTest : BaseTests() {
         DefaultSudoEntitlementsClient(
             mockContext,
             mockSudoUserClient,
-            mockAppSyncClient,
+            GraphQLClient(mockApiCategory),
             mockLogger,
         )
     }
@@ -83,41 +92,32 @@ class SudoEntitlementsGetExternalIdTest : BaseTests() {
     @Before
     fun init() {
         whenever(mockSudoUserClient.isSignedIn()).thenReturn(true)
-
-        queryHolder.callback = null
     }
 
     @After
     fun fini() {
-        verifyNoMoreInteractions(mockContext, mockSudoUserClient, mockAppSyncClient)
+        verifyNoMoreInteractions(mockContext, mockSudoUserClient, mockApiCategory)
     }
 
     @Test
     fun `getExternalId() should return results when no error present`() = runBlocking<Unit> {
-        queryHolder.callback shouldBe null
-
         val deferredResult = async(Dispatchers.IO) {
             client.getExternalId()
         }
         deferredResult.start()
 
         delay(100L)
-        queryHolder.callback shouldNotBe null
-        queryHolder.callback?.onResponse(queryResponse)
 
         val result = deferredResult.await()
         result shouldBe queryResult
 
         verify(mockSudoUserClient).isSignedIn()
-        verify(mockAppSyncClient).query(any<GetExternalIdQuery>())
+        verify(mockApiCategory).query<String>(check { assertEquals(it.query, GetExternalIdQuery.OPERATION_DOCUMENT) }, any(), any())
     }
 
     @Test
     fun `getExternalId() should throw if not signed in`() = runBlocking<Unit> {
         whenever(mockSudoUserClient.isSignedIn()).thenReturn(false)
-
-        queryHolder.callback shouldBe null
-
         val deferredResult = async(Dispatchers.IO) {
             shouldThrow<SudoEntitlementsClient.EntitlementsException.NotSignedInException> {
                 client.getExternalId()
@@ -126,20 +126,24 @@ class SudoEntitlementsGetExternalIdTest : BaseTests() {
         deferredResult.start()
 
         delay(100L)
-        queryHolder.callback shouldBe null
 
         verify(mockSudoUserClient).isSignedIn()
-        verify(mockAppSyncClient, never()).query(any<GetExternalIdQuery>())
+        verify(
+            mockApiCategory,
+            never(),
+        ).query<String>(check { assertEquals(it.query, GetExternalIdQuery.OPERATION_DOCUMENT) }, any(), any())
     }
 
     @Test
     fun `getExternalId() should throw when query response is null`() = runBlocking<Unit> {
-        queryHolder.callback shouldBe null
-
-        val nullResponse by before {
-            Response.builder<GetExternalIdQuery.Data>(GetExternalIdQuery())
-                .data(null)
-                .build()
+        whenever(
+            mockApiCategory.query<String>(argThat { this.query.equals(GetExternalIdQuery.OPERATION_DOCUMENT) }, any(), any()),
+        ).thenAnswer {
+            @Suppress("UNCHECKED_CAST")
+            (it.arguments[1] as Consumer<GraphQLResponse<String>>).accept(
+                GraphQLResponse(null, null),
+            )
+            mock<GraphQLOperation<String>>()
         }
 
         val deferredResult = async(Dispatchers.IO) {
@@ -150,27 +154,27 @@ class SudoEntitlementsGetExternalIdTest : BaseTests() {
         deferredResult.start()
 
         delay(100L)
-        queryHolder.callback shouldNotBe null
-        queryHolder.callback?.onResponse(nullResponse)
 
         verify(mockSudoUserClient).isSignedIn()
-        verify(mockAppSyncClient).query(any<GetExternalIdQuery>())
+        verify(mockApiCategory).query<String>(check { assertEquals(it.query, GetExternalIdQuery.OPERATION_DOCUMENT) }, any(), any())
     }
 
     @Test
     fun `getExternalId() should throw when response has a NoExternalIdError`() = runBlocking<Unit> {
-        queryHolder.callback shouldBe null
-
-        val errorQueryResponse by before {
-            val error = com.apollographql.apollo.api.Error(
+        whenever(
+            mockApiCategory.query<String>(argThat { this.query.equals(GetExternalIdQuery.OPERATION_DOCUMENT) }, any(), any()),
+        ).thenAnswer {
+            val error = GraphQLResponse.Error(
                 "mock",
+                emptyList(),
                 emptyList(),
                 mapOf("errorType" to "sudoplatform.entitlements.NoExternalIdError"),
             )
-            Response.builder<GetExternalIdQuery.Data>(GetExternalIdQuery())
-                .errors(listOf(error))
-                .data(null)
-                .build()
+            @Suppress("UNCHECKED_CAST")
+            (it.arguments[1] as Consumer<GraphQLResponse<String>>).accept(
+                GraphQLResponse(null, listOf(error)),
+            )
+            mock<GraphQLOperation<String>>()
         }
 
         val deferredResult = async(Dispatchers.IO) {
@@ -180,30 +184,28 @@ class SudoEntitlementsGetExternalIdTest : BaseTests() {
         }
         deferredResult.start()
         delay(100L)
-
-        queryHolder.callback shouldNotBe null
-        queryHolder.callback?.onResponse(errorQueryResponse)
-
         deferredResult.await()
 
         verify(mockSudoUserClient).isSignedIn()
-        verify(mockAppSyncClient).query(any<GetExternalIdQuery>())
+        verify(mockApiCategory).query<String>(check { assertEquals(it.query, GetExternalIdQuery.OPERATION_DOCUMENT) }, any(), any())
     }
 
     @Test
     fun `getExternalId() should throw when response has a NoBillingGroupError`() = runBlocking<Unit> {
-        queryHolder.callback shouldBe null
-
-        val errorQueryResponse by before {
-            val error = com.apollographql.apollo.api.Error(
+        whenever(
+            mockApiCategory.query<String>(argThat { this.query.equals(GetExternalIdQuery.OPERATION_DOCUMENT) }, any(), any()),
+        ).thenAnswer {
+            val error = GraphQLResponse.Error(
                 "mock",
+                emptyList(),
                 emptyList(),
                 mapOf("errorType" to "sudoplatform.entitlements.NoBillingGroupError"),
             )
-            Response.builder<GetExternalIdQuery.Data>(GetExternalIdQuery())
-                .errors(listOf(error))
-                .data(null)
-                .build()
+            @Suppress("UNCHECKED_CAST")
+            (it.arguments[1] as Consumer<GraphQLResponse<String>>).accept(
+                GraphQLResponse(null, listOf(error)),
+            )
+            mock<GraphQLOperation<String>>()
         }
 
         val deferredResult = async(Dispatchers.IO) {
@@ -214,29 +216,28 @@ class SudoEntitlementsGetExternalIdTest : BaseTests() {
         deferredResult.start()
         delay(100L)
 
-        queryHolder.callback shouldNotBe null
-        queryHolder.callback?.onResponse(errorQueryResponse)
-
         deferredResult.await()
 
         verify(mockSudoUserClient).isSignedIn()
-        verify(mockAppSyncClient).query(any<GetExternalIdQuery>())
+        verify(mockApiCategory).query<String>(check { assertEquals(it.query, GetExternalIdQuery.OPERATION_DOCUMENT) }, any(), any())
     }
 
     @Test
     fun `getExternalId() should throw when response has a EntitlementsSetNotFoundError`() = runBlocking<Unit> {
-        queryHolder.callback shouldBe null
-
-        val errorQueryResponse by before {
-            val error = com.apollographql.apollo.api.Error(
+        whenever(
+            mockApiCategory.query<String>(argThat { this.query.equals(GetExternalIdQuery.OPERATION_DOCUMENT) }, any(), any()),
+        ).thenAnswer {
+            val error = GraphQLResponse.Error(
                 "mock",
+                emptyList(),
                 emptyList(),
                 mapOf("errorType" to "sudoplatform.entitlements.EntitlementsSetNotFoundError"),
             )
-            Response.builder<GetExternalIdQuery.Data>(GetExternalIdQuery())
-                .errors(listOf(error))
-                .data(null)
-                .build()
+            @Suppress("UNCHECKED_CAST")
+            (it.arguments[1] as Consumer<GraphQLResponse<String>>).accept(
+                GraphQLResponse(null, listOf(error)),
+            )
+            mock<GraphQLOperation<String>>()
         }
 
         val deferredResult = async(Dispatchers.IO) {
@@ -247,29 +248,28 @@ class SudoEntitlementsGetExternalIdTest : BaseTests() {
         deferredResult.start()
         delay(100L)
 
-        queryHolder.callback shouldNotBe null
-        queryHolder.callback?.onResponse(errorQueryResponse)
-
         deferredResult.await()
 
         verify(mockSudoUserClient).isSignedIn()
-        verify(mockAppSyncClient).query(any<GetExternalIdQuery>())
+        verify(mockApiCategory).query<String>(check { assertEquals(it.query, GetExternalIdQuery.OPERATION_DOCUMENT) }, any(), any())
     }
 
     @Test
     fun `getExternalId() should throw when response has a EntitlementsSequenceNotFoundError`() = runBlocking<Unit> {
-        queryHolder.callback shouldBe null
-
-        val errorQueryResponse by before {
-            val error = com.apollographql.apollo.api.Error(
+        whenever(
+            mockApiCategory.query<String>(argThat { this.query.equals(GetExternalIdQuery.OPERATION_DOCUMENT) }, any(), any()),
+        ).thenAnswer {
+            val error = GraphQLResponse.Error(
                 "mock",
+                emptyList(),
                 emptyList(),
                 mapOf("errorType" to "sudoplatform.entitlements.EntitlementsSequenceNotFoundError"),
             )
-            Response.builder<GetExternalIdQuery.Data>(GetExternalIdQuery())
-                .errors(listOf(error))
-                .data(null)
-                .build()
+            @Suppress("UNCHECKED_CAST")
+            (it.arguments[1] as Consumer<GraphQLResponse<String>>).accept(
+                GraphQLResponse(null, listOf(error)),
+            )
+            mock<GraphQLOperation<String>>()
         }
 
         val deferredResult = async(Dispatchers.IO) {
@@ -280,29 +280,28 @@ class SudoEntitlementsGetExternalIdTest : BaseTests() {
         deferredResult.start()
         delay(100L)
 
-        queryHolder.callback shouldNotBe null
-        queryHolder.callback?.onResponse(errorQueryResponse)
-
         deferredResult.await()
 
         verify(mockSudoUserClient).isSignedIn()
-        verify(mockAppSyncClient).query(any<GetExternalIdQuery>())
+        verify(mockApiCategory).query<String>(check { assertEquals(it.query, GetExternalIdQuery.OPERATION_DOCUMENT) }, any(), any())
     }
 
     @Test
     fun `getExternalId() should throw when response has error`() = runBlocking<Unit> {
-        queryHolder.callback shouldBe null
-
-        val error = com.apollographql.apollo.api.Error(
-            "mock",
-            emptyList(),
-            mapOf("errorType" to "DilithiumCrystalsOutOfAlignment"),
-        )
-
-        val responseWithNullData by before {
-            Response.builder<GetExternalIdQuery.Data>(GetExternalIdQuery())
-                .errors(listOf(error))
-                .build()
+        whenever(
+            mockApiCategory.query<String>(argThat { this.query.equals(GetExternalIdQuery.OPERATION_DOCUMENT) }, any(), any()),
+        ).thenAnswer {
+            val error = GraphQLResponse.Error(
+                "mock",
+                emptyList(),
+                emptyList(),
+                mapOf("errorType" to "DilithiumCrystalsOutOfAlignment"),
+            )
+            @Suppress("UNCHECKED_CAST")
+            (it.arguments[1] as Consumer<GraphQLResponse<String>>).accept(
+                GraphQLResponse(null, listOf(error)),
+            )
+            mock<GraphQLOperation<String>>()
         }
 
         val deferredResult = async(Dispatchers.IO) {
@@ -313,19 +312,30 @@ class SudoEntitlementsGetExternalIdTest : BaseTests() {
         deferredResult.start()
 
         delay(100L)
-        queryHolder.callback shouldNotBe null
-        queryHolder.callback?.onResponse(responseWithNullData)
 
         deferredResult.await()
 
         verify(mockSudoUserClient).isSignedIn()
-        verify(mockAppSyncClient).query(any<GetExternalIdQuery>())
+        verify(mockApiCategory).query<String>(check { assertEquals(it.query, GetExternalIdQuery.OPERATION_DOCUMENT) }, any(), any())
     }
 
     @Test
     fun `getExternalId() should throw when http error occurs`() = runBlocking<Unit> {
-        queryHolder.callback shouldBe null
-
+        whenever(
+            mockApiCategory.query<String>(argThat { this.query.equals(GetExternalIdQuery.OPERATION_DOCUMENT) }, any(), any()),
+        ).thenAnswer {
+            val error = GraphQLResponse.Error(
+                "mock",
+                emptyList(),
+                emptyList(),
+                mapOf("httpStatus" to HttpURLConnection.HTTP_FORBIDDEN),
+            )
+            @Suppress("UNCHECKED_CAST")
+            (it.arguments[1] as Consumer<GraphQLResponse<String>>).accept(
+                GraphQLResponse(null, listOf(error)),
+            )
+            mock<GraphQLOperation<String>>()
+        }
         val deferredResult = async(Dispatchers.IO) {
             shouldThrow<SudoEntitlementsClient.EntitlementsException.FailedException> {
                 client.getExternalId()
@@ -333,35 +343,23 @@ class SudoEntitlementsGetExternalIdTest : BaseTests() {
         }
         deferredResult.start()
         delay(100L)
-
-        val request = Request.Builder()
-            .get()
-            .url("http://www.smh.com.au")
-            .build()
-        val responseBody = "{}".toResponseBody("application/json; charset=utf-8".toMediaType())
-        val forbidden = okhttp3.Response.Builder()
-            .protocol(Protocol.HTTP_1_1)
-            .code(HttpURLConnection.HTTP_FORBIDDEN)
-            .request(request)
-            .message("Forbidden")
-            .body(responseBody)
-            .build()
-
-        queryHolder.callback shouldNotBe null
-        queryHolder.callback?.onHttpError(ApolloHttpException(forbidden))
-
         deferredResult.await()
 
         verify(mockSudoUserClient).isSignedIn()
-        verify(mockAppSyncClient).query(any<GetExternalIdQuery>())
+        verify(mockApiCategory).query<String>(check { assertEquals(it.query, GetExternalIdQuery.OPERATION_DOCUMENT) }, any(), any())
     }
 
     @Test
     fun `getExternalId() should throw when unknown error occurs`() = runBlocking<Unit> {
-        queryHolder.callback shouldBe null
-
-        mockAppSyncClient.stub {
-            on { query(any<GetExternalIdQuery>()) } doThrow RuntimeException("Mock Runtime Exception")
+        mockApiCategory.stub {
+            on {
+                query<String>(
+                    argThat {
+                        this.query.equals(GetExternalIdQuery.OPERATION_DOCUMENT)
+                    },
+                    any(), any(),
+                )
+            } doThrow RuntimeException("Mock Runtime Exception")
         }
 
         val deferredResult = async(Dispatchers.IO) {
@@ -375,16 +373,25 @@ class SudoEntitlementsGetExternalIdTest : BaseTests() {
         deferredResult.await()
 
         verify(mockSudoUserClient).isSignedIn()
-        verify(mockAppSyncClient).query(any<GetExternalIdQuery>())
+        verify(mockApiCategory).query<String>(check { assertEquals(it.query, GetExternalIdQuery.OPERATION_DOCUMENT) }, any(), any())
     }
 
     @Test
     fun `getExternalId() should find error when unauthorized error occurs`() = runBlocking<Unit> {
-        queryHolder.callback shouldBe null
-
-        val exceptionToThrow = RuntimeException(ApolloException("", IOException(NotAuthorizedException(""))))
-        mockAppSyncClient.stub {
-            on { query(any<GetExternalIdQuery>()) } doThrow exceptionToThrow
+        whenever(
+            mockApiCategory.query<String>(argThat { this.query.equals(GetExternalIdQuery.OPERATION_DOCUMENT) }, any(), any()),
+        ).thenAnswer {
+            val error = GraphQLResponse.Error(
+                "mock",
+                emptyList(),
+                emptyList(),
+                mapOf("httpStatus" to HttpURLConnection.HTTP_UNAUTHORIZED),
+            )
+            @Suppress("UNCHECKED_CAST")
+            (it.arguments[1] as Consumer<GraphQLResponse<String>>).accept(
+                GraphQLResponse(null, listOf(error)),
+            )
+            mock<GraphQLOperation<String>>()
         }
 
         val deferredResult = async(Dispatchers.IO) {
@@ -398,13 +405,20 @@ class SudoEntitlementsGetExternalIdTest : BaseTests() {
         deferredResult.await()
 
         verify(mockSudoUserClient).isSignedIn()
-        verify(mockAppSyncClient).query(any<GetExternalIdQuery>())
+        verify(mockApiCategory).query<String>(check { assertEquals(it.query, GetExternalIdQuery.OPERATION_DOCUMENT) }, any(), any())
     }
 
     @Test
     fun `getExternalId() should not suppress CancellationException`() = runBlocking<Unit> {
-        mockAppSyncClient.stub {
-            on { query(any<GetExternalIdQuery>()) } doThrow CancellationException("Mock Cancellation Exception")
+        mockApiCategory.stub {
+            on {
+                query<String>(
+                    argThat {
+                        this.query.equals(GetExternalIdQuery.OPERATION_DOCUMENT)
+                    },
+                    any(), any(),
+                )
+            } doThrow CancellationException("Mock Cancellation Exception")
         }
 
         shouldThrow<CancellationException> {
@@ -412,6 +426,10 @@ class SudoEntitlementsGetExternalIdTest : BaseTests() {
         }
 
         verify(mockSudoUserClient).isSignedIn()
-        verify(mockAppSyncClient).query(any<GetExternalIdQuery>())
+        verify(mockApiCategory).query<String>(
+            check { assertEquals(it.query, GetExternalIdQuery.OPERATION_DOCUMENT) },
+            any(),
+            any(),
+        )
     }
 }
