@@ -80,7 +80,7 @@ internal class DefaultSudoEntitlementsClient(
      * and allow us to retry.  The value of `version` doesn't need to be kept up-to-date with the
      * version of the code.
      */
-    private val version: String = "12.0.2"
+    private val version: String = "12.0.3"
 
     private val graphQLClient: GraphQLClient =
         graphQLClient ?: ApiClientManager.getClient(

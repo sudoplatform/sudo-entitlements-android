@@ -12,7 +12,7 @@ android {
         minSdkVersion 26
         targetSdkVersion 34
         versionCode = 1
-        versionName = "12.0.2"
+        versionName = "12.0.3"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         testApplicationId = "com.sudoplatform.sudoentitlements.test"
         consumerProguardFiles 'consumer-rules.pro'
@@ -92,28 +92,29 @@ dependencies {
 
     // Sudo Platform
     implementation "com.sudoplatform:sudologging:5.0.0"
-    implementation "com.sudoplatform:sudokeymanager:8.0.0"
+    implementation 'com.sudoplatform:sudokeymanager:8.1.0'
     implementation 'com.sudoplatform:sudoconfigmanager:8.0.0'
-    implementation 'com.sudoplatform:sudouser:20.0.0'
-    implementation 'com.sudoplatform:sudoapiclient:11.0.0'
+    implementation 'com.sudoplatform:sudouser:20.0.2'
+    implementation 'com.sudoplatform:sudoapiclient:11.1.1'
 
     // Testing
     testImplementation "junit:junit:4.13.2"
-    testImplementation 'org.json:json:20240303'
+    testImplementation 'org.json:json:20250107'
     testImplementation "io.kotlintest:kotlintest-assertions:3.4.2"
     testImplementation "org.jetbrains.kotlinx:kotlinx-coroutines-test:$coroutine_version"
     testImplementation "org.jetbrains.kotlin:kotlin-reflect:$kotlin_version"
-    testImplementation 'org.mockito.kotlin:mockito-kotlin:5.3.1'
+    testImplementation 'org.mockito.kotlin:mockito-kotlin:5.4.0'
     testImplementation 'androidx.test:core:1.6.1'
-    testImplementation 'org.robolectric:robolectric:4.12.1'
+    testImplementation 'org.robolectric:robolectric:4.14.1'
     testImplementation "com.jakewharton.timber:timber:5.0.1"
 
     androidTestImplementation 'androidx.test.ext:junit:1.2.1'
-    androidTestImplementation 'androidx.test:runner:1.6.1'
+    androidTestImplementation 'androidx.test:runner:1.6.2'
     androidTestImplementation 'androidx.test:core:1.6.1'
     androidTestImplementation "io.kotlintest:kotlintest-assertions:$kotlintest_version"
     androidTestImplementation "com.jakewharton.timber:timber:5.0.1"
-    androidTestImplementation "com.sudoplatform:sudoentitlementsadmin:10.0.0"
+    androidTestImplementation 'com.sudoplatform:sudoentitlementsadmin:10.1.0'
+
 }
 
 // Returns a list of `configurations` which should not be scanned for vulnerabilities

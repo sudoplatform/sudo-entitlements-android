@@ -60,14 +60,16 @@ class SudoEntitlementsClientIntegrationTest : BaseIntegrationTest() {
 
     @After
     fun fini() = runBlocking {
-        withTimeout(30000) {
-            if (userClient.isRegistered()) {
-                if (!userClient.isSignedIn()) {
-                    userClient.signInWithKey()
+        try {
+            withTimeout(30000) {
+                if (userClient.isRegistered()) {
+                    if (!userClient.isSignedIn()) {
+                        userClient.signInWithKey()
+                    }
+                    userClient.deregister()
                 }
-                userClient.deregister()
             }
-        }
+        } catch (_: Exception) {}
         userClient.reset()
         Timber.uprootAll()
     }
@@ -261,6 +263,7 @@ class SudoEntitlementsClientIntegrationTest : BaseIntegrationTest() {
     fun getExternalIdAfterClaimEntitlementsRedeemShouldWork() = runBlocking {
         // Can only run if client config files are present
         assumeTrue(clientConfigFilesPresent())
+        assumeTrue(integrationTestEntitlementsSetAvailable())
 
         signInAndRegister()
 
