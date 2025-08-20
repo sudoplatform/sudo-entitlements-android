@@ -44,7 +44,6 @@ internal class DefaultSudoEntitlementsClient(
     graphQLClient: GraphQLClient? = null,
     private val logger: Logger = Logger(LogConstants.SUDOLOG_TAG, AndroidUtilsLogDriver(LogLevel.INFO)),
 ) : SudoEntitlementsClient {
-
     companion object {
         /** Exception messages */
         private const val ENTITLEMENTS_NOT_FOUND_MSG = "No entitlements returned in response"
@@ -80,7 +79,7 @@ internal class DefaultSudoEntitlementsClient(
      * and allow us to retry.  The value of `version` doesn't need to be kept up-to-date with the
      * version of the code.
      */
-    private val version: String = "12.0.3"
+    private val version: String = "13.0.0"
 
     private val graphQLClient: GraphQLClient =
         graphQLClient ?: ApiClientManager.getClient(
@@ -95,18 +94,20 @@ internal class DefaultSudoEntitlementsClient(
         }
 
         try {
-            val queryResponse = graphQLClient.query<GetEntitlementsConsumptionQuery, GetEntitlementsConsumptionQuery.Data>(
-                GetEntitlementsConsumptionQuery.OPERATION_DOCUMENT,
-                emptyMap(),
-            )
+            val queryResponse =
+                graphQLClient.query<GetEntitlementsConsumptionQuery, GetEntitlementsConsumptionQuery.Data>(
+                    GetEntitlementsConsumptionQuery.OPERATION_DOCUMENT,
+                    emptyMap(),
+                )
 
             if (queryResponse.hasErrors()) {
                 logger.warning("errors = ${queryResponse.errors}")
                 throw interpretEntitlementsError(queryResponse.errors.first())
             }
 
-            val result = queryResponse.data?.getEntitlementsConsumption
-                ?: throw SudoEntitlementsClient.EntitlementsException.FailedException(ENTITLEMENTS_NOT_FOUND_MSG)
+            val result =
+                queryResponse.data?.getEntitlementsConsumption
+                    ?: throw SudoEntitlementsClient.EntitlementsException.FailedException(ENTITLEMENTS_NOT_FOUND_MSG)
             return result.let { EntitlementsTransformer.toEntityFromGetEntitlementsConsumptionQueryResult(it) }
         } catch (e: Throwable) {
             logger.debug("unexpected error $e")
@@ -121,10 +122,11 @@ internal class DefaultSudoEntitlementsClient(
         }
 
         try {
-            val queryResponse = graphQLClient.query<GetExternalIdQuery, GetExternalIdQuery.Data>(
-                GetExternalIdQuery.OPERATION_DOCUMENT,
-                emptyMap(),
-            )
+            val queryResponse =
+                graphQLClient.query<GetExternalIdQuery, GetExternalIdQuery.Data>(
+                    GetExternalIdQuery.OPERATION_DOCUMENT,
+                    emptyMap(),
+                )
 
             if (queryResponse.hasErrors()) {
                 logger.warning("errors = ${queryResponse.errors}")
@@ -147,10 +149,11 @@ internal class DefaultSudoEntitlementsClient(
         }
 
         try {
-            val queryResponse = graphQLClient.query<GetEntitlementsQuery, GetEntitlementsQuery.Data>(
-                GetEntitlementsQuery.OPERATION_DOCUMENT,
-                emptyMap(),
-            )
+            val queryResponse =
+                graphQLClient.query<GetEntitlementsQuery, GetEntitlementsQuery.Data>(
+                    GetEntitlementsQuery.OPERATION_DOCUMENT,
+                    emptyMap(),
+                )
 
             if (queryResponse.hasErrors()) {
                 logger.warning("errors = ${queryResponse.errors}")
@@ -172,18 +175,20 @@ internal class DefaultSudoEntitlementsClient(
         }
 
         try {
-            val mutationResponse = graphQLClient.mutate<RedeemEntitlementsMutation, RedeemEntitlementsMutation.Data>(
-                RedeemEntitlementsMutation.OPERATION_DOCUMENT,
-                emptyMap(),
-            )
+            val mutationResponse =
+                graphQLClient.mutate<RedeemEntitlementsMutation, RedeemEntitlementsMutation.Data>(
+                    RedeemEntitlementsMutation.OPERATION_DOCUMENT,
+                    emptyMap(),
+                )
 
             if (mutationResponse.hasErrors()) {
                 logger.warning("errors = ${mutationResponse.errors}")
                 throw interpretEntitlementsError(mutationResponse.errors.first())
             }
 
-            val result = mutationResponse.data?.redeemEntitlements
-                ?: throw SudoEntitlementsClient.EntitlementsException.FailedException(ENTITLEMENTS_NOT_FOUND_MSG)
+            val result =
+                mutationResponse.data?.redeemEntitlements
+                    ?: throw SudoEntitlementsClient.EntitlementsException.FailedException(ENTITLEMENTS_NOT_FOUND_MSG)
             return EntitlementsTransformer.toEntityFromRedeemEntitlementsMutationResult(result)
         } catch (e: Throwable) {
             logger.debug("unexpected error $e")
@@ -198,10 +203,11 @@ internal class DefaultSudoEntitlementsClient(
         }
 
         try {
-            val mutationResponse = graphQLClient.mutate<ConsumeBooleanEntitlementsMutation, ConsumeBooleanEntitlementsMutation.Data>(
-                ConsumeBooleanEntitlementsMutation.OPERATION_DOCUMENT,
-                mapOf("entitlementNames" to entitlementNames.toList()),
-            )
+            val mutationResponse =
+                graphQLClient.mutate<ConsumeBooleanEntitlementsMutation, ConsumeBooleanEntitlementsMutation.Data>(
+                    ConsumeBooleanEntitlementsMutation.OPERATION_DOCUMENT,
+                    mapOf("entitlementNames" to entitlementNames.toList()),
+                )
 
             if (mutationResponse.hasErrors()) {
                 logger.warning("errors = ${mutationResponse.errors}")
@@ -259,14 +265,18 @@ internal class DefaultSudoEntitlementsClient(
 }
 
 @VisibleForTesting
-fun recognizeError(e: Throwable): Throwable {
-    return recognizeRootCause(e)
+fun recognizeError(e: Throwable): Throwable =
+    recognizeRootCause(e)
         ?: SudoEntitlementsClient.EntitlementsException.UnknownException(e)
-}
 
 private fun recognizeRootCause(e: Throwable?): Throwable? {
     // If we find a Sudo Platform exception, return that
-    if (e?.javaClass?.`package`?.name?.startsWith("com.sudoplatform.") ?: false) {
+    if (e
+            ?.javaClass
+            ?.`package`
+            ?.name
+            ?.startsWith("com.sudoplatform.") ?: false
+    ) {
         return e
     }
 

@@ -16,4 +16,7 @@ import kotlinx.parcelize.Parcelize
  * @property issuer [String] Issuer of the ID of the consumer. For example `sudoplatform.sudoservice` for a Sudo ID.
  */
 @Parcelize
-data class EntitlementConsumer(val id: String, val issuer: String) : Parcelable
+data class EntitlementConsumer(
+    val id: String,
+    val issuer: String,
+) : Parcelable

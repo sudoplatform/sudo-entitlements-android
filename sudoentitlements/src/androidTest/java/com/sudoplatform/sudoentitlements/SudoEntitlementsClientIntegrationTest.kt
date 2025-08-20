@@ -34,7 +34,6 @@ import com.sudoplatform.sudoentitlementsadmin.types.Entitlement as AdminEntitlem
  */
 @RunWith(AndroidJUnit4::class)
 class SudoEntitlementsClientIntegrationTest : BaseIntegrationTest() {
-
     private val verbose = false
     private val logLevel = if (verbose) LogLevel.VERBOSE else LogLevel.INFO
     private val logger = Logger("entitlements-test", AndroidUtilsLogDriver(logLevel))
@@ -46,33 +45,41 @@ class SudoEntitlementsClientIntegrationTest : BaseIntegrationTest() {
         Timber.plant(Timber.DebugTree())
 
         if (verbose) {
-            java.util.logging.Logger.getLogger("com.amazonaws").level = java.util.logging.Level.FINEST
-            java.util.logging.Logger.getLogger("org.apache.http").level = java.util.logging.Level.FINEST
+            java.util.logging.Logger
+                .getLogger("com.amazonaws")
+                .level = java.util.logging.Level.FINEST
+            java.util.logging.Logger
+                .getLogger("org.apache.http")
+                .level = java.util.logging.Level.FINEST
         }
 
         userClient.reset()
-        entitlementsClient = SudoEntitlementsClient.builder()
-            .setContext(context)
-            .setSudoUserClient(userClient)
-            .setLogger(logger)
-            .build()
+        entitlementsClient =
+            SudoEntitlementsClient
+                .builder()
+                .setContext(context)
+                .setSudoUserClient(userClient)
+                .setLogger(logger)
+                .build()
     }
 
     @After
-    fun fini() = runBlocking {
-        try {
-            withTimeout(30000) {
-                if (userClient.isRegistered()) {
-                    if (!userClient.isSignedIn()) {
-                        userClient.signInWithKey()
+    fun fini() =
+        runBlocking {
+            try {
+                withTimeout(30000) {
+                    if (userClient.isRegistered()) {
+                        if (!userClient.isSignedIn()) {
+                            userClient.signInWithKey()
+                        }
+                        userClient.deregister()
                     }
-                    userClient.deregister()
                 }
+            } catch (_: Exception) {
             }
-        } catch (_: Exception) {}
-        userClient.reset()
-        Timber.uprootAll()
-    }
+            userClient.reset()
+            Timber.uprootAll()
+        }
 
     @Test
     fun shouldThrowIfRequiredItemsNotProvidedToBuilder() {
@@ -86,14 +93,16 @@ class SudoEntitlementsClientIntegrationTest : BaseIntegrationTest() {
 
         // Context not provided
         shouldThrow<NullPointerException> {
-            SudoEntitlementsClient.builder()
+            SudoEntitlementsClient
+                .builder()
                 .setSudoUserClient(userClient)
                 .build()
         }
 
         // SudoUserClient not provided
         shouldThrow<NullPointerException> {
-            SudoEntitlementsClient.builder()
+            SudoEntitlementsClient
+                .builder()
                 .setContext(context)
                 .build()
         }
@@ -104,7 +113,8 @@ class SudoEntitlementsClientIntegrationTest : BaseIntegrationTest() {
         // Can only run if client config files are present
         assumeTrue(clientConfigFilesPresent())
 
-        SudoEntitlementsClient.builder()
+        SudoEntitlementsClient
+            .builder()
             .setContext(context)
             .setSudoUserClient(userClient)
             .build()
@@ -117,7 +127,8 @@ class SudoEntitlementsClientIntegrationTest : BaseIntegrationTest() {
 
         val graphQLClient = ApiClientManager.getClient(context, userClient)
 
-        SudoEntitlementsClient.builder()
+        SudoEntitlementsClient
+            .builder()
             .setContext(context)
             .setSudoUserClient(userClient)
             .setGraphQLClient(graphQLClient)
@@ -126,211 +137,226 @@ class SudoEntitlementsClientIntegrationTest : BaseIntegrationTest() {
     }
 
     @Test
-    fun redeemEntitlementsShouldReturnEntitlementsSet() = runBlocking {
-        // Can only run if client config files are present
-        assumeTrue(clientConfigFilesPresent())
-        assumeTrue(integrationTestEntitlementsSetAvailable())
+    fun redeemEntitlementsShouldReturnEntitlementsSet() =
+        runBlocking {
+            // Can only run if client config files are present
+            assumeTrue(clientConfigFilesPresent())
+            assumeTrue(integrationTestEntitlementsSetAvailable())
 
-        signInAndRegister()
+            signInAndRegister()
 
-        enableUserForEntitlementsRedemption()
+            enableUserForEntitlementsRedemption()
 
-        checkEntitlementsSet(entitlementsClient.redeemEntitlements())
-    }
-
-    @Test
-    fun redeemEntitlementsShouldSucceedForRawTestUser() = runBlocking {
-        // Can only run if client config files are present
-        assumeTrue(clientConfigFilesPresent())
-
-        signInAndRegister()
-
-        val redeemedEntitlements = entitlementsClient.redeemEntitlements()
-        redeemedEntitlements shouldNotBe null
-    }
-
-    @Test
-    fun getEntitlementsConsumptionShouldReturnEntitlementsSet() = runBlocking {
-        // Can only run if client config files are present
-        assumeTrue(clientConfigFilesPresent())
-        assumeTrue(integrationTestEntitlementsSetAvailable())
-
-        signInAndRegister()
-
-        enableUserForEntitlementsRedemption()
-
-        val redeemed = entitlementsClient.redeemEntitlements()
-        checkEntitlementsSet(redeemed)
-
-        val consumption = entitlementsClient.getEntitlementsConsumption()
-
-        consumption.entitlements.version shouldBe redeemed.version
-        consumption.entitlements.entitlementsSetName shouldBe redeemed.name
-        consumption.entitlements.entitlements.size shouldBe redeemed.entitlements.size
-        for (element in consumption.entitlements.entitlements) {
-            redeemed.entitlements.contains(element) shouldBe true
+            checkEntitlementsSet(entitlementsClient.redeemEntitlements())
         }
-        consumption.consumption shouldBe listOf()
-    }
 
     @Test
-    fun getEntitlementsConsumptionShouldThrowNoEntitlementsErrorForRawTestUser() = runBlocking<Unit> {
-        // Can only run if client config files are present
-        assumeTrue(clientConfigFilesPresent())
+    fun redeemEntitlementsShouldSucceedForRawTestUser() =
+        runBlocking {
+            // Can only run if client config files are present
+            assumeTrue(clientConfigFilesPresent())
 
-        signInAndRegister()
+            signInAndRegister()
 
-        shouldThrow<SudoEntitlementsClient.EntitlementsException.NoEntitlementsException> {
-            entitlementsClient.getEntitlementsConsumption()
+            val redeemedEntitlements = entitlementsClient.redeemEntitlements()
+            redeemedEntitlements shouldNotBe null
         }
-    }
 
     @Test
-    fun getEntitlementsShouldReturnEntitlementsSetResult() = runBlocking {
-        // Can only run if client config files are present
-        assumeTrue(clientConfigFilesPresent())
-        assumeTrue(integrationTestEntitlementsSetAvailable())
+    fun getEntitlementsConsumptionShouldReturnEntitlementsSet() =
+        runBlocking {
+            // Can only run if client config files are present
+            assumeTrue(clientConfigFilesPresent())
+            assumeTrue(integrationTestEntitlementsSetAvailable())
 
-        signInAndRegister()
+            signInAndRegister()
 
-        enableUserForEntitlementsRedemption()
+            enableUserForEntitlementsRedemption()
 
-        val redeemedEntitlements = entitlementsClient.redeemEntitlements()
-        checkEntitlementsSet(redeemedEntitlements)
+            val redeemed = entitlementsClient.redeemEntitlements()
+            checkEntitlementsSet(redeemed)
 
-        val optionalRetrievedEntitlements = entitlementsClient.getEntitlements()
-        optionalRetrievedEntitlements shouldNotBe null
-        val retrievedEntitlements = optionalRetrievedEntitlements!!
-        checkEntitlementsSet(retrievedEntitlements)
+            val consumption = entitlementsClient.getEntitlementsConsumption()
 
-        retrievedEntitlements.name shouldBe redeemedEntitlements.name
-        retrievedEntitlements.version shouldBe redeemedEntitlements.version
-        retrievedEntitlements.entitlements shouldBe redeemedEntitlements.entitlements
-    }
+            consumption.entitlements.version shouldBe redeemed.version
+            consumption.entitlements.entitlementsSetName shouldBe redeemed.name
+            consumption.entitlements.entitlements.size shouldBe redeemed.entitlements.size
+            for (element in consumption.entitlements.entitlements) {
+                redeemed.entitlements.contains(element) shouldBe true
+            }
+            consumption.consumption shouldBe listOf()
+        }
 
     @Test
-    fun getEntitlementsShouldThrowForUnauthorizedCall() = runBlocking<Unit> {
-        // Can only run if client config files are present
-        assumeTrue(clientConfigFilesPresent())
+    fun getEntitlementsConsumptionShouldThrowNoEntitlementsErrorForRawTestUser() =
+        runBlocking<Unit> {
+            // Can only run if client config files are present
+            assumeTrue(clientConfigFilesPresent())
 
-        shouldThrow<SudoEntitlementsClient.EntitlementsException.NotSignedInException> {
+            signInAndRegister()
+
+            shouldThrow<SudoEntitlementsClient.EntitlementsException.NoEntitlementsException> {
+                entitlementsClient.getEntitlementsConsumption()
+            }
+        }
+
+    @Test
+    fun getEntitlementsShouldReturnEntitlementsSetResult() =
+        runBlocking {
+            // Can only run if client config files are present
+            assumeTrue(clientConfigFilesPresent())
+            assumeTrue(integrationTestEntitlementsSetAvailable())
+
+            signInAndRegister()
+
+            enableUserForEntitlementsRedemption()
+
+            val redeemedEntitlements = entitlementsClient.redeemEntitlements()
+            checkEntitlementsSet(redeemedEntitlements)
+
+            val optionalRetrievedEntitlements = entitlementsClient.getEntitlements()
+            optionalRetrievedEntitlements shouldNotBe null
+            val retrievedEntitlements = optionalRetrievedEntitlements!!
+            checkEntitlementsSet(retrievedEntitlements)
+
+            retrievedEntitlements.name shouldBe redeemedEntitlements.name
+            retrievedEntitlements.version shouldBe redeemedEntitlements.version
+            retrievedEntitlements.entitlements shouldBe redeemedEntitlements.entitlements
+        }
+
+    @Test
+    fun getEntitlementsShouldThrowForUnauthorizedCall() =
+        runBlocking<Unit> {
+            // Can only run if client config files are present
+            assumeTrue(clientConfigFilesPresent())
+
+            shouldThrow<SudoEntitlementsClient.EntitlementsException.NotSignedInException> {
+                entitlementsClient.getEntitlements()
+            }
+
+            signInAndRegister()
+
+            // Attempt to query entitlements after signing in then out
+            userClient.globalSignOut()
+
+            shouldThrow<SudoEntitlementsClient.EntitlementsException.NotSignedInException> {
+                entitlementsClient.getEntitlements()
+            }
+        }
+
+    @Test
+    fun getEntitlementsShouldReturnNullForRawTestUser() =
+        runBlocking {
+            // Can only run if client config files are present
+            assumeTrue(clientConfigFilesPresent())
+
+            signInAndRegister()
+
+            entitlementsClient.getEntitlements() shouldBe null
+        }
+
+    @Test
+    fun getEntitlementsShouldSucceedForRawTestUser() =
+        runBlocking<Unit> {
+            // Can only run if client config files are present
+            assumeTrue(clientConfigFilesPresent())
+
+            signInAndRegister()
+
             entitlementsClient.getEntitlements()
         }
 
-        signInAndRegister()
-
-        // Attempt to query entitlements after signing in then out
-        userClient.globalSignOut()
-
-        shouldThrow<SudoEntitlementsClient.EntitlementsException.NotSignedInException> {
-            entitlementsClient.getEntitlements()
-        }
-    }
-
     @Test
-    fun getEntitlementsShouldReturnNullForRawTestUser() = runBlocking {
-        // Can only run if client config files are present
-        assumeTrue(clientConfigFilesPresent())
+    fun getExternalIdBeforeRedeemShouldWork() =
+        runBlocking {
+            // Can only run if client config files are present
+            assumeTrue(clientConfigFilesPresent())
 
-        signInAndRegister()
+            signInAndRegister()
 
-        entitlementsClient.getEntitlements() shouldBe null
-    }
+            val actualExternalId = entitlementsClient.getExternalId()
 
-    @Test
-    fun getEntitlementsShouldSucceedForRawTestUser() = runBlocking<Unit> {
-        // Can only run if client config files are present
-        assumeTrue(clientConfigFilesPresent())
-
-        signInAndRegister()
-
-        entitlementsClient.getEntitlements()
-    }
-
-    @Test
-    fun getExternalIdBeforeRedeemShouldWork() = runBlocking {
-        // Can only run if client config files are present
-        assumeTrue(clientConfigFilesPresent())
-
-        signInAndRegister()
-
-        val actualExternalId = entitlementsClient.getExternalId()
-
-        actualExternalId shouldBe userClient.getUserName()
-    }
-
-    @Test
-    fun getExternalIdAfterClaimEntitlementsRedeemShouldWork() = runBlocking {
-        // Can only run if client config files are present
-        assumeTrue(clientConfigFilesPresent())
-        assumeTrue(integrationTestEntitlementsSetAvailable())
-
-        signInAndRegister()
-
-        val expectedExternalId = enableUserForEntitlementsRedemption()
-
-        entitlementsClient.redeemEntitlements()
-
-        val actualExternalId = entitlementsClient.getExternalId()
-
-        actualExternalId shouldBe expectedExternalId
-    }
-
-    @Test
-    fun consumeBooleanEntitlementsShouldThrowInvalidArgumentError() = runBlocking {
-        assumeTrue(clientConfigFilesPresent())
-
-        signInAndRegister()
-
-        shouldThrow<SudoEntitlementsClient.EntitlementsException.InvalidArgumentException> {
-            entitlementsClient.consumeBooleanEntitlements(arrayOf(UUID.randomUUID().toString()))
-        }
-        Unit
-    }
-
-    @Test
-    fun consumeBooleanEntitlementsShouldSucceed() = runBlocking {
-        assumeTrue(clientConfigFilesPresent())
-        assumeTrue(integrationTestEntitlementsSetAvailable())
-
-        signInAndRegister()
-
-        enableUserForEntitlementsRedemption()
-        entitlementsClient.redeemEntitlements()
-
-        entitlementsClient.consumeBooleanEntitlements(arrayOf("sudoplatform.test.testEntitlement-2"))
-    }
-
-    @Test
-    fun largeEntitlementShouldBeObservable() = runBlocking {
-        assumeTrue(clientConfigFilesPresent())
-        assumeTrue(integrationTestEntitlementsSetAvailable())
-
-        signInAndRegister()
-
-        val largeAdminEntitlement = AdminEntitlement(
-            name = "sudoplatform.test.testEntitlement-1",
-            description = "",
-            value = 2L shl 51 - 1,
-        )
-        val largeEntitlement = Entitlement(
-            name = largeAdminEntitlement.name,
-            description = largeAdminEntitlement.description,
-            value = largeAdminEntitlement.value,
-        )
-
-        enableUserForEntitlementsRedemption(largeAdminEntitlement)
-
-        val redeemResult = entitlementsClient.redeemEntitlements()
-        with(redeemResult) {
-            entitlements shouldBe setOf(largeEntitlement)
+            actualExternalId shouldBe userClient.getUserName()
         }
 
-        val getEntitlementsConsumptionResult = entitlementsClient.getEntitlementsConsumption()
-        with(getEntitlementsConsumptionResult) {
-            entitlements.entitlements shouldBe listOf(largeEntitlement)
+    @Test
+    fun getExternalIdAfterClaimEntitlementsRedeemShouldWork() =
+        runBlocking {
+            // Can only run if client config files are present
+            assumeTrue(clientConfigFilesPresent())
+            assumeTrue(integrationTestEntitlementsSetAvailable())
+
+            signInAndRegister()
+
+            val expectedExternalId = enableUserForEntitlementsRedemption()
+
+            entitlementsClient.redeemEntitlements()
+
+            val actualExternalId = entitlementsClient.getExternalId()
+
+            actualExternalId shouldBe expectedExternalId
         }
-    }
+
+    @Test
+    fun consumeBooleanEntitlementsShouldThrowInvalidArgumentError() =
+        runBlocking {
+            assumeTrue(clientConfigFilesPresent())
+
+            signInAndRegister()
+
+            shouldThrow<SudoEntitlementsClient.EntitlementsException.InvalidArgumentException> {
+                entitlementsClient.consumeBooleanEntitlements(arrayOf(UUID.randomUUID().toString()))
+            }
+            Unit
+        }
+
+    @Test
+    fun consumeBooleanEntitlementsShouldSucceed() =
+        runBlocking {
+            assumeTrue(clientConfigFilesPresent())
+            assumeTrue(integrationTestEntitlementsSetAvailable())
+
+            signInAndRegister()
+
+            enableUserForEntitlementsRedemption()
+            entitlementsClient.redeemEntitlements()
+
+            entitlementsClient.consumeBooleanEntitlements(arrayOf("sudoplatform.test.testEntitlement-2"))
+        }
+
+    @Test
+    fun largeEntitlementShouldBeObservable() =
+        runBlocking {
+            assumeTrue(clientConfigFilesPresent())
+            assumeTrue(integrationTestEntitlementsSetAvailable())
+
+            signInAndRegister()
+
+            val largeAdminEntitlement =
+                AdminEntitlement(
+                    name = "sudoplatform.test.testEntitlement-1",
+                    description = "",
+                    value = 2L shl 51 - 1,
+                )
+            val largeEntitlement =
+                Entitlement(
+                    name = largeAdminEntitlement.name,
+                    description = largeAdminEntitlement.description,
+                    value = largeAdminEntitlement.value,
+                )
+
+            enableUserForEntitlementsRedemption(largeAdminEntitlement)
+
+            val redeemResult = entitlementsClient.redeemEntitlements()
+            with(redeemResult) {
+                entitlements shouldBe setOf(largeEntitlement)
+            }
+
+            val getEntitlementsConsumptionResult = entitlementsClient.getEntitlementsConsumption()
+            with(getEntitlementsConsumptionResult) {
+                entitlements.entitlements shouldBe listOf(largeEntitlement)
+            }
+        }
 
     private fun checkEntitlementsSet(entitlementsSet: EntitlementsSet) {
         with(entitlementsSet) {

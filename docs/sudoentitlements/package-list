@@ -37,7 +37,7 @@ $dokka.location:com.sudoplatform.sudoentitlements.types/UserEntitlements/entitle
 $dokka.location:com.sudoplatform.sudoentitlements.types/UserEntitlements/entitlementsSetName/#/PointingToDeclaration/sudoentitlements/com.sudoplatform.sudoentitlements.types/-user-entitlements/entitlements-set-name.html
 $dokka.location:com.sudoplatform.sudoentitlements.types/UserEntitlements/version/#/PointingToDeclaration/sudoentitlements/com.sudoplatform.sudoentitlements.types/-user-entitlements/version.html
 $dokka.location:com.sudoplatform.sudoentitlements////PointingToDeclaration/sudoentitlements/com.sudoplatform.sudoentitlements/index.html
-$dokka.location:com.sudoplatform.sudoentitlements//entitlementsSetVersionScalingFactor/#/PointingToDeclaration/sudoentitlements/com.sudoplatform.sudoentitlements/entitlements-set-version-scaling-factor.html
+$dokka.location:com.sudoplatform.sudoentitlements//ENTITLEMENTS_SET_VERSION_SCALING_FACTOR/#/PointingToDeclaration/sudoentitlements/com.sudoplatform.sudoentitlements/-e-n-t-i-t-l-e-m-e-n-t-s_-s-e-t_-v-e-r-s-i-o-n_-s-c-a-l-i-n-g_-f-a-c-t-o-r.html
 $dokka.location:com.sudoplatform.sudoentitlements//recognizeError/#kotlin.Throwable/PointingToDeclaration/sudoentitlements/com.sudoplatform.sudoentitlements/recognize-error.html
 $dokka.location:com.sudoplatform.sudoentitlements//splitUserEntitlementsVersion/#kotlin.Double/PointingToDeclaration/sudoentitlements/com.sudoplatform.sudoentitlements/split-user-entitlements-version.html
 $dokka.location:com.sudoplatform.sudoentitlements/SudoEntitlementsClient.Builder///PointingToDeclaration/sudoentitlements/com.sudoplatform.sudoentitlements/-sudo-entitlements-client/-builder/index.html
@@ -85,4 +85,3 @@ $dokka.location:com.sudoplatform.sudoentitlements/SudoEntitlementsClient/getExte
 $dokka.location:com.sudoplatform.sudoentitlements/SudoEntitlementsClient/redeemEntitlements/#/PointingToDeclaration/sudoentitlements/com.sudoplatform.sudoentitlements/-sudo-entitlements-client/redeem-entitlements.html
 com.sudoplatform.sudoentitlements
 com.sudoplatform.sudoentitlements.types
-

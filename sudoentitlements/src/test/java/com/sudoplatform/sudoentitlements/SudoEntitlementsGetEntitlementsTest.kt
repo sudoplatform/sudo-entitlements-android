@@ -79,7 +79,8 @@ class SudoEntitlementsGetEntitlementsTest : BaseTests() {
             on {
                 query<String>(
                     argThat { this.query.equals(GetEntitlementsQuery.OPERATION_DOCUMENT) },
-                    any(), any(),
+                    any(),
+                    any(),
                 )
             } doAnswer {
                 @Suppress("UNCHECKED_CAST")
@@ -111,502 +112,540 @@ class SudoEntitlementsGetEntitlementsTest : BaseTests() {
     }
 
     @Test
-    fun `getEntitlements() should return results when no error present`() = runBlocking<Unit> {
-        val deferredResult = async(Dispatchers.IO) {
-            client.getEntitlements()
-        }
-        deferredResult.start()
-
-        delay(100L)
-
-        val optionalResult = deferredResult.await()
-        optionalResult shouldNotBe null
-        val result = optionalResult!!
-        result.name shouldBe "name"
-        result.description shouldBe "description"
-        result.version shouldBe 1.0
-        result.entitlements.isEmpty() shouldBe false
-        result.entitlements.isEmpty() shouldBe false
-        result.entitlements.size shouldBe 1
-        with(result.entitlements.first()) {
-            name shouldBe "e.name"
-            description shouldBe "e.description"
-            value shouldBe 42
-        }
-
-        verify(mockSudoUserClient).isSignedIn()
-        verify(mockApiCategory).query<String>(
-            check { assertEquals(it.query, GetEntitlementsQuery.OPERATION_DOCUMENT) },
-            any(),
-            any(),
-        )
-    }
-
-    @Test
-    fun `getEntitlements() should return empty list output when query result list is empty`() = runBlocking<Unit> {
-        val queryResponseWithEmptyList = JSONObject(
-            """
-            {
-                'getEntitlements': {
-                    'createdAtEpochMs': 1.0,
-                    'updatedAtEpochMs': 2.0,
-                    'version': 1.0,
-                    'name': 'name',
-                    'description': 'description',
-                    'entitlements': []
-
+    fun `getEntitlements() should return results when no error present`() =
+        runBlocking<Unit> {
+            val deferredResult =
+                async(Dispatchers.IO) {
+                    client.getEntitlements()
                 }
+            deferredResult.start()
+
+            delay(100L)
+
+            val optionalResult = deferredResult.await()
+            optionalResult shouldNotBe null
+            val result = optionalResult!!
+            result.name shouldBe "name"
+            result.description shouldBe "description"
+            result.version shouldBe 1.0
+            result.entitlements.isEmpty() shouldBe false
+            result.entitlements.isEmpty() shouldBe false
+            result.entitlements.size shouldBe 1
+            with(result.entitlements.first()) {
+                name shouldBe "e.name"
+                description shouldBe "e.description"
+                value shouldBe 42
             }
-            """.trimIndent(),
-        )
-        whenever(
-            mockApiCategory.query<String>(
-                argThat { this.query.equals(GetEntitlementsQuery.OPERATION_DOCUMENT) },
+
+            verify(mockSudoUserClient).isSignedIn()
+            verify(mockApiCategory).query<String>(
+                check { assertEquals(it.query, GetEntitlementsQuery.OPERATION_DOCUMENT) },
                 any(),
                 any(),
-            ),
-        ).thenAnswer {
-            @Suppress("UNCHECKED_CAST")
-            (it.arguments[1] as Consumer<GraphQLResponse<String>>).accept(
-                GraphQLResponse(queryResponseWithEmptyList.toString(), null),
             )
-            mock<GraphQLOperation<String>>()
         }
-        val deferredResult = async(Dispatchers.IO) {
-            client.getEntitlements()
-        }
-        deferredResult.start()
-
-        delay(100L)
-
-        val optionalResult = deferredResult.await()
-        optionalResult shouldNotBe null
-        val result = optionalResult!!
-        result.entitlements.isEmpty() shouldBe true
-        result.entitlements.size shouldBe 0
-
-        verify(mockSudoUserClient).isSignedIn()
-        verify(mockApiCategory).query<String>(
-            check { assertEquals(it.query, GetEntitlementsQuery.OPERATION_DOCUMENT) },
-            any(),
-            any(),
-        )
-    }
 
     @Test
-    fun `getEntitlements() should throw if not signed in`() = runBlocking<Unit> {
-        whenever(mockSudoUserClient.isSignedIn()).thenReturn(false)
+    fun `getEntitlements() should return empty list output when query result list is empty`() =
+        runBlocking<Unit> {
+            val queryResponseWithEmptyList =
+                JSONObject(
+                    """
+                    {
+                        'getEntitlements': {
+                            'createdAtEpochMs': 1.0,
+                            'updatedAtEpochMs': 2.0,
+                            'version': 1.0,
+                            'name': 'name',
+                            'description': 'description',
+                            'entitlements': []
 
-        val deferredResult = async(Dispatchers.IO) {
-            shouldThrow<SudoEntitlementsClient.EntitlementsException.NotSignedInException> {
-                client.getEntitlements()
-            }
-        }
-        deferredResult.start()
-        delay(100L)
-
-        verify(mockSudoUserClient).isSignedIn()
-        verify(mockApiCategory, never()).query<String>(
-            check { assertEquals(it.query, GetEntitlementsQuery.OPERATION_DOCUMENT) },
-            any(),
-            any(),
-        )
-    }
-
-    @Test
-    fun `getEntitlements() should return null when query response data is null`() = runBlocking<Unit> {
-        val queryResponseWithEmptyData = JSONObject(
-            """
-            {
-                'getEntitlements': null
-            }
-            """.trimIndent(),
-        )
-        whenever(
-            mockApiCategory.query<String>(
-                argThat { this.query.equals(GetEntitlementsQuery.OPERATION_DOCUMENT) },
-                any(),
-                any(),
-            ),
-        ).thenAnswer {
-            @Suppress("UNCHECKED_CAST")
-            (it.arguments[1] as Consumer<GraphQLResponse<String>>).accept(
-                GraphQLResponse(queryResponseWithEmptyData.toString(), null),
-            )
-            mock<GraphQLOperation<String>>()
-        }
-
-        val deferredResult = async(Dispatchers.IO) {
-            client.getEntitlements()
-        }
-        deferredResult.start()
-
-        delay(100L)
-
-        val optionalResult = deferredResult.await()
-        optionalResult shouldBe null
-
-        verify(mockSudoUserClient).isSignedIn()
-        verify(mockApiCategory).query<String>(
-            check { assertEquals(it.query, GetEntitlementsQuery.OPERATION_DOCUMENT) },
-            any(),
-            any(),
-        )
-    }
-
-    @Test
-    fun `getEntitlements() should return null when query response is null`() = runBlocking<Unit> {
-        whenever(
-            mockApiCategory.query<String>(
-                argThat { this.query.equals(GetEntitlementsQuery.OPERATION_DOCUMENT) },
-                any(),
-                any(),
-            ),
-        ).thenAnswer {
-            @Suppress("UNCHECKED_CAST")
-            (it.arguments[1] as Consumer<GraphQLResponse<String>>).accept(
-                GraphQLResponse(null, null),
-            )
-            mock<GraphQLOperation<String>>()
-        }
-
-        val deferredResult = async(Dispatchers.IO) {
-            client.getEntitlements()
-        }
-        deferredResult.start()
-
-        delay(100L)
-
-        val optionalResult = deferredResult.await()
-        optionalResult shouldBe null
-
-        verify(mockSudoUserClient).isSignedIn()
-        verify(mockApiCategory).query<String>(
-            check { assertEquals(it.query, GetEntitlementsQuery.OPERATION_DOCUMENT) },
-            any(),
-            any(),
-        )
-    }
-
-    @Test
-    fun `getEntitlements() should throw when response has a NoExternalIdError`() = runBlocking<Unit> {
-        whenever(
-            mockApiCategory.query<String>(
-                argThat { this.query.equals(GetEntitlementsQuery.OPERATION_DOCUMENT) },
-                any(),
-                any(),
-            ),
-        ).thenAnswer {
-            val error = GraphQLResponse.Error(
-                "mock",
-                emptyList(),
-                emptyList(),
-                mapOf("errorType" to "sudoplatform.entitlements.NoExternalIdError"),
-            )
-            @Suppress("UNCHECKED_CAST")
-            (it.arguments[1] as Consumer<GraphQLResponse<String>>).accept(
-                GraphQLResponse(null, listOf(error)),
-            )
-            mock<GraphQLOperation<String>>()
-        }
-
-        val deferredResult = async(Dispatchers.IO) {
-            shouldThrow<SudoEntitlementsClient.EntitlementsException.NoExternalIdException> {
-                client.getEntitlements()
-            }
-        }
-        deferredResult.start()
-        delay(100L)
-
-        deferredResult.await()
-
-        verify(mockSudoUserClient).isSignedIn()
-        verify(mockApiCategory).query<String>(
-            check { assertEquals(it.query, GetEntitlementsQuery.OPERATION_DOCUMENT) },
-            any(),
-            any(),
-        )
-    }
-
-    @Test
-    fun `getEntitlements() should throw when response has a NoBillingGroupError`() = runBlocking<Unit> {
-        whenever(
-            mockApiCategory.query<String>(
-                argThat { this.query.equals(GetEntitlementsQuery.OPERATION_DOCUMENT) },
-                any(),
-                any(),
-            ),
-        ).thenAnswer {
-            val error = GraphQLResponse.Error(
-                "mock",
-                emptyList(),
-                emptyList(),
-                mapOf("errorType" to "sudoplatform.entitlements.NoBillingGroupError"),
-            )
-            @Suppress("UNCHECKED_CAST")
-            (it.arguments[1] as Consumer<GraphQLResponse<String>>).accept(
-                GraphQLResponse(null, listOf(error)),
-            )
-            mock<GraphQLOperation<String>>()
-        }
-
-        val deferredResult = async(Dispatchers.IO) {
-            shouldThrow<SudoEntitlementsClient.EntitlementsException.NoBillingGroupException> {
-                client.getEntitlements()
-            }
-        }
-        deferredResult.start()
-        delay(100L)
-
-        deferredResult.await()
-
-        verify(mockSudoUserClient).isSignedIn()
-        verify(mockApiCategory).query<String>(
-            check { assertEquals(it.query, GetEntitlementsQuery.OPERATION_DOCUMENT) },
-            any(),
-            any(),
-        )
-    }
-
-    @Test
-    fun `getEntitlements() should throw when response has a EntitlementsSetNotFoundError`() = runBlocking<Unit> {
-        whenever(
-            mockApiCategory.query<String>(
-                argThat { this.query.equals(GetEntitlementsQuery.OPERATION_DOCUMENT) },
-                any(),
-                any(),
-            ),
-        ).thenAnswer {
-            val error = GraphQLResponse.Error(
-                "mock",
-                emptyList(),
-                emptyList(),
-                mapOf("errorType" to "sudoplatform.entitlements.EntitlementsSetNotFoundError"),
-            )
-            @Suppress("UNCHECKED_CAST")
-            (it.arguments[1] as Consumer<GraphQLResponse<String>>).accept(
-                GraphQLResponse(null, listOf(error)),
-            )
-            mock<GraphQLOperation<String>>()
-        }
-
-        val deferredResult = async(Dispatchers.IO) {
-            shouldThrow<SudoEntitlementsClient.EntitlementsException.EntitlementsSetNotFoundException> {
-                client.getEntitlements()
-            }
-        }
-        deferredResult.start()
-        delay(100L)
-
-        deferredResult.await()
-
-        verify(mockSudoUserClient).isSignedIn()
-        verify(mockApiCategory).query<String>(
-            check { assertEquals(it.query, GetEntitlementsQuery.OPERATION_DOCUMENT) },
-            any(),
-            any(),
-        )
-    }
-
-    @Test
-    fun `getEntitlements() should throw when response has a EntitlementsSequenceNotFoundError`() = runBlocking<Unit> {
-        whenever(
-            mockApiCategory.query<String>(
-                argThat { this.query.equals(GetEntitlementsQuery.OPERATION_DOCUMENT) },
-                any(),
-                any(),
-            ),
-        ).thenAnswer {
-            val error = GraphQLResponse.Error(
-                "mock",
-                emptyList(),
-                emptyList(),
-                mapOf("errorType" to "sudoplatform.entitlements.EntitlementsSequenceNotFoundError"),
-            )
-            @Suppress("UNCHECKED_CAST")
-            (it.arguments[1] as Consumer<GraphQLResponse<String>>).accept(
-                GraphQLResponse(null, listOf(error)),
-            )
-            mock<GraphQLOperation<String>>()
-        }
-
-        val deferredResult = async(Dispatchers.IO) {
-            shouldThrow<SudoEntitlementsClient.EntitlementsException.EntitlementsSequenceNotFoundException> {
-                client.getEntitlements()
-            }
-        }
-        deferredResult.start()
-        delay(100L)
-
-        deferredResult.await()
-
-        verify(mockSudoUserClient).isSignedIn()
-        verify(mockApiCategory).query<String>(
-            check { assertEquals(it.query, GetEntitlementsQuery.OPERATION_DOCUMENT) },
-            any(),
-            any(),
-        )
-    }
-
-    @Test
-    fun `getEntitlements() should throw when response has error`() = runBlocking<Unit> {
-        whenever(
-            mockApiCategory.query<String>(
-                argThat { this.query.equals(GetEntitlementsQuery.OPERATION_DOCUMENT) },
-                any(),
-                any(),
-            ),
-        ).thenAnswer {
-            val error = GraphQLResponse.Error(
-                "mock",
-                emptyList(),
-                emptyList(),
-                mapOf("errorType" to "DilithiumCrystalsOutOfAlignment"),
-            )
-            @Suppress("UNCHECKED_CAST")
-            (it.arguments[1] as Consumer<GraphQLResponse<String>>).accept(
-                GraphQLResponse(null, listOf(error)),
-            )
-            mock<GraphQLOperation<String>>()
-        }
-
-        val deferredResult = async(Dispatchers.IO) {
-            shouldThrow<SudoEntitlementsClient.EntitlementsException.FailedException> {
-                client.getEntitlements()
-            }
-        }
-        deferredResult.start()
-
-        delay(100L)
-
-        deferredResult.await()
-
-        verify(mockSudoUserClient).isSignedIn()
-        verify(
-            mockApiCategory,
-        ).query<String>(check { assertEquals(it.query, GetEntitlementsQuery.OPERATION_DOCUMENT) }, any(), any())
-    }
-
-    @Test
-    fun `getEntitlements() should throw when http error occurs`() = runBlocking<Unit> {
-        whenever(
-            mockApiCategory.query<String>(
-                argThat { this.query.equals(GetEntitlementsQuery.OPERATION_DOCUMENT) },
-                any(),
-                any(),
-            ),
-        ).thenAnswer {
-            val error = GraphQLResponse.Error(
-                "mock",
-                emptyList(),
-                emptyList(),
-                mapOf("httpStatus" to HttpURLConnection.HTTP_FORBIDDEN),
-            )
-            @Suppress("UNCHECKED_CAST")
-            (it.arguments[1] as Consumer<GraphQLResponse<String>>).accept(
-                GraphQLResponse(null, listOf(error)),
-            )
-            mock<GraphQLOperation<String>>()
-        }
-        val deferredResult = async(Dispatchers.IO) {
-            shouldThrow<SudoEntitlementsClient.EntitlementsException.FailedException> {
-                client.getEntitlements()
-            }
-        }
-        deferredResult.start()
-        delay(100L)
-        deferredResult.await()
-
-        verify(mockSudoUserClient).isSignedIn()
-        verify(
-            mockApiCategory,
-        ).query<String>(check { assertEquals(it.query, GetEntitlementsQuery.OPERATION_DOCUMENT) }, any(), any())
-    }
-
-    @Test
-    fun `getEntitlements() should throw when unknown error occurs`() = runBlocking<Unit> {
-        mockApiCategory.stub {
-            on {
-                query<String>(
-                    argThat { this.query.equals(GetEntitlementsQuery.OPERATION_DOCUMENT) },
-                    any(), any(),
+                        }
+                    }
+                    """.trimIndent(),
                 )
-            } doThrow RuntimeException("Mock Runtime Exception")
-        }
-
-        val deferredResult = async(Dispatchers.IO) {
-            shouldThrow<SudoEntitlementsClient.EntitlementsException.UnknownException> {
-                client.getEntitlements()
-            }
-        }
-        deferredResult.start()
-
-        delay(100L)
-        deferredResult.await()
-
-        verify(mockSudoUserClient).isSignedIn()
-        verify(
-            mockApiCategory,
-        ).query<String>(check { assertEquals(it.query, GetEntitlementsQuery.OPERATION_DOCUMENT) }, any(), any())
-    }
-
-    @Test
-    fun `getEntitlements() should find error when unauthorized error occurs`() = runBlocking<Unit> {
-        whenever(
-            mockApiCategory.query<String>(
-                argThat { this.query.equals(GetEntitlementsQuery.OPERATION_DOCUMENT) },
-                any(),
-                any(),
-            ),
-        ).thenAnswer {
-            val error = GraphQLResponse.Error(
-                "mock",
-                emptyList(),
-                emptyList(),
-                mapOf("httpStatus" to HttpURLConnection.HTTP_UNAUTHORIZED),
-            )
-            @Suppress("UNCHECKED_CAST")
-            (it.arguments[1] as Consumer<GraphQLResponse<String>>).accept(
-                GraphQLResponse(null, listOf(error)),
-            )
-            mock<GraphQLOperation<String>>()
-        }
-        val deferredResult = async(Dispatchers.IO) {
-            shouldThrow<SudoEntitlementsClient.EntitlementsException.AuthenticationException> {
-                client.getEntitlements()
-            }
-        }
-        deferredResult.start()
-        delay(100L)
-
-        deferredResult.await()
-
-        verify(mockSudoUserClient).isSignedIn()
-        verify(
-            mockApiCategory,
-        ).query<String>(check { assertEquals(it.query, GetEntitlementsQuery.OPERATION_DOCUMENT) }, any(), any())
-    }
-
-    @Test
-    fun `getEntitlements() should not suppress CancellationException`() = runBlocking<Unit> {
-        mockApiCategory.stub {
-            on {
-                query<String>(
+            whenever(
+                mockApiCategory.query<String>(
                     argThat { this.query.equals(GetEntitlementsQuery.OPERATION_DOCUMENT) },
-                    any(), any(),
+                    any(),
+                    any(),
+                ),
+            ).thenAnswer {
+                @Suppress("UNCHECKED_CAST")
+                (it.arguments[1] as Consumer<GraphQLResponse<String>>).accept(
+                    GraphQLResponse(queryResponseWithEmptyList.toString(), null),
                 )
-            } doThrow CancellationException("Mock Cancellation Exception")
+                mock<GraphQLOperation<String>>()
+            }
+            val deferredResult =
+                async(Dispatchers.IO) {
+                    client.getEntitlements()
+                }
+            deferredResult.start()
+
+            delay(100L)
+
+            val optionalResult = deferredResult.await()
+            optionalResult shouldNotBe null
+            val result = optionalResult!!
+            result.entitlements.isEmpty() shouldBe true
+            result.entitlements.size shouldBe 0
+
+            verify(mockSudoUserClient).isSignedIn()
+            verify(mockApiCategory).query<String>(
+                check { assertEquals(it.query, GetEntitlementsQuery.OPERATION_DOCUMENT) },
+                any(),
+                any(),
+            )
         }
 
-        shouldThrow<CancellationException> {
-            client.getEntitlements()
+    @Test
+    fun `getEntitlements() should throw if not signed in`() =
+        runBlocking<Unit> {
+            whenever(mockSudoUserClient.isSignedIn()).thenReturn(false)
+
+            val deferredResult =
+                async(Dispatchers.IO) {
+                    shouldThrow<SudoEntitlementsClient.EntitlementsException.NotSignedInException> {
+                        client.getEntitlements()
+                    }
+                }
+            deferredResult.start()
+            delay(100L)
+
+            verify(mockSudoUserClient).isSignedIn()
+            verify(mockApiCategory, never()).query<String>(
+                check { assertEquals(it.query, GetEntitlementsQuery.OPERATION_DOCUMENT) },
+                any(),
+                any(),
+            )
         }
 
-        verify(mockSudoUserClient).isSignedIn()
-        verify(mockApiCategory).query<String>(
-            check { assertEquals(it.query, GetEntitlementsQuery.OPERATION_DOCUMENT) },
-            any(),
-            any(),
-        )
-    }
+    @Test
+    fun `getEntitlements() should return null when query response data is null`() =
+        runBlocking<Unit> {
+            val queryResponseWithEmptyData =
+                JSONObject(
+                    """
+                    {
+                        'getEntitlements': null
+                    }
+                    """.trimIndent(),
+                )
+            whenever(
+                mockApiCategory.query<String>(
+                    argThat { this.query.equals(GetEntitlementsQuery.OPERATION_DOCUMENT) },
+                    any(),
+                    any(),
+                ),
+            ).thenAnswer {
+                @Suppress("UNCHECKED_CAST")
+                (it.arguments[1] as Consumer<GraphQLResponse<String>>).accept(
+                    GraphQLResponse(queryResponseWithEmptyData.toString(), null),
+                )
+                mock<GraphQLOperation<String>>()
+            }
+
+            val deferredResult =
+                async(Dispatchers.IO) {
+                    client.getEntitlements()
+                }
+            deferredResult.start()
+
+            delay(100L)
+
+            val optionalResult = deferredResult.await()
+            optionalResult shouldBe null
+
+            verify(mockSudoUserClient).isSignedIn()
+            verify(mockApiCategory).query<String>(
+                check { assertEquals(it.query, GetEntitlementsQuery.OPERATION_DOCUMENT) },
+                any(),
+                any(),
+            )
+        }
+
+    @Test
+    fun `getEntitlements() should return null when query response is null`() =
+        runBlocking<Unit> {
+            whenever(
+                mockApiCategory.query<String>(
+                    argThat { this.query.equals(GetEntitlementsQuery.OPERATION_DOCUMENT) },
+                    any(),
+                    any(),
+                ),
+            ).thenAnswer {
+                @Suppress("UNCHECKED_CAST")
+                (it.arguments[1] as Consumer<GraphQLResponse<String>>).accept(
+                    GraphQLResponse(null, null),
+                )
+                mock<GraphQLOperation<String>>()
+            }
+
+            val deferredResult =
+                async(Dispatchers.IO) {
+                    client.getEntitlements()
+                }
+            deferredResult.start()
+
+            delay(100L)
+
+            val optionalResult = deferredResult.await()
+            optionalResult shouldBe null
+
+            verify(mockSudoUserClient).isSignedIn()
+            verify(mockApiCategory).query<String>(
+                check { assertEquals(it.query, GetEntitlementsQuery.OPERATION_DOCUMENT) },
+                any(),
+                any(),
+            )
+        }
+
+    @Test
+    fun `getEntitlements() should throw when response has a NoExternalIdError`() =
+        runBlocking<Unit> {
+            whenever(
+                mockApiCategory.query<String>(
+                    argThat { this.query.equals(GetEntitlementsQuery.OPERATION_DOCUMENT) },
+                    any(),
+                    any(),
+                ),
+            ).thenAnswer {
+                val error =
+                    GraphQLResponse.Error(
+                        "mock",
+                        emptyList(),
+                        emptyList(),
+                        mapOf("errorType" to "sudoplatform.entitlements.NoExternalIdError"),
+                    )
+                @Suppress("UNCHECKED_CAST")
+                (it.arguments[1] as Consumer<GraphQLResponse<String>>).accept(
+                    GraphQLResponse(null, listOf(error)),
+                )
+                mock<GraphQLOperation<String>>()
+            }
+
+            val deferredResult =
+                async(Dispatchers.IO) {
+                    shouldThrow<SudoEntitlementsClient.EntitlementsException.NoExternalIdException> {
+                        client.getEntitlements()
+                    }
+                }
+            deferredResult.start()
+            delay(100L)
+
+            deferredResult.await()
+
+            verify(mockSudoUserClient).isSignedIn()
+            verify(mockApiCategory).query<String>(
+                check { assertEquals(it.query, GetEntitlementsQuery.OPERATION_DOCUMENT) },
+                any(),
+                any(),
+            )
+        }
+
+    @Test
+    fun `getEntitlements() should throw when response has a NoBillingGroupError`() =
+        runBlocking<Unit> {
+            whenever(
+                mockApiCategory.query<String>(
+                    argThat { this.query.equals(GetEntitlementsQuery.OPERATION_DOCUMENT) },
+                    any(),
+                    any(),
+                ),
+            ).thenAnswer {
+                val error =
+                    GraphQLResponse.Error(
+                        "mock",
+                        emptyList(),
+                        emptyList(),
+                        mapOf("errorType" to "sudoplatform.entitlements.NoBillingGroupError"),
+                    )
+                @Suppress("UNCHECKED_CAST")
+                (it.arguments[1] as Consumer<GraphQLResponse<String>>).accept(
+                    GraphQLResponse(null, listOf(error)),
+                )
+                mock<GraphQLOperation<String>>()
+            }
+
+            val deferredResult =
+                async(Dispatchers.IO) {
+                    shouldThrow<SudoEntitlementsClient.EntitlementsException.NoBillingGroupException> {
+                        client.getEntitlements()
+                    }
+                }
+            deferredResult.start()
+            delay(100L)
+
+            deferredResult.await()
+
+            verify(mockSudoUserClient).isSignedIn()
+            verify(mockApiCategory).query<String>(
+                check { assertEquals(it.query, GetEntitlementsQuery.OPERATION_DOCUMENT) },
+                any(),
+                any(),
+            )
+        }
+
+    @Test
+    fun `getEntitlements() should throw when response has a EntitlementsSetNotFoundError`() =
+        runBlocking<Unit> {
+            whenever(
+                mockApiCategory.query<String>(
+                    argThat { this.query.equals(GetEntitlementsQuery.OPERATION_DOCUMENT) },
+                    any(),
+                    any(),
+                ),
+            ).thenAnswer {
+                val error =
+                    GraphQLResponse.Error(
+                        "mock",
+                        emptyList(),
+                        emptyList(),
+                        mapOf("errorType" to "sudoplatform.entitlements.EntitlementsSetNotFoundError"),
+                    )
+                @Suppress("UNCHECKED_CAST")
+                (it.arguments[1] as Consumer<GraphQLResponse<String>>).accept(
+                    GraphQLResponse(null, listOf(error)),
+                )
+                mock<GraphQLOperation<String>>()
+            }
+
+            val deferredResult =
+                async(Dispatchers.IO) {
+                    shouldThrow<SudoEntitlementsClient.EntitlementsException.EntitlementsSetNotFoundException> {
+                        client.getEntitlements()
+                    }
+                }
+            deferredResult.start()
+            delay(100L)
+
+            deferredResult.await()
+
+            verify(mockSudoUserClient).isSignedIn()
+            verify(mockApiCategory).query<String>(
+                check { assertEquals(it.query, GetEntitlementsQuery.OPERATION_DOCUMENT) },
+                any(),
+                any(),
+            )
+        }
+
+    @Test
+    fun `getEntitlements() should throw when response has a EntitlementsSequenceNotFoundError`() =
+        runBlocking<Unit> {
+            whenever(
+                mockApiCategory.query<String>(
+                    argThat { this.query.equals(GetEntitlementsQuery.OPERATION_DOCUMENT) },
+                    any(),
+                    any(),
+                ),
+            ).thenAnswer {
+                val error =
+                    GraphQLResponse.Error(
+                        "mock",
+                        emptyList(),
+                        emptyList(),
+                        mapOf("errorType" to "sudoplatform.entitlements.EntitlementsSequenceNotFoundError"),
+                    )
+                @Suppress("UNCHECKED_CAST")
+                (it.arguments[1] as Consumer<GraphQLResponse<String>>).accept(
+                    GraphQLResponse(null, listOf(error)),
+                )
+                mock<GraphQLOperation<String>>()
+            }
+
+            val deferredResult =
+                async(Dispatchers.IO) {
+                    shouldThrow<SudoEntitlementsClient.EntitlementsException.EntitlementsSequenceNotFoundException> {
+                        client.getEntitlements()
+                    }
+                }
+            deferredResult.start()
+            delay(100L)
+
+            deferredResult.await()
+
+            verify(mockSudoUserClient).isSignedIn()
+            verify(mockApiCategory).query<String>(
+                check { assertEquals(it.query, GetEntitlementsQuery.OPERATION_DOCUMENT) },
+                any(),
+                any(),
+            )
+        }
+
+    @Test
+    fun `getEntitlements() should throw when response has error`() =
+        runBlocking<Unit> {
+            whenever(
+                mockApiCategory.query<String>(
+                    argThat { this.query.equals(GetEntitlementsQuery.OPERATION_DOCUMENT) },
+                    any(),
+                    any(),
+                ),
+            ).thenAnswer {
+                val error =
+                    GraphQLResponse.Error(
+                        "mock",
+                        emptyList(),
+                        emptyList(),
+                        mapOf("errorType" to "DilithiumCrystalsOutOfAlignment"),
+                    )
+                @Suppress("UNCHECKED_CAST")
+                (it.arguments[1] as Consumer<GraphQLResponse<String>>).accept(
+                    GraphQLResponse(null, listOf(error)),
+                )
+                mock<GraphQLOperation<String>>()
+            }
+
+            val deferredResult =
+                async(Dispatchers.IO) {
+                    shouldThrow<SudoEntitlementsClient.EntitlementsException.FailedException> {
+                        client.getEntitlements()
+                    }
+                }
+            deferredResult.start()
+
+            delay(100L)
+
+            deferredResult.await()
+
+            verify(mockSudoUserClient).isSignedIn()
+            verify(
+                mockApiCategory,
+            ).query<String>(check { assertEquals(it.query, GetEntitlementsQuery.OPERATION_DOCUMENT) }, any(), any())
+        }
+
+    @Test
+    fun `getEntitlements() should throw when http error occurs`() =
+        runBlocking<Unit> {
+            whenever(
+                mockApiCategory.query<String>(
+                    argThat { this.query.equals(GetEntitlementsQuery.OPERATION_DOCUMENT) },
+                    any(),
+                    any(),
+                ),
+            ).thenAnswer {
+                val error =
+                    GraphQLResponse.Error(
+                        "mock",
+                        emptyList(),
+                        emptyList(),
+                        mapOf("httpStatus" to HttpURLConnection.HTTP_FORBIDDEN),
+                    )
+                @Suppress("UNCHECKED_CAST")
+                (it.arguments[1] as Consumer<GraphQLResponse<String>>).accept(
+                    GraphQLResponse(null, listOf(error)),
+                )
+                mock<GraphQLOperation<String>>()
+            }
+            val deferredResult =
+                async(Dispatchers.IO) {
+                    shouldThrow<SudoEntitlementsClient.EntitlementsException.FailedException> {
+                        client.getEntitlements()
+                    }
+                }
+            deferredResult.start()
+            delay(100L)
+            deferredResult.await()
+
+            verify(mockSudoUserClient).isSignedIn()
+            verify(
+                mockApiCategory,
+            ).query<String>(check { assertEquals(it.query, GetEntitlementsQuery.OPERATION_DOCUMENT) }, any(), any())
+        }
+
+    @Test
+    fun `getEntitlements() should throw when unknown error occurs`() =
+        runBlocking<Unit> {
+            mockApiCategory.stub {
+                on {
+                    query<String>(
+                        argThat { this.query.equals(GetEntitlementsQuery.OPERATION_DOCUMENT) },
+                        any(),
+                        any(),
+                    )
+                } doThrow RuntimeException("Mock Runtime Exception")
+            }
+
+            val deferredResult =
+                async(Dispatchers.IO) {
+                    shouldThrow<SudoEntitlementsClient.EntitlementsException.UnknownException> {
+                        client.getEntitlements()
+                    }
+                }
+            deferredResult.start()
+
+            delay(100L)
+            deferredResult.await()
+
+            verify(mockSudoUserClient).isSignedIn()
+            verify(
+                mockApiCategory,
+            ).query<String>(check { assertEquals(it.query, GetEntitlementsQuery.OPERATION_DOCUMENT) }, any(), any())
+        }
+
+    @Test
+    fun `getEntitlements() should find error when unauthorized error occurs`() =
+        runBlocking<Unit> {
+            whenever(
+                mockApiCategory.query<String>(
+                    argThat { this.query.equals(GetEntitlementsQuery.OPERATION_DOCUMENT) },
+                    any(),
+                    any(),
+                ),
+            ).thenAnswer {
+                val error =
+                    GraphQLResponse.Error(
+                        "mock",
+                        emptyList(),
+                        emptyList(),
+                        mapOf("httpStatus" to HttpURLConnection.HTTP_UNAUTHORIZED),
+                    )
+                @Suppress("UNCHECKED_CAST")
+                (it.arguments[1] as Consumer<GraphQLResponse<String>>).accept(
+                    GraphQLResponse(null, listOf(error)),
+                )
+                mock<GraphQLOperation<String>>()
+            }
+            val deferredResult =
+                async(Dispatchers.IO) {
+                    shouldThrow<SudoEntitlementsClient.EntitlementsException.AuthenticationException> {
+                        client.getEntitlements()
+                    }
+                }
+            deferredResult.start()
+            delay(100L)
+
+            deferredResult.await()
+
+            verify(mockSudoUserClient).isSignedIn()
+            verify(
+                mockApiCategory,
+            ).query<String>(check { assertEquals(it.query, GetEntitlementsQuery.OPERATION_DOCUMENT) }, any(), any())
+        }
+
+    @Test
+    fun `getEntitlements() should not suppress CancellationException`() =
+        runBlocking<Unit> {
+            mockApiCategory.stub {
+                on {
+                    query<String>(
+                        argThat { this.query.equals(GetEntitlementsQuery.OPERATION_DOCUMENT) },
+                        any(),
+                        any(),
+                    )
+                } doThrow CancellationException("Mock Cancellation Exception")
+            }
+
+            shouldThrow<CancellationException> {
+                client.getEntitlements()
+            }
+
+            verify(mockSudoUserClient).isSignedIn()
+            verify(mockApiCategory).query<String>(
+                check { assertEquals(it.query, GetEntitlementsQuery.OPERATION_DOCUMENT) },
+                any(),
+                any(),
+            )
+        }
 }

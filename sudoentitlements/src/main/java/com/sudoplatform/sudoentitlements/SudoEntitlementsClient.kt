@@ -29,7 +29,6 @@ import java.util.Objects
  * @sample com.sudoplatform.sudoentitlements.samples.Samples.sudoEntitlementsClient
  */
 interface SudoEntitlementsClient {
-
     companion object {
         /** Create a [Builder] for [SudoEntitlementsClient]. */
         @JvmStatic
@@ -48,34 +47,38 @@ interface SudoEntitlementsClient {
         /**
          * Provide the application context (required input).
          */
-        fun setContext(context: Context) = also {
-            this.context = context
-        }
+        fun setContext(context: Context) =
+            also {
+                this.context = context
+            }
 
         /**
          * Provide the implementation of the [SudoUserClient] used to perform
          * sign in and ownership operations (required input).
          */
-        fun setSudoUserClient(sudoUserClient: SudoUserClient) = also {
-            this.sudoUserClient = sudoUserClient
-        }
+        fun setSudoUserClient(sudoUserClient: SudoUserClient) =
+            also {
+                this.sudoUserClient = sudoUserClient
+            }
 
         /**
          * Provide a [GraphQLClient] for the [SudoEntitlementsClient] to use
          * (optional input). If this is not supplied, a [GraphQLClient] will
          * be constructed and used.
          */
-        fun setGraphQLClient(graphQLClient: GraphQLClient) = also {
-            this.graphQLClient = graphQLClient
-        }
+        fun setGraphQLClient(graphQLClient: GraphQLClient) =
+            also {
+                this.graphQLClient = graphQLClient
+            }
 
         /**
          * Provide the implementation of the [Logger] used for logging errors (optional input).
          * If a value is not supplied a default implementation will be used.
          */
-        fun setLogger(logger: Logger) = also {
-            this.logger = logger
-        }
+        fun setLogger(logger: Logger) =
+            also {
+                this.logger = logger
+            }
 
         /**
          * Construct the [SudoEntitlementsClient]. Will throw a [NullPointerException] if
@@ -86,8 +89,9 @@ interface SudoEntitlementsClient {
             Objects.requireNonNull(context, "Context must be provided.")
             Objects.requireNonNull(sudoUserClient, "SudoUserClient must be provided.")
 
-            val client = graphQLClient
-                ?: ApiClientManager.getClient(this@Builder.context!!, this@Builder.sudoUserClient!!)
+            val client =
+                graphQLClient
+                    ?: ApiClientManager.getClient(this@Builder.context!!, this@Builder.sudoUserClient!!)
 
             return DefaultSudoEntitlementsClient(
                 context = context!!,
@@ -104,35 +108,78 @@ interface SudoEntitlementsClient {
      * @property message Accompanying message for the exception.
      * @property cause The cause for the exception.
      */
-    sealed class EntitlementsException(message: String? = null, cause: Throwable? = null) : RuntimeException(message, cause) {
-        class AmbiguousEntitlementsException(message: String? = null, cause: Throwable? = null) :
-            EntitlementsException(message = message, cause = cause)
-        class AuthenticationException(message: String? = null, cause: Throwable? = null) :
-            EntitlementsException(message = message, cause = cause)
-        class FailedException(message: String? = null, cause: Throwable? = null) :
-            EntitlementsException(message = message, cause = cause)
-        class InsufficientEntitlementsException(message: String? = null, cause: Throwable? = null) :
-            EntitlementsException(message = message, cause = cause)
-        class InvalidArgumentException(message: String? = null, cause: Throwable? = null) :
-            EntitlementsException(message = message, cause = cause)
-        class InvalidTokenException(message: String? = null, cause: Throwable? = null) :
-            EntitlementsException(message = message, cause = cause)
-        class NoEntitlementsException(message: String? = null, cause: Throwable? = null) :
-            EntitlementsException(message = message, cause = cause)
-        class NoExternalIdException(message: String? = null, cause: Throwable? = null) :
-            EntitlementsException(message = message, cause = cause)
-        class NoBillingGroupException(message: String? = null, cause: Throwable? = null) :
-            EntitlementsException(message = message, cause = cause)
-        class EntitlementsSequenceNotFoundException(message: String? = null, cause: Throwable? = null) :
-            EntitlementsException(message = message, cause = cause)
-        class EntitlementsSetNotFoundException(message: String? = null, cause: Throwable? = null) :
-            EntitlementsException(message = message, cause = cause)
-        class ServiceException(message: String? = null, cause: Throwable? = null) :
-            EntitlementsException(message = message, cause = cause)
-        class NotSignedInException(message: String? = null, cause: Throwable? = null) :
-            EntitlementsException(message = message, cause = cause)
-        class UnknownException(cause: Throwable) :
-            EntitlementsException(cause = cause)
+    sealed class EntitlementsException(
+        message: String? = null,
+        cause: Throwable? = null,
+    ) : RuntimeException(message, cause) {
+        class AmbiguousEntitlementsException(
+            message: String? = null,
+            cause: Throwable? = null,
+        ) : EntitlementsException(message = message, cause = cause)
+
+        class AuthenticationException(
+            message: String? = null,
+            cause: Throwable? = null,
+        ) : EntitlementsException(message = message, cause = cause)
+
+        class FailedException(
+            message: String? = null,
+            cause: Throwable? = null,
+        ) : EntitlementsException(message = message, cause = cause)
+
+        class InsufficientEntitlementsException(
+            message: String? = null,
+            cause: Throwable? = null,
+        ) : EntitlementsException(message = message, cause = cause)
+
+        class InvalidArgumentException(
+            message: String? = null,
+            cause: Throwable? = null,
+        ) : EntitlementsException(message = message, cause = cause)
+
+        class InvalidTokenException(
+            message: String? = null,
+            cause: Throwable? = null,
+        ) : EntitlementsException(message = message, cause = cause)
+
+        class NoEntitlementsException(
+            message: String? = null,
+            cause: Throwable? = null,
+        ) : EntitlementsException(message = message, cause = cause)
+
+        class NoExternalIdException(
+            message: String? = null,
+            cause: Throwable? = null,
+        ) : EntitlementsException(message = message, cause = cause)
+
+        class NoBillingGroupException(
+            message: String? = null,
+            cause: Throwable? = null,
+        ) : EntitlementsException(message = message, cause = cause)
+
+        class EntitlementsSequenceNotFoundException(
+            message: String? = null,
+            cause: Throwable? = null,
+        ) : EntitlementsException(message = message, cause = cause)
+
+        class EntitlementsSetNotFoundException(
+            message: String? = null,
+            cause: Throwable? = null,
+        ) : EntitlementsException(message = message, cause = cause)
+
+        class ServiceException(
+            message: String? = null,
+            cause: Throwable? = null,
+        ) : EntitlementsException(message = message, cause = cause)
+
+        class NotSignedInException(
+            message: String? = null,
+            cause: Throwable? = null,
+        ) : EntitlementsException(message = message, cause = cause)
+
+        class UnknownException(
+            cause: Throwable,
+        ) : EntitlementsException(cause = cause)
     }
 
     /**
@@ -202,7 +249,7 @@ interface SudoEntitlementsClient {
  * constructing a composite version as in [UserEntitlements] and [EntitlementsSet]
  * types.
  */
-const val entitlementsSetVersionScalingFactor = 100000
+const val ENTITLEMENTS_SET_VERSION_SCALING_FACTOR = 100000
 
 @Throws(IllegalArgumentException::class)
 fun splitUserEntitlementsVersion(version: Double): Pair<Long, Long> {
@@ -210,9 +257,9 @@ fun splitUserEntitlementsVersion(version: Double): Pair<Long, Long> {
         throw IllegalArgumentException("version negative")
     }
     val userEntitlementsVersion = Math.round(version)
-    val entitlementsSetVersion = Math.round(version * entitlementsSetVersionScalingFactor % entitlementsSetVersionScalingFactor)
+    val entitlementsSetVersion = Math.round(version * ENTITLEMENTS_SET_VERSION_SCALING_FACTOR % ENTITLEMENTS_SET_VERSION_SCALING_FACTOR)
 
-    val reconstructed = userEntitlementsVersion + entitlementsSetVersion.toDouble() / entitlementsSetVersionScalingFactor
+    val reconstructed = userEntitlementsVersion + entitlementsSetVersion.toDouble() / ENTITLEMENTS_SET_VERSION_SCALING_FACTOR
     if (reconstructed != version) {
         throw IllegalArgumentException("version too precise")
     }

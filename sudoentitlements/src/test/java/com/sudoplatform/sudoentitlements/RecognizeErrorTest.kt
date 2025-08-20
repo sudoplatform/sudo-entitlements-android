@@ -20,7 +20,6 @@ import java.util.concurrent.CancellationException
  * Test the correct operation of [SudoEntitlementsClient.getEntitlements] using mocks and spies.
  */
 class RecognizeErrorTest {
-
     private val cancellationException = CancellationException()
     private val noEntitlementsException = SudoEntitlementsClient.EntitlementsException.NoEntitlementsException()
     private val sudoUserNotAuthorizedException = SudoUserException.NotAuthorizedException()

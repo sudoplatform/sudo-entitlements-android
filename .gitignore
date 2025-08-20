@@ -49,6 +49,9 @@ captures/
 **/src/test/resources/register_key*
 register_key*
 
+# MCP configuration (project-specific)
+.mcp-project.json
+
 projectFilesBackup/.idea/workspace.xml
 
 kits.gradle

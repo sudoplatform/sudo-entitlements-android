@@ -17,53 +17,57 @@ import org.junit.Test
  * Test the correct operation of [SudoEntitlementsClient.getEntitlements] using mocks and spies.
  */
 class SplitUserEntitlementsVersionTest {
-
     @Test
-    fun `splitUserEntitlementsVersion() should throw error when version is negative`() = runBlocking {
-        var thrown: Throwable? = null
-        try {
-            splitUserEntitlementsVersion(-1.0)
-        } catch (t: Throwable) {
-            thrown = t
+    fun `splitUserEntitlementsVersion() should throw error when version is negative`() =
+        runBlocking {
+            var thrown: Throwable? = null
+            try {
+                splitUserEntitlementsVersion(-1.0)
+            } catch (t: Throwable) {
+                thrown = t
+            }
+
+            thrown shouldNotBe null
+            thrown should beInstanceOf<IllegalArgumentException>()
+            thrown?.message shouldBe ("version negative")
         }
 
-        thrown shouldNotBe null
-        thrown should beInstanceOf<IllegalArgumentException>()
-        thrown?.message shouldBe("version negative")
-    }
-
     @Test
-    fun `splitUserEntitlementsVersion() should throw error when version is too precise`() = runBlocking {
-        var thrown: Throwable? = null
-        try {
-            splitUserEntitlementsVersion(1.000001)
-        } catch (t: Throwable) {
-            thrown = t
+    fun `splitUserEntitlementsVersion() should throw error when version is too precise`() =
+        runBlocking {
+            var thrown: Throwable? = null
+            try {
+                splitUserEntitlementsVersion(1.000001)
+            } catch (t: Throwable) {
+                thrown = t
+            }
+
+            thrown shouldNotBe null
+            thrown should beInstanceOf<IllegalArgumentException>()
+            thrown?.message shouldBe "version too precise"
         }
 
-        thrown shouldNotBe null
-        thrown should beInstanceOf<IllegalArgumentException>()
-        thrown?.message shouldBe "version too precise"
-    }
+    @Test
+    fun `splitUserEntitlementsVersion() should set entitlement set to zero for version with no fraction`() =
+        runBlocking {
+            val (userEntitlementsVersion, entitlementsSetVersion) = splitUserEntitlementsVersion(1.0)
+            userEntitlementsVersion shouldBe 1
+            entitlementsSetVersion shouldBe 0
+        }
 
     @Test
-    fun `splitUserEntitlementsVersion() should set entitlement set to zero for version with no fraction`() = runBlocking {
-        val (userEntitlementsVersion, entitlementsSetVersion) = splitUserEntitlementsVersion(1.0)
-        userEntitlementsVersion shouldBe 1
-        entitlementsSetVersion shouldBe 0
-    }
+    fun `splitUserEntitlementsVersion() should split single digit version elements`() =
+        runBlocking {
+            val (userEntitlementsVersion, entitlementsSetVersion) = splitUserEntitlementsVersion(2.00001)
+            userEntitlementsVersion shouldBe 2
+            entitlementsSetVersion shouldBe 1
+        }
 
     @Test
-    fun `splitUserEntitlementsVersion() should split single digit version elements`() = runBlocking {
-        val (userEntitlementsVersion, entitlementsSetVersion) = splitUserEntitlementsVersion(2.00001)
-        userEntitlementsVersion shouldBe 2
-        entitlementsSetVersion shouldBe 1
-    }
-
-    @Test
-    fun `splitUserEntitlementsVersion() should split double digit version elements`() = runBlocking {
-        val (userEntitlementsVersion, entitlementsSetVersion) = splitUserEntitlementsVersion(20.0001)
-        userEntitlementsVersion shouldBe 20
-        entitlementsSetVersion shouldBe 10
-    }
+    fun `splitUserEntitlementsVersion() should split double digit version elements`() =
+        runBlocking {
+            val (userEntitlementsVersion, entitlementsSetVersion) = splitUserEntitlementsVersion(20.0001)
+            userEntitlementsVersion shouldBe 20
+            entitlementsSetVersion shouldBe 10
+        }
 }

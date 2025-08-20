@@ -29,29 +29,28 @@ internal object EntitlementsTransformer {
      */
     fun toEntityFromGetEntitlementsConsumptionQueryResult(
         result: GetEntitlementsConsumptionQuery.GetEntitlementsConsumption,
-    ): EntitlementsConsumption {
-        return EntitlementsConsumption(
-            entitlements = UserEntitlements(
-                version = result.entitlements.version,
-                entitlementsSetName = result.entitlements.entitlementsSetName,
-                entitlements = fromQueryEntitlements(result.entitlements.entitlements),
-            ),
+    ): EntitlementsConsumption =
+        EntitlementsConsumption(
+            entitlements =
+                UserEntitlements(
+                    version = result.entitlements.version,
+                    entitlementsSetName = result.entitlements.entitlementsSetName,
+                    entitlements = fromQueryEntitlements(result.entitlements.entitlements),
+                ),
             consumption = fromQueryConsumption(result.consumption),
         )
-    }
 
-    private fun fromQueryEntitlements(items: List<GetEntitlementsConsumptionQuery.Entitlement>): List<Entitlement> {
-        return items.map { item ->
+    private fun fromQueryEntitlements(items: List<GetEntitlementsConsumptionQuery.Entitlement>): List<Entitlement> =
+        items.map { item ->
             Entitlement(
                 name = item.name,
                 description = item.description,
                 value = item.value.toLong(),
             )
         }
-    }
 
-    private fun fromQueryConsumption(items: List<GetEntitlementsConsumptionQuery.Consumption>): List<EntitlementConsumption> {
-        return items.map { item ->
+    private fun fromQueryConsumption(items: List<GetEntitlementsConsumptionQuery.Consumption>): List<EntitlementConsumption> =
+        items.map { item ->
             EntitlementConsumption(
                 name = item.name,
                 consumer = item.consumer?.let { EntitlementConsumer(id = it.id, issuer = it.issuer) },
@@ -62,7 +61,6 @@ internal object EntitlementsTransformer {
                 lastConsumedAtEpochMs = item.lastConsumedAtEpochMs,
             )
         }
-    }
 
     /**
      * Transform the results of [GetEntitlementsQuery] to the publicly visible type.
@@ -70,10 +68,8 @@ internal object EntitlementsTransformer {
      * @param result The result of the GraphQL query.
      * @return The [EntitlementsSet] entity type.
      */
-    fun toEntityFromGetEntitlementsQueryResult(
-        result: GetEntitlementsQuery.GetEntitlements,
-    ): EntitlementsSet {
-        return EntitlementsSet(
+    fun toEntityFromGetEntitlementsQueryResult(result: GetEntitlementsQuery.GetEntitlements): EntitlementsSet =
+        EntitlementsSet(
             name = result.name,
             description = result.description,
             entitlements = fromQuerySet(result.entitlements),
@@ -81,17 +77,16 @@ internal object EntitlementsTransformer {
             createdAt = result.createdAtEpochMs.toDate(),
             updatedAt = result.updatedAtEpochMs.toDate(),
         )
-    }
 
-    private fun fromQuerySet(items: List<GetEntitlementsQuery.Entitlement>): Set<Entitlement> {
-        return items.map { item ->
-            Entitlement(
-                name = item.name,
-                description = item.description,
-                value = item.value.toLong(),
-            )
-        }.toSet()
-    }
+    private fun fromQuerySet(items: List<GetEntitlementsQuery.Entitlement>): Set<Entitlement> =
+        items
+            .map { item ->
+                Entitlement(
+                    name = item.name,
+                    description = item.description,
+                    value = item.value.toLong(),
+                )
+            }.toSet()
 
     /**
      * Transform the results of [RedeemEntitlementsMutation] to the publicly visible type.
@@ -99,10 +94,8 @@ internal object EntitlementsTransformer {
      * @param result The result of the GraphQL query.
      * @return The [EntitlementsSet] entity type.
      */
-    fun toEntityFromRedeemEntitlementsMutationResult(
-        result: RedeemEntitlementsMutation.RedeemEntitlements,
-    ): EntitlementsSet {
-        return EntitlementsSet(
+    fun toEntityFromRedeemEntitlementsMutationResult(result: RedeemEntitlementsMutation.RedeemEntitlements): EntitlementsSet =
+        EntitlementsSet(
             name = result.name,
             description = result.description,
             entitlements = fromMutationSet(result.entitlements),
@@ -110,15 +103,14 @@ internal object EntitlementsTransformer {
             createdAt = result.createdAtEpochMs.toDate(),
             updatedAt = result.updatedAtEpochMs.toDate(),
         )
-    }
 
-    private fun fromMutationSet(items: List<RedeemEntitlementsMutation.Entitlement>): Set<Entitlement> {
-        return items.map { item ->
-            Entitlement(
-                name = item.name,
-                description = item.description,
-                value = item.value.toLong(),
-            )
-        }.toSet()
-    }
+    private fun fromMutationSet(items: List<RedeemEntitlementsMutation.Entitlement>): Set<Entitlement> =
+        items
+            .map { item ->
+                Entitlement(
+                    name = item.name,
+                    description = item.description,
+                    value = item.value.toLong(),
+                )
+            }.toSet()
 }
