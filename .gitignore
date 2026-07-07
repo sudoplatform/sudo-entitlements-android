@@ -30,6 +30,7 @@ Thumbs.db
 # Intellij project files
 *.iws
 .idea/*
+.kotlin/
 build/
 *.iml
 

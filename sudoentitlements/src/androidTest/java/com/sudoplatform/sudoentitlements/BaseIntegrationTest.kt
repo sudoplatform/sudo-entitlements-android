@@ -106,6 +106,14 @@ abstract class BaseIntegrationTest {
         return (integrationTestEntitlementsSet ?: "false").toBoolean()
     }
 
+    protected fun defaultEntitlementsSetForTestUsers(): Boolean {
+        val defaultEntitlementsSetForTestUsersValue =
+            InstrumentationRegistry.getArguments().getString(
+                "DEFAULT_ENTITLEMENTS_SET_FOR_TEST_USERS",
+            )
+        return (defaultEntitlementsSetForTestUsersValue ?: "false").toBoolean()
+    }
+
     /**
      * @return external ID of user
      */

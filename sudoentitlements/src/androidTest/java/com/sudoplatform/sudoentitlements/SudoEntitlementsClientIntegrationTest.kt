@@ -8,6 +8,7 @@ package com.sudoplatform.sudoentitlements
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.sudoplatform.sudoapiclient.ApiClientManager
+import com.sudoplatform.sudoconfigmanager.DefaultSudoConfigManager
 import com.sudoplatform.sudoentitlements.types.Entitlement
 import com.sudoplatform.sudoentitlements.types.EntitlementsSet
 import com.sudoplatform.sudologging.AndroidUtilsLogDriver
@@ -21,6 +22,7 @@ import io.kotlintest.shouldThrow
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withTimeout
 import org.junit.After
+import org.junit.Assume.assumeFalse
 import org.junit.Assume.assumeTrue
 import org.junit.Before
 import org.junit.Test
@@ -39,6 +41,8 @@ class SudoEntitlementsClientIntegrationTest : BaseIntegrationTest() {
     private val logger = Logger("entitlements-test", AndroidUtilsLogDriver(logLevel))
 
     private lateinit var entitlementsClient: SudoEntitlementsClient
+
+    private var redeemOnUserRegistration: Boolean = false
 
     @Before
     fun init() {
@@ -61,6 +65,17 @@ class SudoEntitlementsClientIntegrationTest : BaseIntegrationTest() {
                 .setSudoUserClient(userClient)
                 .setLogger(logger)
                 .build()
+
+        val configManager = DefaultSudoConfigManager(context, logger)
+        val entitlementsServiceConfiguration = configManager.getConfigSet(namespace = "entitlementsService")
+        entitlementsServiceConfiguration shouldNotBe null
+        if (entitlementsServiceConfiguration == null) {
+            throw Error("entitlementsServiceConfiguration unexpectedly null")
+        }
+
+        if (entitlementsServiceConfiguration.has("redeemOnUserRegistration")) {
+            this.redeemOnUserRegistration = entitlementsServiceConfiguration.getBoolean("redeemOnUserRegistration")
+        }
     }
 
     @After
@@ -151,15 +166,29 @@ class SudoEntitlementsClientIntegrationTest : BaseIntegrationTest() {
         }
 
     @Test
-    fun redeemEntitlementsShouldSucceedForRawTestUser() =
+    fun redeemEntitlementsShouldSucceedForRawTestUserIfDefaultEntitlementsAreSet() =
         runBlocking {
             // Can only run if client config files are present
             assumeTrue(clientConfigFilesPresent())
+            assumeTrue(defaultEntitlementsSetForTestUsers())
 
             signInAndRegister()
 
             val redeemedEntitlements = entitlementsClient.redeemEntitlements()
             redeemedEntitlements shouldNotBe null
+        }
+
+    @Test
+    fun test_redeemEntitlementsShouldThrowNoEntitlementsErrorForRawTestUserIfDefaultEntitlementsAreNotSet() =
+        runBlocking<Unit> {
+            // Can only run if client config files are present
+            assumeTrue(clientConfigFilesPresent())
+            assumeFalse(defaultEntitlementsSetForTestUsers())
+
+            signInAndRegister()
+            shouldThrow<SudoEntitlementsClient.EntitlementsException.NoEntitlementsException> {
+                entitlementsClient.redeemEntitlements()
+            }
         }
 
     @Test
@@ -192,6 +221,8 @@ class SudoEntitlementsClientIntegrationTest : BaseIntegrationTest() {
         runBlocking<Unit> {
             // Can only run if client config files are present
             assumeTrue(clientConfigFilesPresent())
+            // Can only run if we are not auto redeeming on registration
+            assumeFalse(redeemOnUserRegistration)
 
             signInAndRegister()
 
@@ -249,6 +280,8 @@ class SudoEntitlementsClientIntegrationTest : BaseIntegrationTest() {
         runBlocking {
             // Can only run if client config files are present
             assumeTrue(clientConfigFilesPresent())
+            // Can only run if we are not auto redeeming on registration
+            assumeFalse(redeemOnUserRegistration)
 
             signInAndRegister()
 
